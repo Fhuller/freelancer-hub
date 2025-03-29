@@ -1,4 +1,4 @@
-# FreelanceHub - Sistema de Controle para Freelancers
+# FreelancerHub - Sistema de Controle para Freelancers
 
 Um sistema completo para gerenciamento de clientes, projetos e finanças desenvolvido especialmente para as necessidades de freelancers.
 
