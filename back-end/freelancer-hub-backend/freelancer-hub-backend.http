@@ -1,0 +1,6 @@
+@freelancer_hub_backend_HostAddress = http://localhost:5093
+
+GET {{freelancer_hub_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
