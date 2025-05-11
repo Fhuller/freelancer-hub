@@ -43,6 +43,8 @@ RFC: https://www.overleaf.com/read/xthqfscqnfrw#653fbd
 - Relatórios de clientes e projetos
 - Exportação em vários formatos
 
+![Diagrama ER](docs/UML.png)
+
 ## 📝 Planos Futuros
 
 - Integração com plataformas de freelance populares
