@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("freelancer-hub-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a86877c7df23f1dbca943ac89a929ef4067cdadf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ce916e9260359d6aff66d408915ea16e0eca292d")]
 [assembly: System.Reflection.AssemblyProductAttribute("freelancer-hub-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("freelancer-hub-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
