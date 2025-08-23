@@ -10,10 +10,5 @@
         public string? CompanyName { get; set; }
         public string? Notes { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public User User { get; set; } = default!;
-        public ICollection<Project> Projects { get; set; } = new List<Project>();
-        public ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
     }
-
 }

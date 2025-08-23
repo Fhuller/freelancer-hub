@@ -12,11 +12,5 @@
         public string Status { get; set; } = "pendente";
         public string? PdfUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public User User { get; set; } = default!;
-        public Client Client { get; set; } = default!;
-        public Project Project { get; set; } = default!;
-        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
-
 }

@@ -9,8 +9,5 @@
         public string Status { get; set; } = "pendente";
         public DateTime DueDate { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public Project Project { get; set; } = default!;
     }
-
 }

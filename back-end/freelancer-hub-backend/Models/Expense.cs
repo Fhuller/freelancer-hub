@@ -10,8 +10,5 @@
         public DateTime PaymentDate { get; set; }
         public string? Notes { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public User User { get; set; } = default!;
     }
-
 }

@@ -18,11 +18,29 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // Registrando o DbContext
 builder.Services.AddDbContext<FreelancerContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Aplica todas as migrations pendentes antes de iniciar o app
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FreelancerContext>();
+    try
+    {
+        db.Database.Migrate();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Migrations aplicadas com sucesso.");
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogCritical(ex, "Falha ao aplicar migrations no banco de dados.");
+        throw;
+    }
+}
+
+// Configure o pipeline
 app.UseSwagger();
 app.UseSwaggerUI();
 
