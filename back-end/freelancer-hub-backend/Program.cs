@@ -1,9 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configurar logging para o console
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
 
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -25,9 +30,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
-app.Run();
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    // Esse log garante que erros de startup apareçam no console
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogCritical(ex, "Falha ao iniciar a aplicação");
+    throw;
+}
