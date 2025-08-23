@@ -11,10 +11,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("25928965-3ed8-473a-8064-711777fe2546")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("freelancer-hub-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5ba7efc993dd41341eddb9347c1f6a4f76ccc8d3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a855acc42f31a81360c7c05c750e2bec1bb4745c")]
 [assembly: System.Reflection.AssemblyProductAttribute("freelancer-hub-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("freelancer-hub-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
