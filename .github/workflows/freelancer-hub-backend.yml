@@ -72,7 +72,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.freelancer_hub_backendapi_SPN }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure WebApp
         uses: azure/webapps-deploy@v2
