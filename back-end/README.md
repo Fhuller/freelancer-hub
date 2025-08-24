@@ -2,6 +2,7 @@
 
 ## 📋 Descrição
 Este é um projeto desenvolvido em .NET 8 que utiliza SQL Server hospedado no Azure como banco de dados e implementa CI/CD para deploy automatizado.
+Link API: https://freelancer-hub-backend-exe7f6cygggae0db.eastus2-01.azurewebsites.net/swagger/index.html
 
 ## 🛠️ Pré-requisitos
 
