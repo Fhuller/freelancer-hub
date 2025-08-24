@@ -58,7 +58,7 @@ namespace freelancer_hub_backend.Controllers
         {
             var user = new User
             {
-                Id = Guid.NewGuid(),
+                Id = dto.Id,
                 Name = dto.Name,
                 Email = dto.Email,
                 CreatedAt = DateTime.UtcNow

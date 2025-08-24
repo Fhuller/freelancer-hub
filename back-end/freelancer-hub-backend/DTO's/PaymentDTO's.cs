@@ -2,6 +2,7 @@
 {
     public class PaymentCreateDto
     {
+        public required string UserId { get; set; }
         public Guid InvoiceId { get; set; }
         public decimal Amount { get; set; }
         public DateTime PaymentDate { get; set; }

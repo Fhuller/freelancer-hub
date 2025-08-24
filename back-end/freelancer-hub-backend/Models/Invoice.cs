@@ -3,7 +3,7 @@
     public class Invoice
     {
         public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public required string UserId { get; set; }
         public Guid ClientId { get; set; }
         public Guid ProjectId { get; set; }
         public DateTime IssueDate { get; set; }

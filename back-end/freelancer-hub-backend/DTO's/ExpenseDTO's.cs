@@ -2,7 +2,7 @@
 {
     public class ExpenseCreateDto
     {
-        public Guid UserId { get; set; }
+        public required string UserId { get; set; }
         public string Title { get; set; } = default!;
         public decimal Amount { get; set; }
         public string Category { get; set; } = default!;
@@ -21,7 +21,7 @@
     public class ExpenseDto
     {
         public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public required string UserId { get; set; }
         public string Title { get; set; } = default!;
         public decimal Amount { get; set; }
         public string Category { get; set; } = default!;

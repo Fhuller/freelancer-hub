@@ -65,6 +65,7 @@ namespace freelancer_hub_backend.Controllers
             var payment = new Payment
             {
                 Id = Guid.NewGuid(),
+                UserId = dto.UserId,
                 InvoiceId = dto.InvoiceId,
                 Amount = dto.Amount,
                 PaymentDate = dto.PaymentDate,

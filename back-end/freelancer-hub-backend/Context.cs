@@ -16,6 +16,18 @@ public class FreelancerContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Expense>()
+            .Property(e => e.Amount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Invoice>()
+            .Property(i => i.Amount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Payment>()
+            .Property(p => p.Amount)
+            .HasPrecision(18, 2);
+
         base.OnModelCreating(modelBuilder);
     }
 }

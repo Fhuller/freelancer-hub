@@ -64,7 +64,7 @@ namespace freelancer_hub_backend.Controllers
         public async Task<ActionResult<ClientReadDto>> CreateClient(ClientCreateDto dto)
         {
             // Supondo que você pega o UserId do token OAuth futuramente.
-            var userId = Guid.NewGuid(); // Aqui substitua depois pelo UserId autenticado.
+            var userId = "Guid.NewGuid()"; // Aqui substitua depois pelo UserId autenticado.
 
             var client = new Client
             {

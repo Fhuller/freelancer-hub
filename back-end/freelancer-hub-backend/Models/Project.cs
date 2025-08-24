@@ -3,7 +3,7 @@
     public class Project
     {
         public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public required string UserId { get; set; }
         public Guid ClientId { get; set; }
         public string Title { get; set; } = default!;
         public string? Description { get; set; }
