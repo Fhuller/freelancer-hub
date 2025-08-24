@@ -3,6 +3,11 @@
 ## 🌐 Demo
 **Aplicação em produção**: [https://freelancer-hub-tau.vercel.app/](https://freelancer-hub-tau.vercel.app/)
 
+para rodar o projeto é npm run dev
+para rodar com link de api de prod é:
+npm run build
+npm run preview
+
 ## 📋 Descrição
 Frontend da aplicação Freelancer Hub desenvolvido em **Vue 3** com **TypeScript**, utilizando **Vite** como bundler e **Vercel** para deploy automatizado.
 
