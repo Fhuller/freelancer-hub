@@ -12,6 +12,15 @@ builder.Logging.SetMinimumLevel(LogLevel.Information);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // onde o Vite roda
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Pegando a connection string do appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -21,6 +30,8 @@ builder.Services.AddDbContext<FreelancerContext>(options =>
     options.UseSqlServer(connectionString));
 
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 // Aplica todas as migrations pendentes antes de iniciar o app
 using (var scope = app.Services.CreateScope())

@@ -1,6 +1,16 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+
+const users = ref<any[]>([])
+
+import { fetchUsers } from './services/users'
+
+onMounted(async () => {
+  users.value = await fetchUsers()
+})
+
 </script>
 
 <template>
@@ -18,6 +28,12 @@ import HelloWorld from './components/HelloWorld.vue'
   </header>
 
   <RouterView />
+
+  <!-- Exibir retorno da API -->
+  <main>
+    <h2>Retorno da API:</h2>
+    <pre>{{ users }}</pre>
+  </main>
 </template>
 
 <style scoped>
