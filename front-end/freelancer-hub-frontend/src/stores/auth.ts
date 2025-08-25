@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { signUp, signIn, signOut, getSession } from '../services/supabase'
 import type { User, Session } from '@supabase/supabase-js'
+import router from '@/router'
 
 export const useAuthStore = defineStore('auth', () => {
   const session = ref<Session | null>(null)
@@ -15,14 +16,14 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       isLoading.value = true
       error.value = ''
-      
+
       const { data, error: authError } = await signIn(email, password)
-      
+
       if (authError) {
         error.value = authError.message
         return false
       }
-      
+
       session.value = data.session
       return true
     } catch (err) {
@@ -37,14 +38,14 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       isLoading.value = true
       error.value = ''
-      
+
       const { data, error: authError } = await signUp(email, password)
-      
+
       if (authError) {
         error.value = authError.message
         return false
       }
-      
+
       return true
     } catch (err) {
       error.value = 'Erro inesperado ao registrar'
@@ -58,6 +59,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await signOut()
       session.value = null
+      router.push('/login') // redireciona imediatamente
     } catch (err) {
       console.error('Erro ao fazer logout:', err)
     }

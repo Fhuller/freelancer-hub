@@ -6,40 +6,31 @@ import Dashboard from '../views/Dashboard.vue'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    {
-      path: '/',
-      redirect: '/dashboard'
-    },
-    {
-      path: '/login',
-      name: 'Login',
-      component: Login,
-      meta: { requiresGuest: true }
-    },
-    {
-      path: '/dashboard',
-      name: 'Dashboard',
-      component: Dashboard,
-      meta: { requiresAuth: true }
-    }
+    { path: '/', redirect: '/dashboard' },
+    { path: '/login', name: 'Login', component: Login, meta: { requiresGuest: true } },
+    { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
+    { path: '/:pathMatch(.*)*', redirect: '/dashboard' } // fallback para evitar tela de erro
   ]
 })
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
-  // Verificar se o usuário está autenticado
-  if (!authStore.session) {
-    await authStore.checkAuth()
+
+  try {
+    await authStore.checkAuth() // sempre checa antes de decidir
+  } catch (err) {
+    console.error(err)
   }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next('/dashboard')
-  } else {
-    next()
+    return next('/login')
   }
+
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    return next('/dashboard')
+  }
+
+  next()
 })
 
 export default router
