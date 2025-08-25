@@ -82,20 +82,6 @@ builder.Services.AddAuthentication()
             ValidAudience = "authenticated",
             ClockSkew = TimeSpan.FromMinutes(5)
         };
-
-        o.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine("Token inválido: " + context.Exception.Message);
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = context =>
-            {
-                Console.WriteLine("Token válido!");
-                return Task.CompletedTask;
-            }
-        };
     });
 
 

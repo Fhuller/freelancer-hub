@@ -18,6 +18,6 @@ export async function signOut() {
   return await supabase.auth.signOut()
 }
 
-export function getUser() {
-  return supabase.auth.getUser()
+export function getSession() {
+  return supabase.auth.getSession()
 }

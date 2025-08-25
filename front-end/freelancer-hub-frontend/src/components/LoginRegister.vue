@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { signUp, signIn, getUser } from '../services/supabase'
+import { signUp, signIn, getSession } from '../services/supabase'
 
 // Campos separados para registro
 const signUpEmail = ref('')
@@ -77,9 +77,9 @@ const handleGetUser = async () => {
   userMessage.value = ''
   
   try {
-    const { data } = await getUser()
-    if (data.user) {
-      userMessage.value = JSON.stringify(data.user, null, 2)
+    const { data } = await getSession()
+    if (data.session) {
+      userMessage.value = JSON.stringify(data.session, null, 2)
     } else {
       userMessage.value = 'Nenhum usuário logado.'
     }
