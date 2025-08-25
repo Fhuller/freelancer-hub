@@ -90,19 +90,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-app.Use(async (context, next) =>
-{
-    if (context.Request.Method == HttpMethods.Options)
-    {
-        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-        context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
-        await context.Response.CompleteAsync();
-        return;
-    }
-
-    await next();
-});
-
 // Usar CORS antes de mapear endpoints e antes de autenticação
 app.UseCors("AllowFrontend");
 
