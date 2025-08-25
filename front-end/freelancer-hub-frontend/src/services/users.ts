@@ -13,7 +13,7 @@ export const fetchUsers = async (token?: string) => {
 
     headers.accept = 'accept: text/plain'
     
-    const response = await fetch(apiUrl + '/User', {
+    const response = await fetch(apiUrl + '/Client', {
       method: 'GET',
       headers
     })
