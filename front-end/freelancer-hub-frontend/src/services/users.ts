@@ -4,6 +4,7 @@ export const fetchUsers = async (token?: string) => {
   try {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json' 
     }
     
     // Adicionar token se fornecido
@@ -11,7 +12,6 @@ export const fetchUsers = async (token?: string) => {
       headers.Authorization = `Bearer ${token}`
     }
 
-    headers.accept = 'accept: text/plain'
     
     const response = await fetch(apiUrl + '/Client', {
       method: 'GET',
