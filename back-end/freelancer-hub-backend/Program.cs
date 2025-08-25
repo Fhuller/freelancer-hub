@@ -93,7 +93,7 @@ var app = builder.Build();
 // Usar CORS antes de mapear endpoints e antes de autenticação
 app.UseCors("AllowFrontend");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
