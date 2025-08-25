@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +15,38 @@ builder.Logging.SetMinimumLevel(LogLevel.Information);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Configurar Swagger com Authorization
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Freelancer API", Version = "v1" });
+
+    // Adicionar configuração de Bearer
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Insira o token JWT desta forma: Bearer {seu_token}",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 // Configurar CORS
 builder.Services.AddCors(options =>
@@ -32,27 +64,17 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<FreelancerContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Configurar JWT do Supabase
-var supabaseJwtKey = builder.Configuration["Supabase:JwtKey"];
-var supabaseIssuer = builder.Configuration["Supabase:Issuer"];
-var supabaseAudience = builder.Configuration["Supabase:Audience"];
+builder.Services.AddAuthorization();
 
-builder.Services.AddAuthentication(options =>
+var bytes = Encoding.UTF8.GetBytes("r0kxY3QfjQQBgZbqxspFmHiVZFAAFEMeocxVMp6r/F9jtvaa5ESMF1AG+rZDoWNuD7TKRzgmFXqr/NhLn56iEg==");
+
+builder.Services.AddAuthentication().AddJwtBearer(o =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+    o.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidIssuer = supabaseIssuer,
-        ValidateAudience = true,
-        ValidAudience = supabaseAudience,
-        ValidateLifetime = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(supabaseJwtKey)),
-        ValidateIssuerSigningKey = true
+        IssuerSigningKey = new SymmetricSecurityKey(bytes),
+        ValidAudience = "authenticated",
+        ValidIssuer = "https://ccsaysezfijfkydhldow.supabase.co/auth/v1/"
     };
 });
 
@@ -80,11 +102,14 @@ using (var scope = app.Services.CreateScope())
 
 // Configure pipeline
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Freelancer API V1");
+});
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); // precisa vir antes de Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -96,6 +121,6 @@ try
 catch (Exception ex)
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogCritical(ex, "Falha ao iniciar a aplica��o");
+    logger.LogCritical(ex, "Falha ao iniciar a aplicação");
     throw;
 }

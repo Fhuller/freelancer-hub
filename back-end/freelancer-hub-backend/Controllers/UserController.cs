@@ -1,5 +1,6 @@
 ﻿using freelancer_hub_backend.DTO_s;
 using freelancer_hub_backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace freelancer_hub_backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly FreelancerContext _context;
@@ -56,9 +58,30 @@ namespace freelancer_hub_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> Create(UserCreateDto dto)
         {
+            var userId = "a7a8003b-6e49-4ac4-ab16-edde844f3d93";
+            
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var existingUser = await _context.Users.FindAsync(userId);
+
+            if (existingUser != null)
+            {
+                // Já existe, retorna os dados
+                return Ok(new UserDto
+                {
+                    Id = existingUser.Id,
+                    Name = existingUser.Name,
+                    Email = existingUser.Email,
+                    CreatedAt = existingUser.CreatedAt
+                });
+            }
+
             var user = new User
             {
-                Id = dto.Id,
+                Id = userId,
                 Name = dto.Name,
                 Email = dto.Email,
                 CreatedAt = DateTime.UtcNow
