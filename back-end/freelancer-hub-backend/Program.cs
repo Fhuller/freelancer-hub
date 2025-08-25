@@ -72,7 +72,7 @@ builder.Services.AddAuthorization();
 
 var keyBytes = Encoding.UTF8.GetBytes("r0kxY3QfjQQBgZbqxspFmHiVZFAAFEMeocxVMp6r/F9jtvaa5ESMF1AG+rZDoWNuD7TKRzgmFXqr/NhLn56iEg==");
 
-builder.Services.AddAuthentication()
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
         o.TokenValidationParameters = new TokenValidationParameters

@@ -1,5 +1,6 @@
 ﻿using freelancer_hub_backend.DTO_s;
 using freelancer_hub_backend.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace freelancer_hub_backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableCors("AllowFrontend")]
     public class ClientController : ControllerBase
     {
         private readonly FreelancerContext _context;
