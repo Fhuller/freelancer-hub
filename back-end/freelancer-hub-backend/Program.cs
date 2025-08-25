@@ -48,14 +48,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configurar CORS
+// Configurar CORS para localhost e frontend hospedado
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "https://freelancer-hub-tau.vercel.app"
+            )
+            .AllowAnyHeader() // permite Authorization, Content-Type etc.
+            .AllowAnyMethod() // GET, POST, PUT, DELETE, OPTIONS
+            .AllowCredentials(); // caso você use cookies
     });
 });
 
@@ -84,11 +88,15 @@ builder.Services.AddAuthentication()
         };
     });
 
-
 var app = builder.Build();
 
-// Usar CORS antes de mapear endpoints
+// Usar CORS antes de mapear endpoints e antes de autenticação
 app.UseCors("AllowFrontend");
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Aplicar migrations automaticamente
 using (var scope = app.Services.CreateScope())
@@ -107,17 +115,12 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure pipeline
+// Configure Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Freelancer API V1");
 });
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 
