@@ -66,17 +66,38 @@ builder.Services.AddDbContext<FreelancerContext>(options =>
 
 builder.Services.AddAuthorization();
 
-var bytes = Encoding.UTF8.GetBytes("r0kxY3QfjQQBgZbqxspFmHiVZFAAFEMeocxVMp6r/F9jtvaa5ESMF1AG+rZDoWNuD7TKRzgmFXqr/NhLn56iEg==");
+var keyBytes = Encoding.UTF8.GetBytes("r0kxY3QfjQQBgZbqxspFmHiVZFAAFEMeocxVMp6r/F9jtvaa5ESMF1AG+rZDoWNuD7TKRzgmFXqr/NhLn56iEg==");
 
-builder.Services.AddAuthentication().AddJwtBearer(o =>
-{
-    o.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication()
+    .AddJwtBearer(o =>
     {
-        IssuerSigningKey = new SymmetricSecurityKey(bytes),
-        ValidAudience = "authenticated",
-        ValidIssuer = "https://ccsaysezfijfkydhldow.supabase.co/auth/v1/"
-    };
-});
+        o.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+            ValidIssuer = "https://ccsaysezfijfkydhldow.supabase.co/auth/v1",
+            ValidAudience = "authenticated",
+            ClockSkew = TimeSpan.FromMinutes(5)
+        };
+
+        o.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine("Token inválido: " + context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("Token válido!");
+                return Task.CompletedTask;
+            }
+        };
+    });
+
 
 var app = builder.Build();
 
