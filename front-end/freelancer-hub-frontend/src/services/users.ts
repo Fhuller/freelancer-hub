@@ -12,7 +12,6 @@ export const fetchUsers = async (token?: string) => {
       headers.Authorization = `Bearer ${token}`
     }
 
-    
     const response = await fetch(apiUrl + '/Client', {
       method: 'GET',
       headers

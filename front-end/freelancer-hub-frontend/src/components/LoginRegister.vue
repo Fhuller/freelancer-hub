@@ -176,30 +176,36 @@ const clearMessages = () => {
 
 <style scoped>
 .auth-container {
-  max-width: 500px;
-  margin: 0 auto;
+  max-width: 1200px;       /* largura adequada para desktop */
+  margin: 40px auto;       /* centraliza o conteúdo */
   padding: 20px;
+  display: grid;           /* usa grid layout */
+  grid-template-columns: repeat(3, 1fr); /* 3 colunas iguais */
+  gap: 20px;
 }
 
 .auth-section {
-  margin-bottom: 30px;
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* leve sombra para estilo desktop */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 input {
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 15px;
 }
 
 input:disabled {
@@ -208,13 +214,13 @@ input:disabled {
 }
 
 button {
-  padding: 10px 15px;
+  padding: 12px 18px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   transition: background-color 0.2s;
 }
 
@@ -229,7 +235,7 @@ button:disabled {
 
 .clear-btn {
   background-color: #6c757d;
-  margin-left: 10px;
+  margin-top: 10px;
 }
 
 .clear-btn:hover {
@@ -237,12 +243,13 @@ button:disabled {
 }
 
 .message {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 4px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 6px;
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+  font-size: 14px;
 }
 
 .message.success {
@@ -252,19 +259,22 @@ button:disabled {
 }
 
 .user-info {
-  margin-top: 10px;
-  padding: 10px;
+  margin-top: 12px;
+  padding: 12px;
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
-  border-radius: 4px;
-  font-size: 12px;
-  max-height: 200px;
+  border-radius: 6px;
+  font-size: 13px;
+  max-height: 250px;
   overflow-y: auto;
   color: black;
+  white-space: pre-wrap; /* mantém a formatação do JSON */
 }
 
 h2 {
   margin-top: 0;
+  margin-bottom: 15px;
   color: #333;
+  font-size: 20px;
 }
 </style>

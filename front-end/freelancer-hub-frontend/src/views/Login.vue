@@ -118,52 +118,65 @@ const toggleMode = () => {
   align-items: center;
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  padding: 40px;
 }
 
 .login-card {
   background: white;
-  padding: 40px;
+  padding: 50px;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 400px;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* divide em 2 colunas */
+  gap: 40px;
 }
 
 .logo-section {
   text-align: center;
-  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #eee;
+  padding-right: 20px;
+}
+
+.logo-section img {
+  margin-bottom: 20px;
 }
 
 .logo-section h1 {
-  margin: 15px 0 0 0;
+  margin: 0;
   color: #333;
   font-weight: 600;
+  font-size: 24px;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding-left: 20px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .form-group label {
   font-weight: 500;
-  color: #555;
-  font-size: 14px;
+  color: #444;
+  font-size: 15px;
 }
 
 .form-group input {
   padding: 12px;
   border: 2px solid #e1e5e9;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 15px;
   transition: border-color 0.2s;
 }
 
@@ -192,7 +205,7 @@ const toggleMode = () => {
   border: none;
   padding: 14px;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s;
@@ -209,7 +222,7 @@ const toggleMode = () => {
 
 .toggle-mode {
   text-align: center;
-  color: #666;
+  color: #555;
   font-size: 14px;
 }
 
@@ -220,6 +233,7 @@ const toggleMode = () => {
   cursor: pointer;
   text-decoration: underline;
   margin-left: 5px;
+  font-size: 14px;
 }
 
 .link-btn:hover {
