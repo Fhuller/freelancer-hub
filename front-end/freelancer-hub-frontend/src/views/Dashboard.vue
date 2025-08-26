@@ -13,9 +13,8 @@ const loadUsers = async () => {
     isLoadingUsers.value = true
     error.value = ''
     
-    // Aqui você pode passar o token se necessário
-    const token = authStore.accessToken
-    users.value = await fetchUsers(token)
+    // Não é mais necessário pegar o token aqui
+    users.value = await fetchUsers()
   } catch (err) {
     error.value = 'Erro ao carregar usuários'
     console.error('Erro ao carregar usuários:', err)
@@ -30,7 +29,7 @@ onMounted(() => {
 
 const handleLogout = async () => {
   await authStore.logout()
-  // O router guard irá redirecionar para /login automaticamente
+  // O router guard já vai redirecionar para /login
 }
 </script>
 
