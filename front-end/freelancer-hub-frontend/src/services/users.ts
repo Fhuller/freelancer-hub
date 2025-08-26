@@ -1,29 +1,12 @@
-const apiUrl = import.meta.env.VITE_API_URL
+import { apiFetch } from './api'
 
-export const fetchUsers = async (token?: string) => {
-  try {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json' 
-    }
-    
-    // Adicionar token se fornecido
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
+export function fetchUsers() {
+  return apiFetch('/User', { method: 'GET' })
+}
 
-    const response = await fetch(apiUrl + '/User', {
-      method: 'GET',
-      headers
-    })
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    
-    return await response.json()
-  } catch (error) {
-    console.error('Erro ao buscar usuários:', error)
-    throw error
-  }
+export function createUser(data: any) {
+  return apiFetch('/User', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
 }
