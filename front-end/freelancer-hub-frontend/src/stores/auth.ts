@@ -4,6 +4,7 @@ import { signUp, signIn, signOut, getSession } from '../services/supabase'
 import type { Session } from '@supabase/supabase-js'
 import router from '@/router'
 import { useToast } from 'vue-toast-notification'
+import { createUser } from '../services/users'
 
 export const useAuthStore = defineStore('auth', () => {
   const toast = useToast()
@@ -20,15 +21,25 @@ export const useAuthStore = defineStore('auth', () => {
       error.value = ''
 
       const { data, error: authError } = await signIn(email, password)
-
       if (authError) {
         error.value = authError.message
-        toast.error(authError.message) // toast de erro
+        toast.error(authError.message)
         return false
       }
 
       session.value = data.session
       toast.success('Login realizado com sucesso!')
+
+      try {
+        await createUser({
+          name: email.split('@')[0],
+          email: email
+        })
+      } catch (backendErr: any) {
+        console.error('Erro ao criar usuário no backend:', backendErr)
+        toast.error('Erro ao sincronizar usuário com o backend')
+      }
+
       return true
     } catch (err: any) {
       error.value = 'Erro inesperado ao fazer login'

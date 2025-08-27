@@ -1,8 +1,10 @@
 ﻿using freelancer_hub_backend.DTO_s;
 using freelancer_hub_backend.Models;
+using freelancer_hub_backend.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace freelancer_hub_backend.Controllers
 {
@@ -37,7 +39,7 @@ namespace freelancer_hub_backend.Controllers
 
         // GET: api/user/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDto>> GetById(Guid id)
+        public async Task<ActionResult<UserDto>> GetById(string id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -58,18 +60,13 @@ namespace freelancer_hub_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> Create(UserCreateDto dto)
         {
-            var userId = "a7a8003b-6e49-4ac4-ab16-edde844f3d93";
-            
-            if (userId == null)
-            {
+            var userId = UserUtils.GetSupabaseUserId(User);
+            if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
-            }
 
             var existingUser = await _context.Users.FindAsync(userId);
-
             if (existingUser != null)
             {
-                // Já existe, retorna os dados
                 return Ok(new UserDto
                 {
                     Id = existingUser.Id,
@@ -79,6 +76,7 @@ namespace freelancer_hub_backend.Controllers
                 });
             }
 
+            // Cria novo usuário
             var user = new User
             {
                 Id = userId,
@@ -100,6 +98,7 @@ namespace freelancer_hub_backend.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = user.Id }, result);
         }
+
 
         // PUT: api/user/{id}
         [HttpPut("{id}")]
