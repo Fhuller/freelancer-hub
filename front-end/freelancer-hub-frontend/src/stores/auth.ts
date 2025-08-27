@@ -69,7 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
         return false
       }
 
-      toast.success('Cadastro realizado com sucesso!')
+      toast.success('Cadastro realizado com sucesso, um email de confirmação de conta foi enviado!')
       return true
     } catch (err: any) {
       error.value = 'Erro inesperado ao registrar'

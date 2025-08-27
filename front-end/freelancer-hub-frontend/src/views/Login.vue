@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useToast} from 'vue-toast-notification'
 
+const toast = useToast()
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -126,7 +128,7 @@ const toggleMode = () => {
   padding: 50px;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  width: 45%;
+  width: 50%;
   display: grid;
   grid-template-columns: 1fr 1fr; /* divide em 2 colunas */
   gap: 40px;
@@ -145,7 +147,7 @@ const toggleMode = () => {
 .logo-section img {
   margin-bottom: 20px;
   width: 150px;
-  height: 150px;
+  height: 140px;
 }
 
 .logo-section h1 {
