@@ -25,65 +25,46 @@ namespace freelancer_hub_backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ClientReadDto>>> GetClients()
         {
-            var userId = UserUtils.GetSupabaseUserId(User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
             try
             {
+                var userId = UserUtils.GetSupabaseUserId(User);
                 var clients = await _clientService.GetClientsAsync(userId);
                 return Ok(clients);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = ex.Message });
             }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ClientReadDto>> GetClient(Guid id)
+        public async Task<ActionResult<ClientReadDto>> GetClientById(Guid id)
         {
-            var client = await _context.Clients.FindAsync(id);
+            var client = await _clientService.GetClientByIdAsync(id);
+            if (client == null) return NotFound();
 
-            if (client == null)
-                return NotFound();
-
-            var dto = new ClientReadDto
-            {
-                Id = client.Id,
-                Name = client.Name,
-                Email = client.Email,
-                Phone = client.Phone,
-                CompanyName = client.CompanyName,
-                Notes = client.Notes,
-                CreatedAt = client.CreatedAt
-            };
-
-            return Ok(dto);
+            return Ok(client);
         }
+
 
         [HttpPost]
         public async Task<ActionResult<ClientReadDto>> CreateClient(ClientCreateDto dto)
         {
-            var userId = UserUtils.GetSupabaseUserId(User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
             try
             {
+                var userId = UserUtils.GetSupabaseUserId(User);
                 var client = await _clientService.CreateClientAsync(userId, dto);
-                return CreatedAtAction(nameof(GetClient), new { id = client.Id }, client);
+                return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
-            catch (UnauthorizedAccessException)
-            {
-                return Unauthorized();
-            }
         }
-
 
         // PUT: api/client/{id}
         [HttpPut("{id}")]

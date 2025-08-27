@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using freelancer_hub_backend.Models;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace freelancer_hub_backend.Utils
@@ -8,24 +9,19 @@ namespace freelancer_hub_backend.Utils
         /// <summary>
         /// Retorna o userId do Supabase JWT, lendo a claim user_metadata.sub
         /// </summary>
-        public static string? GetSupabaseUserId(ClaimsPrincipal user)
+        public static string GetSupabaseUserId(ClaimsPrincipal user)
         {
-            if (user == null || !user.Identity?.IsAuthenticated == true)
-                return null;
-
             var userMetadataClaim = user.Claims.FirstOrDefault(c => c.Type == "user_metadata")?.Value;
             if (string.IsNullOrEmpty(userMetadataClaim))
-                return null;
+                throw new UnauthorizedAccessException("Usuário sem metadata");
 
-            try
-            {
-                var userMetadata = JsonSerializer.Deserialize<JsonElement>(userMetadataClaim);
-                return userMetadata.GetProperty("sub").GetString();
-            }
-            catch
-            {
-                return null;
-            }
+            var userMetadata = JsonSerializer.Deserialize<JsonElement>(userMetadataClaim);
+            var userReturn = userMetadata.GetProperty("sub").GetString();
+
+            if (string.IsNullOrEmpty(userReturn))
+                throw new UnauthorizedAccessException("Usuário sem sub");
+
+            return userReturn;
         }
     }
 }

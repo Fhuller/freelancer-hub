@@ -1,27 +1,24 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using freelancer_hub_backend.Repository;
+using freelancer_hub_backend.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar logging para o console
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 
-// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Configurar Swagger com Authorization
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Freelancer API", Version = "v1" });
 
-    // Adicionar configuração de Bearer
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Insira o token JWT desta forma: Bearer {seu_token}",
@@ -48,7 +45,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configurar CORS para localhost e frontend hospedado
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -57,16 +53,18 @@ builder.Services.AddCors(options =>
                 "http://localhost:5173",
                 "https://freelancer-hub-tau.vercel.app"
             )
-            .AllowAnyHeader() // permite Authorization, Content-Type etc.
-            .AllowAnyMethod() // GET, POST, PUT, DELETE, OPTIONS
-            .AllowCredentials(); // caso você use cookies
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
-// Configurar EF Core
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<FreelancerContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IClientService, ClientService>();
 
 builder.Services.AddAuthorization();
 
@@ -90,15 +88,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// Usar CORS antes de mapear endpoints e antes de autenticação
 app.UseCors("AllowFrontend");
-
-//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Aplicar migrations automaticamente
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FreelancerContext>();
