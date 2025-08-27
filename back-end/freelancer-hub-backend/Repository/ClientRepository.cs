@@ -1,5 +1,4 @@
-﻿using freelancer_hub_backend.DTO_s;
-using freelancer_hub_backend.Models;
+﻿using freelancer_hub_backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace freelancer_hub_backend.Repository
@@ -13,22 +12,34 @@ namespace freelancer_hub_backend.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Client>> GetClientByUserIdAsync(string userId)
+        public async Task<IEnumerable<Client>> GetByUserIdAsync(string userId)
         {
             return await _context.Clients
             .Where(c => c.UserId == userId)
             .ToListAsync();
         }
 
-        public async Task<Client> GetClientByIdAsync(Guid id)
+        public async Task<Client> GetByIdAsync(Guid id)
         {
             return await _context.Clients
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task AddClientAsync(Client client)
+        public async Task AddAsync(Client client)
         {
             _context.Clients.Add(client);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Client client)
+        {
+            _context.Entry(client).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(Client client)
+        {
+            _context.Clients.Remove(client);
             await _context.SaveChangesAsync();
         }
 

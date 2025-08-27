@@ -7,5 +7,7 @@ namespace freelancer_hub_backend.Services
         Task<IEnumerable<ClientReadDto>> GetClientsAsync(string userId);
         Task<ClientReadDto> GetClientByIdAsync(Guid id);
         Task<ClientReadDto> CreateClientAsync(string userId, ClientCreateDto dto);
+        Task UpdateClientAsync(Guid id, ClientUpdateDto dto);
+        Task DeleteClientAsync(Guid id);
     }
 }

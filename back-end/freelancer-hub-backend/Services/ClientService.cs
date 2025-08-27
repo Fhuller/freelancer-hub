@@ -1,7 +1,6 @@
 ﻿using freelancer_hub_backend.DTO_s;
 using freelancer_hub_backend.Models;
 using freelancer_hub_backend.Repository;
-using Microsoft.EntityFrameworkCore;
 
 namespace freelancer_hub_backend.Services
 {
@@ -19,7 +18,7 @@ namespace freelancer_hub_backend.Services
             if (string.IsNullOrEmpty(userId))
                 throw new UnauthorizedAccessException("Usuário não autenticado.");
 
-            var clients = await _clientRepository.GetClientByUserIdAsync(userId);
+            var clients = await _clientRepository.GetByUserIdAsync(userId);
 
             return clients.Select(c => new ClientReadDto
             {
@@ -35,7 +34,7 @@ namespace freelancer_hub_backend.Services
 
         public async Task<ClientReadDto> GetClientByIdAsync(Guid id)
         {
-            var client = await _clientRepository.GetClientByIdAsync(id);
+            var client = await _clientRepository.GetByIdAsync(id);
 
             if (client == null)
                 return null;
@@ -71,7 +70,7 @@ namespace freelancer_hub_backend.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _clientRepository.AddClientAsync(client);
+            await _clientRepository.AddAsync(client);
 
             return new ClientReadDto
             {
@@ -83,6 +82,32 @@ namespace freelancer_hub_backend.Services
                 Notes = client.Notes,
                 CreatedAt = client.CreatedAt
             };
+        }
+
+        public async Task UpdateClientAsync(Guid id, ClientUpdateDto dto)
+        {
+            var client = await _clientRepository.GetByIdAsync(id);
+
+            if (client == null)
+                throw new KeyNotFoundException("Cliente não encontrado.");
+
+            client.Name = dto.Name;
+            client.Email = dto.Email;
+            client.Phone = dto.Phone;
+            client.CompanyName = dto.CompanyName;
+            client.Notes = dto.Notes;
+
+            await _clientRepository.UpdateAsync(client);
+        }
+
+        public async Task DeleteClientAsync(Guid id)
+        {
+            var client = await _clientRepository.GetByIdAsync(id);
+
+            if (client == null)
+                throw new KeyNotFoundException("Cliente não encontrado.");
+
+            await _clientRepository.DeleteAsync(client);
         }
 
         private async Task ValidateClientAsync(string userId, ClientCreateDto dto)
@@ -107,5 +132,6 @@ namespace freelancer_hub_backend.Services
             if (emailExists)
                 throw new ArgumentException("Já existe um cliente com este email.");
         }
+
     }
 }
