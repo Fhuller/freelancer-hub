@@ -47,7 +47,7 @@ const toggleMode = () => {
   <div class="login-container">
     <div class="login-card">
       <div class="logo-section">
-        <img alt="Vue logo" src="@/assets/logo.svg" width="60" height="60" />
+        <img alt="Freelancer Icon" src="@/assets/logo_icon.png"/>
         <h1>{{ isRegisterMode ? 'Criar Conta' : 'Entrar' }}</h1>
       </div>
 
@@ -126,7 +126,7 @@ const toggleMode = () => {
   padding: 50px;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  width: 100%;
+  width: 45%;
   display: grid;
   grid-template-columns: 1fr 1fr; /* divide em 2 colunas */
   gap: 40px;
@@ -144,6 +144,8 @@ const toggleMode = () => {
 
 .logo-section img {
   margin-bottom: 20px;
+  width: 150px;
+  height: 150px;
 }
 
 .logo-section h1 {

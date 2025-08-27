@@ -8,9 +8,9 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace freelancer_hub_backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly FreelancerContext _context;
@@ -20,7 +20,6 @@ namespace freelancer_hub_backend.Controllers
             _context = context;
         }
 
-        // GET: api/user
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAll()
         {
@@ -37,7 +36,6 @@ namespace freelancer_hub_backend.Controllers
             return Ok(users);
         }
 
-        // GET: api/user/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetById(string id)
         {
@@ -56,7 +54,6 @@ namespace freelancer_hub_backend.Controllers
             return Ok(dto);
         }
 
-        // POST: api/user
         [HttpPost]
         public async Task<ActionResult<UserDto>> Create(UserCreateDto dto)
         {
@@ -76,7 +73,6 @@ namespace freelancer_hub_backend.Controllers
                 });
             }
 
-            // Cria novo usuário
             var user = new User
             {
                 Id = userId,
@@ -99,8 +95,6 @@ namespace freelancer_hub_backend.Controllers
             return CreatedAtAction(nameof(GetById), new { id = user.Id }, result);
         }
 
-
-        // PUT: api/user/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UserUpdateDto dto)
         {
@@ -116,7 +110,6 @@ namespace freelancer_hub_backend.Controllers
             return NoContent();
         }
 
-        // DELETE: api/user/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

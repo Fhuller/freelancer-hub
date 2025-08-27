@@ -12,8 +12,6 @@ const loadUsers = async () => {
   try {
     isLoadingUsers.value = true
     error.value = ''
-    
-    // Não é mais necessário pegar o token aqui
     users.value = await fetchUsers()
   } catch (err) {
     error.value = 'Erro ao carregar usuários'
@@ -38,8 +36,7 @@ const handleLogout = async () => {
     <header class="dashboard-header">
       <div class="header-content">
         <div class="logo-section">
-          <img alt="Vue logo" src="@/assets/logo.svg" width="40" height="40" />
-          <h1>Dashboard</h1>
+          <img alt="Freelancer Hub" src="@/assets/logo_grd.png" width="140" height="50" />
         </div>
         
         <div class="user-section">

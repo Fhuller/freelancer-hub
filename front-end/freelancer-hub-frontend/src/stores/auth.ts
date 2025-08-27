@@ -5,12 +5,18 @@ import type { Session } from '@supabase/supabase-js'
 import router from '@/router'
 import { useToast } from 'vue-toast-notification'
 import { createUser } from '../services/users'
+import { createClient } from '@supabase/supabase-js'
 
 export const useAuthStore = defineStore('auth', () => {
   const toast = useToast()
   const session = ref<Session | null>(null)
   const isLoading = ref(false)
   const error = ref<string>('')
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  
+  const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
   const isAuthenticated = computed(() => !!session.value)
   const accessToken = computed(() => session.value?.access_token)
@@ -76,7 +82,15 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
-      await signOut()
+      if (session.value) {
+        await supabase.auth.setSession({
+          access_token: session.value.access_token,
+          refresh_token: session.value.refresh_token
+        })
+      }
+
+      await supabase.auth.signOut()
+
       session.value = null
       router.push('/login')
       toast.info('Você saiu da conta.')
@@ -85,6 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
       toast.error(err?.message || 'Erro ao fazer logout')
     }
   }
+
 
   const checkAuth = async () => {
     try {
