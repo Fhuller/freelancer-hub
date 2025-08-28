@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import Login from '../views/Login.vue'
 import Dashboard from '../views/Dashboard.vue'
+import Clients from '../views/Clients.vue'
+import Finance from '../views/Finance.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -9,7 +11,9 @@ const router = createRouter({
     { path: '/', redirect: '/dashboard' },
     { path: '/login', name: 'Login', component: Login, meta: { requiresGuest: true } },
     { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
-    { path: '/:pathMatch(.*)*', redirect: '/dashboard' } // fallback para evitar tela de erro
+    { path: '/clients', name: 'Clients', component: Clients, meta: { requiresAuth: true } },
+    { path: '/finance', name: 'Finance', component: Finance, meta: { requiresAuth: true } },
+    { path: '/:pathMatch(.*)*', redirect: '/dashboard' }
   ]
 })
 
@@ -17,7 +21,7 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
   try {
-    await authStore.checkAuth() // sempre checa antes de decidir
+    await authStore.checkAuth()
   } catch (err) {
     console.error(err)
   }

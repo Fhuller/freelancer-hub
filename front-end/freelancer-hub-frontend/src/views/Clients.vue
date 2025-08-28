@@ -28,41 +28,7 @@ onMounted(() => {
 <template>
   <AuthenticatedLayout> 
     <div class="content-section">
-      <div class="section-header">
-        <h2>Dados da API</h2>
-        <button
-          @click="loadUsers"
-          :disabled="isLoadingUsers"
-          class="refresh-btn"
-        >
-          {{ isLoadingUsers ? 'Carregando...' : 'Atualizar' }}
-        </button>
-      </div>
-
-      <div v-if="error" class="error-message">
-        {{ error }}
-      </div>
-
-      <div v-else-if="isLoadingUsers" class="loading-state">
-        <div class="spinner"></div>
-        <p>Carregando dados...</p>
-      </div>
-
-      <div v-else-if="users.length > 0" class="data-section">
-        <div class="data-grid">
-          <div
-            v-for="(user, index) in users"
-            :key="index"
-            class="data-card"
-          >
-            <pre>{{ JSON.stringify(user, null, 2) }}</pre>
-          </div>
-        </div>
-      </div>
-
-      <div v-else class="empty-state">
-        <p>Nenhum dado encontrado.</p>
-      </div>
+      Clientes
     </div>
   </AuthenticatedLayout>
 </template>
