@@ -1,10 +1,8 @@
 ﻿using freelancer_hub_backend.DTO_s;
-using freelancer_hub_backend.Models;
+using freelancer_hub_backend.Services;
 using freelancer_hub_backend.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace freelancer_hub_backend.Controllers
 {
@@ -13,115 +11,131 @@ namespace freelancer_hub_backend.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly FreelancerContext _context;
+        private readonly IUserService _userService;
 
-        public UserController(FreelancerContext context)
+        public UserController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            var users = await _context.Users
-                .Select(u => new UserDto
-                {
-                    Id = u.Id,
-                    Name = u.Name,
-                    Email = u.Email,
-                    CreatedAt = u.CreatedAt
-                })
-                .ToListAsync();
-
+            var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDto>> GetById(string id)
+        public async Task<ActionResult<UserDto>> GetUserById(string id)
         {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null) return NotFound();
-
-            var dto = new UserDto
+            try
             {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                CreatedAt = user.CreatedAt
-            };
+                var user = await _userService.GetUserByIdAsync(id);
+                if (user == null) return NotFound();
 
-            return Ok(dto);
+                return Ok(user);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("me")]
+        public async Task<ActionResult<UserDto>> GetCurrentUser()
+        {
+            try
+            {
+                var userId = UserUtils.GetSupabaseUserId(User);
+                var user = await _userService.GetCurrentUserAsync(userId);
+
+                if (user == null) return NotFound();
+
+                return Ok(user);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<UserDto>> Create(UserCreateDto dto)
+        public async Task<ActionResult<UserDto>> CreateOrGetUser(UserCreateDto dto)
         {
-            var userId = UserUtils.GetSupabaseUserId(User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            var existingUser = await _context.Users.FindAsync(userId);
-            if (existingUser != null)
+            try
             {
-                return Ok(new UserDto
+                var userId = UserUtils.GetSupabaseUserId(User);
+                var user = await _userService.CreateOrGetUserAsync(userId, dto);
+
+                // Se o usuário já existia, retorna 200. Se foi criado, retorna 201
+                var existingUser = await _userService.GetUserByIdAsync(userId);
+                if (existingUser?.CreatedAt == user.CreatedAt)
                 {
-                    Id = existingUser.Id,
-                    Name = existingUser.Name,
-                    Email = existingUser.Email,
-                    CreatedAt = existingUser.CreatedAt
-                });
+                    return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+                }
+
+                return Ok(user);
             }
-
-            var user = new User
+            catch (UnauthorizedAccessException ex)
             {
-                Id = userId,
-                Name = dto.Name,
-                Email = dto.Email,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var result = new UserDto
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
             {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                CreatedAt = user.CreatedAt
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = user.Id }, result);
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, UserUpdateDto dto)
+        public async Task<IActionResult> UpdateUser(string id, UserUpdateDto dto)
         {
-            var user = await _context.Users.FindAsync(id);
+            try
+            {
+                var currentUserId = UserUtils.GetSupabaseUserId(User);
+                if (currentUserId != id)
+                {
+                    return Forbid("Você só pode atualizar seu próprio perfil.");
+                }
 
-            if (user == null) return NotFound();
-
-            user.Name = dto.Name;
-            user.Email = dto.Email;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                await _userService.UpdateUserAsync(id, dto);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> DeleteUser(string id)
         {
-            var user = await _context.Users.FindAsync(id);
+            try
+            {
+                var currentUserId = UserUtils.GetSupabaseUserId(User);
+                if (currentUserId != id)
+                {
+                    return Forbid("Você só pode deletar seu próprio perfil.");
+                }
 
-            if (user == null) return NotFound();
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                await _userService.DeleteUserAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
-
 }

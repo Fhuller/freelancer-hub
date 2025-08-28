@@ -1,127 +1,100 @@
 ﻿using freelancer_hub_backend.DTO_s;
-using freelancer_hub_backend.Models;
-using System;
+using freelancer_hub_backend.Services;
+using freelancer_hub_backend.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace freelancer_hub_backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TaskItemController : ControllerBase
     {
-        private readonly FreelancerContext _context;
+        private readonly ITaskItemService _taskItemService;
 
-        public TaskItemController(FreelancerContext context)
+        public TaskItemController(ITaskItemService taskItemService)
         {
-            _context = context;
+            _taskItemService = taskItemService;
         }
 
-        // GET: api/taskitem
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetAll()
+        [HttpGet("project/{projectId}")]
+        public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetTaskItemsByProject(Guid projectId)
         {
-            var tasks = await _context.TaskItems
-                .Select(t => new TaskItemDto
-                {
-                    Id = t.Id,
-                    ProjectId = t.ProjectId,
-                    Title = t.Title,
-                    Description = t.Description,
-                    Status = t.Status,
-                    DueDate = t.DueDate,
-                    CreatedAt = t.CreatedAt
-                })
-                .ToListAsync();
-
-            return Ok(tasks);
+            try
+            {
+                var userId = UserUtils.GetSupabaseUserId(User);
+                var taskItems = await _taskItemService.GetTaskItemsByProjectAsync(userId, projectId);
+                return Ok(taskItems);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // GET: api/taskitem/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<TaskItemDto>> GetById(Guid id)
+        public async Task<ActionResult<TaskItemDto>> GetTaskItemById(Guid id)
         {
-            var task = await _context.TaskItems.FindAsync(id);
+            var taskItem = await _taskItemService.GetTaskItemByIdAsync(id);
+            if (taskItem == null) return NotFound();
 
-            if (task == null) return NotFound();
-
-            var dto = new TaskItemDto
-            {
-                Id = task.Id,
-                ProjectId = task.ProjectId,
-                Title = task.Title,
-                Description = task.Description,
-                Status = task.Status,
-                DueDate = task.DueDate,
-                CreatedAt = task.CreatedAt
-            };
-
-            return Ok(dto);
+            return Ok(taskItem);
         }
 
-        // POST: api/taskitem
         [HttpPost]
-        public async Task<ActionResult<TaskItemDto>> Create(TaskItemCreateDto dto)
+        public async Task<ActionResult<TaskItemDto>> CreateTaskItem(TaskItemCreateDto dto)
         {
-            var task = new TaskItem
+            try
             {
-                Id = Guid.NewGuid(),
-                ProjectId = dto.ProjectId,
-                Title = dto.Title,
-                Description = dto.Description,
-                Status = dto.Status,
-                DueDate = dto.DueDate,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.TaskItems.Add(task);
-            await _context.SaveChangesAsync();
-
-            var result = new TaskItemDto
+                var userId = UserUtils.GetSupabaseUserId(User);
+                var taskItem = await _taskItemService.CreateTaskItemAsync(userId, dto);
+                return CreatedAtAction(nameof(GetTaskItemById), new { id = taskItem.Id }, taskItem);
+            }
+            catch (UnauthorizedAccessException)
             {
-                Id = task.Id,
-                ProjectId = task.ProjectId,
-                Title = task.Title,
-                Description = task.Description,
-                Status = task.Status,
-                DueDate = task.DueDate,
-                CreatedAt = task.CreatedAt
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = task.Id }, result);
+                return Unauthorized();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // PUT: api/taskitem/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, TaskItemUpdateDto dto)
+        public async Task<IActionResult> UpdateTaskItem(Guid id, TaskItemUpdateDto dto)
         {
-            var task = await _context.TaskItems.FindAsync(id);
-
-            if (task == null) return NotFound();
-
-            task.Title = dto.Title;
-            task.Description = dto.Description;
-            task.Status = dto.Status;
-            task.DueDate = dto.DueDate;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                await _taskItemService.UpdateTaskItemAsync(id, dto);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // DELETE: api/taskitem/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> DeleteTaskItem(Guid id)
         {
-            var task = await _context.TaskItems.FindAsync(id);
-
-            if (task == null) return NotFound();
-
-            _context.TaskItems.Remove(task);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                await _taskItemService.DeleteTaskItemAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
-
 }
