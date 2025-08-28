@@ -1,131 +1,96 @@
 ﻿using freelancer_hub_backend.DTO_s;
-using freelancer_hub_backend.Models;
-using System;
+using freelancer_hub_backend.Services;
+using freelancer_hub_backend.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace freelancer_hub_backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ProjectController : ControllerBase
     {
-        private readonly FreelancerContext _context;
+        private readonly IProjectService _projectService;
 
-        public ProjectController(FreelancerContext context)
+        public ProjectController(IProjectService projectService)
         {
-            _context = context;
+            _projectService = projectService;
         }
 
-        // GET: api/project
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProjectDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ProjectDto>>> GetProjects()
         {
-            var projects = await _context.Projects
-                .Select(p => new ProjectDto
-                {
-                    Id = p.Id,
-                    UserId = p.UserId,
-                    ClientId = p.ClientId,
-                    Title = p.Title,
-                    Description = p.Description,
-                    Status = p.Status,
-                    DueDate = p.DueDate,
-                    CreatedAt = p.CreatedAt
-                })
-                .ToListAsync();
-
-            return Ok(projects);
+            try
+            {
+                var userId = UserUtils.GetSupabaseUserId(User);
+                var projects = await _projectService.GetProjectsAsync(userId);
+                return Ok(projects);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
         }
 
-        // GET: api/project/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProjectDto>> GetById(Guid id)
+        public async Task<ActionResult<ProjectDto>> GetProjectById(Guid id)
         {
-            var project = await _context.Projects.FindAsync(id);
-
+            var project = await _projectService.GetProjectByIdAsync(id);
             if (project == null) return NotFound();
 
-            var dto = new ProjectDto
-            {
-                Id = project.Id,
-                UserId = project.UserId,
-                ClientId = project.ClientId,
-                Title = project.Title,
-                Description = project.Description,
-                Status = project.Status,
-                DueDate = project.DueDate,
-                CreatedAt = project.CreatedAt
-            };
-
-            return Ok(dto);
+            return Ok(project);
         }
 
-        // POST: api/project
         [HttpPost]
-        public async Task<ActionResult<ProjectDto>> Create(ProjectCreateDto dto)
+        public async Task<ActionResult<ProjectDto>> CreateProject(ProjectCreateDto dto)
         {
-            var project = new Project
+            try
             {
-                Id = Guid.NewGuid(),
-                UserId = dto.UserId,
-                ClientId = dto.ClientId,
-                Title = dto.Title,
-                Description = dto.Description,
-                Status = dto.Status,
-                DueDate = dto.DueDate,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Projects.Add(project);
-            await _context.SaveChangesAsync();
-
-            var result = new ProjectDto
+                var userId = UserUtils.GetSupabaseUserId(User);
+                var project = await _projectService.CreateProjectAsync(userId, dto);
+                return CreatedAtAction(nameof(GetProjectById), new { id = project.Id }, project);
+            }
+            catch (UnauthorizedAccessException)
             {
-                Id = project.Id,
-                UserId = project.UserId,
-                ClientId = project.ClientId,
-                Title = project.Title,
-                Description = project.Description,
-                Status = project.Status,
-                DueDate = project.DueDate,
-                CreatedAt = project.CreatedAt
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = project.Id }, result);
+                return Unauthorized();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // PUT: api/project/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, ProjectUpdateDto dto)
+        public async Task<IActionResult> UpdateProject(Guid id, ProjectUpdateDto dto)
         {
-            var project = await _context.Projects.FindAsync(id);
-
-            if (project == null) return NotFound();
-
-            project.Title = dto.Title;
-            project.Description = dto.Description;
-            project.Status = dto.Status;
-            project.DueDate = dto.DueDate;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                await _projectService.UpdateProjectAsync(id, dto);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // DELETE: api/project/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> DeleteProject(Guid id)
         {
-            var project = await _context.Projects.FindAsync(id);
-
-            if (project == null) return NotFound();
-
-            _context.Projects.Remove(project);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                await _projectService.DeleteProjectAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
-
 }
