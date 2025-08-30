@@ -9,11 +9,26 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const isRegisterMode = ref(false)
+const isForgotMode = ref(false)
+
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 
 const handleSubmit = async () => {
+  if (isForgotMode.value) {
+    if (!email.value) {
+      toast.error('Digite seu e-mail para redefinir a senha')
+      return
+    }
+    const success = await authStore.resetPassword(email.value)
+    if (success) {
+      isForgotMode.value = false
+      email.value = ''
+    }
+    return
+  }
+
   if (isRegisterMode.value) {
     if (password.value !== confirmPassword.value) {
       authStore.error = 'As senhas não coincidem'
@@ -22,7 +37,6 @@ const handleSubmit = async () => {
     
     const success = await authStore.register(email.value, password.value)
     if (success) {
-      // Mostrar mensagem de sucesso e alternar para login
       isRegisterMode.value = false
       email.value = ''
       password.value = ''
@@ -38,6 +52,16 @@ const handleSubmit = async () => {
 
 const toggleMode = () => {
   isRegisterMode.value = !isRegisterMode.value
+  isForgotMode.value = false
+  authStore.clearError()
+  email.value = ''
+  password.value = ''
+  confirmPassword.value = ''
+}
+
+const toggleForgotMode = () => {
+  isForgotMode.value = !isForgotMode.value
+  isRegisterMode.value = false
   authStore.clearError()
   email.value = ''
   password.value = ''
@@ -50,7 +74,9 @@ const toggleMode = () => {
     <div class="login-card">
       <div class="logo-section">
         <img alt="Freelancer Icon" src="@/assets/logo_icon.png"/>
-        <h1>{{ isRegisterMode ? 'Criar Conta' : 'Entrar' }}</h1>
+        <h1>
+          {{ isRegisterMode ? 'Criar Conta' : (isForgotMode ? 'Redefinir Senha' : 'Entrar') }}
+        </h1>
       </div>
 
       <form @submit.prevent="handleSubmit" class="login-form">
@@ -66,7 +92,7 @@ const toggleMode = () => {
           />
         </div>
 
-        <div class="form-group">
+        <div v-if="!isForgotMode" class="form-group">
           <label for="password">Senha</label>
           <input 
             id="password"
@@ -99,14 +125,39 @@ const toggleMode = () => {
           class="submit-btn"
           :disabled="authStore.isLoading"
         >
-          {{ authStore.isLoading ? 'Aguarde...' : (isRegisterMode ? 'Criar Conta' : 'Entrar') }}
+          {{ authStore.isLoading 
+              ? 'Aguarde...' 
+              : (isRegisterMode 
+                  ? 'Criar Conta' 
+                  : (isForgotMode ? 'Enviar Link' : 'Entrar')) 
+          }}
         </button>
 
-        <div class="toggle-mode">
-          {{ isRegisterMode ? 'Já tem uma conta?' : 'Não tem uma conta?' }}
-          <button type="button" @click="toggleMode" class="link-btn">
-            {{ isRegisterMode ? 'Fazer Login' : 'Criar Conta' }}
+        <div v-if="!isForgotMode" class="forgot-password">
+          <button type="button" class="link-btn" @click="toggleForgotMode">
+            Esqueci a senha
           </button>
+        </div>
+
+        <div class="toggle-mode">
+          <template v-if="isRegisterMode">
+            Já tem uma conta?
+            <button type="button" @click="toggleMode" class="link-btn">
+              Fazer Login
+            </button>
+          </template>
+          <template v-else-if="isForgotMode">
+            Lembrou da senha?
+            <button type="button" @click="toggleForgotMode" class="link-btn">
+              Fazer Login
+            </button>
+          </template>
+          <template v-else>
+            Não tem uma conta?
+            <button type="button" @click="toggleMode" class="link-btn">
+              Criar Conta
+            </button>
+          </template>
         </div>
       </form>
     </div>
@@ -130,7 +181,7 @@ const toggleMode = () => {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   width: 50%;
   display: grid;
-  grid-template-columns: 1fr 1fr; /* divide em 2 colunas */
+  grid-template-columns: 1fr 1fr;
   gap: 40px;
 }
 
@@ -222,6 +273,11 @@ const toggleMode = () => {
 .submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: -10px;
 }
 
 .toggle-mode {

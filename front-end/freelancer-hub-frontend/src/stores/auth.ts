@@ -15,7 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-  
+
   const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
   const isAuthenticated = computed(() => !!session.value)
@@ -112,6 +112,32 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const resetPassword = async (email: string) => {
+    try {
+      isLoading.value = true
+      error.value = ''
+
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      })
+
+      if (resetError) {
+        error.value = resetError.message
+        toast.error(resetError.message)
+        return false
+      }
+
+      toast.success('Um link para redefinir sua senha foi enviado para o seu e-mail.')
+      return true
+    } catch (err: any) {
+      error.value = 'Erro inesperado ao solicitar redefinição de senha'
+      toast.error(err?.message || 'Erro inesperado ao solicitar redefinição de senha')
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const clearError = () => {
     error.value = ''
   }
@@ -126,6 +152,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     checkAuth,
-    clearError
+    clearError,
+    resetPassword
   }
 })
