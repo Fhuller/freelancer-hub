@@ -67,7 +67,6 @@ namespace freelancer_hub_backend.Controllers
                 var userId = UserUtils.GetSupabaseUserId(User);
                 var user = await _userService.CreateOrGetUserAsync(userId, dto);
 
-                // Se o usuário já existia, retorna 200. Se foi criado, retorna 201
                 var existingUser = await _userService.GetUserByIdAsync(userId);
                 if (existingUser?.CreatedAt == user.CreatedAt)
                 {

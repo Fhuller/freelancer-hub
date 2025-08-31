@@ -16,7 +16,6 @@ namespace freelancer_hub_backend.Controllers
             _context = context;
         }
 
-        // GET: api/payment
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PaymentDto>>> GetAll()
         {
@@ -36,7 +35,6 @@ namespace freelancer_hub_backend.Controllers
             return Ok(payments);
         }
 
-        // GET: api/payment/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<PaymentDto>> GetById(Guid id)
         {
@@ -58,7 +56,6 @@ namespace freelancer_hub_backend.Controllers
             return Ok(dto);
         }
 
-        // POST: api/payment
         [HttpPost]
         public async Task<ActionResult<PaymentDto>> Create(PaymentCreateDto dto)
         {
@@ -91,7 +88,6 @@ namespace freelancer_hub_backend.Controllers
             return CreatedAtAction(nameof(GetById), new { id = payment.Id }, result);
         }
 
-        // PUT: api/payment/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, PaymentUpdateDto dto)
         {
@@ -109,7 +105,6 @@ namespace freelancer_hub_backend.Controllers
             return NoContent();
         }
 
-        // DELETE: api/payment/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
