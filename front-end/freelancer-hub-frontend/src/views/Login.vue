@@ -159,13 +159,20 @@ const toggleForgotMode = () => {
             </button>
           </template>
         </div>
-        <button 
-          type="button" 
-          class="submit-btn" 
+        <button
+          type="button"
+          class="google-signin-btn"
           @click="authStore.loginWithGoogle"
           :disabled="authStore.isLoading"
         >
-          Entrar com Google
+          <div class="google-icon-wrapper">
+            <img
+              class="google-icon"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/512px-Google_%22G%22_logo.svg.png"
+              alt="Google Icon"
+            />
+          </div>
+          <span class="btn-text">Entrar com Google</span>
         </button>
       </form>
     </div>
@@ -173,6 +180,58 @@ const toggleForgotMode = () => {
 </template>
 
 <style scoped>
+.google-signin-btn {
+  /* Estilo geral do botão */
+  background-color: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  color: #3c4043;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  height: 40px;
+  padding: 0 16px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  text-decoration: none; /* remove sublinhado, caso esteja em <a> */
+}
+
+/* Estado de hover */
+.google-signin-btn:hover {
+  background-color: #f6f6f6;
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+/* Ícone do Google */
+.google-icon-wrapper {
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.google-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Texto do botão */
+.btn-text {
+  line-height: 1;
+}
+
+/* Estado desabilitado */
+.google-signin-btn:disabled {
+  background-color: #f1f1f1;
+  color: #a0a0a0;
+  border: 1px solid #e0e0e0;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .login-container {
   display: flex;
   justify-content: center;
