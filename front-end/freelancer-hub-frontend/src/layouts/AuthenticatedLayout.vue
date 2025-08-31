@@ -10,10 +10,6 @@ const isSidebarOpen = ref(false);
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value;
 }
-
-onMounted(async () => {
-  await authStore.loadCurrentUser();
-});
 </script>
 
 <template>

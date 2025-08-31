@@ -11,17 +11,14 @@ namespace freelancer_hub_backend.Utils
         /// </summary>
         public static string GetSupabaseUserId(ClaimsPrincipal user)
         {
-            var userMetadataClaim = user.Claims.FirstOrDefault(c => c.Type == "user_metadata")?.Value;
-            if (string.IsNullOrEmpty(userMetadataClaim))
-                throw new UnauthorizedAccessException("Usuário sem metadata");
+            var nameIdentifierClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
-            var userMetadata = JsonSerializer.Deserialize<JsonElement>(userMetadataClaim);
-            var userReturn = userMetadata.GetProperty("sub").GetString();
+            if (nameIdentifierClaim == null || string.IsNullOrEmpty(nameIdentifierClaim.Value))
+            {
+                throw new UnauthorizedAccessException("Usuário sem ID (nameidentifier) no token.");
+            }
 
-            if (string.IsNullOrEmpty(userReturn))
-                throw new UnauthorizedAccessException("Usuário sem sub");
-
-            return userReturn;
+            return nameIdentifierClaim.Value;
         }
     }
 }

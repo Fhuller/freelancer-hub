@@ -159,6 +159,14 @@ const toggleForgotMode = () => {
             </button>
           </template>
         </div>
+        <button 
+          type="button" 
+          class="submit-btn" 
+          @click="authStore.loginWithGoogle"
+          :disabled="authStore.isLoading"
+        >
+          Entrar com Google
+        </button>
       </form>
     </div>
   </div>

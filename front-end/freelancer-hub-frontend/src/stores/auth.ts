@@ -37,6 +37,32 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const loginWithGoogle = async () => {
+    try {
+      isLoading.value = true
+      error.value = ''
+
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/dashboard'
+        }
+      })
+
+      if (authError) {
+        error.value = authError.message
+        toast.error(authError.message)
+        return false
+      }
+    } catch (err: any) {
+      error.value = 'Erro inesperado ao logar com Google'
+      toast.error(err?.message || 'Erro inesperado ao logar com Google')
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const setLanguage = async (lang: string) => {
     locale.value = lang
     if (user.value?.id) {
@@ -138,13 +164,26 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { data: { session: currentSession } } = await getSession()
       session.value = currentSession
-      if (session.value) await loadCurrentUser()
+
+      if (session.value) {
+        try {
+          await createUser({
+            name: session.value.user?.email?.split('@')[0] || 'Usuário',
+            email: session.value.user?.email || ''
+          })
+        } catch (backendErr: any) {
+          console.error('Erro ao criar/verificar usuário no backend:', backendErr)
+        }
+
+        await loadCurrentUser()
+      }
     } catch (err: any) {
       console.error('Erro ao verificar autenticação:', err)
       session.value = null
       user.value = null
     }
   }
+
 
   const register = async (email: string, password: string) => {
     try {
@@ -181,6 +220,7 @@ export const useAuthStore = defineStore('auth', () => {
     loadCurrentUser,
     resetPassword,
     clearError,
-    register
+    register,
+    loginWithGoogle
   }
 })
