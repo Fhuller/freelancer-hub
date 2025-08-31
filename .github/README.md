@@ -13,7 +13,7 @@ FreelanceHub é uma solução integrada que permite aos freelancers manter contr
 
 - **Backend**: .NET Core
 - **Frontend**: Vue.js
-- **Banco de Dados**: PostgreSQL
+- **Banco de Dados**: SQL Server
 
 ## Estrutura do Projeto
 
@@ -55,4 +55,5 @@ FreelanceHub é uma solução integrada que permite aos freelancers manter contr
 - Sistema de cobrança integrado
 
 - Extensão de funcionalidades de gestão financeira
+
 
