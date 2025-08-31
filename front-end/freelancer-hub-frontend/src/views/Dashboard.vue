@@ -29,7 +29,7 @@ onMounted(() => {
   <AuthenticatedLayout> 
     <div class="content-section">
       <div class="section-header">
-        <h2>Dados da API</h2>
+        <h2>{{ $t('hello') }}</h2>
         <button
           @click="loadUsers"
           :disabled="isLoadingUsers"

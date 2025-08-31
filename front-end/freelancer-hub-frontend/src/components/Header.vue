@@ -2,7 +2,9 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useI18n } from 'vue-i18n';
 
+const { locale } = useI18n();
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
@@ -15,6 +17,9 @@ const toggleUserMenu = () => {
     userMenuOpen.value = !userMenuOpen.value;
 };
 
+const changeLanguage = async (lang: string) => {
+  await authStore.setLanguage(lang);
+};
 const closeUserMenu = (event: Event) => {
     if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
         userMenuOpen.value = false;
@@ -108,6 +113,20 @@ onUnmounted(() => {
                         <div class="user-info">
                             <div class="user-email">{{ authStore.session?.user.email }}</div>
                         </div>
+                        <div class="dropdown-language">
+                            <button
+                                @click="changeLanguage('pt')"
+                                :class="{ 'active': locale === 'pt' }"
+                                class="dropdown-item">
+                                <span class="fi fi-br"></span> Português
+                            </button>
+                            <button
+                                @click="changeLanguage('en')"
+                                :class="{ 'active': locale === 'en' }"
+                                class="dropdown-item">
+                                <span class="fi fi-us"></span> English
+                            </button>
+                        </div>
                         <div class="dropdown-divider"></div>
                         <button @click="handleLogout" class="dropdown-item logout-item">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -124,6 +143,16 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.dropdown-language {
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+}
+
+.dropdown-language .dropdown-item.active {
+    font-weight: bold;
+}
+
 .github-header {
     background: white;
     border-bottom: 1px solid #d1d9e0;

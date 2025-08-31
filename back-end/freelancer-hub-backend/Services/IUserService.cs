@@ -10,5 +10,6 @@ namespace freelancer_hub_backend.Services
         Task UpdateUserAsync(string id, UserUpdateDto dto);
         Task DeleteUserAsync(string id);
         Task<UserDto> GetCurrentUserAsync(string userId);
+        Task UpdateLanguageAsync(string id, string language);
     }
 }

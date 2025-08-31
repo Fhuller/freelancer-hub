@@ -136,5 +136,19 @@ namespace freelancer_hub_backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPatch("{id}/language")]
+        public async Task<IActionResult> UpdateLanguage(string id, [FromBody] string language)
+        {
+            try
+            {
+                await _userService.UpdateLanguageAsync(id, language);
+                return Ok(new { id, language });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
     }
 }

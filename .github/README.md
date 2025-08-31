@@ -1,0 +1,1 @@
+# Aqui será definido as funções para o funcionamento do github actions, de compilação e deploy do backend e front

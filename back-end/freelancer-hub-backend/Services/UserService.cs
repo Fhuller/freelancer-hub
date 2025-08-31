@@ -41,7 +41,8 @@ namespace freelancer_hub_backend.Services
                 Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                Language = user.Language
             };
         }
 
@@ -122,6 +123,15 @@ namespace freelancer_hub_backend.Services
                 throw new UnauthorizedAccessException("Usuário não autenticado.");
 
             return await GetUserByIdAsync(userId);
+        }
+
+        public async Task UpdateLanguageAsync(string id, string language)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null) throw new KeyNotFoundException("User not found");
+
+            user.Language = language;
+            await _userRepository.UpdateAsync(user);
         }
 
         private async Task ValidateUserAsync(UserCreateDto dto, string userId)

@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'; 
+import { ref, onMounted } from 'vue'; 
+import { useAuthStore } from '../stores/auth';
 import Header from '../components/Header.vue';
-import Sidebar from '../components/Sidebar.vue'; 
+import Sidebar from '../components/Sidebar.vue';
 
+const authStore = useAuthStore();
 const isSidebarOpen = ref(false); 
 
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value;
 }
+
+onMounted(async () => {
+  await authStore.loadCurrentUser();
+});
 </script>
 
 <template>

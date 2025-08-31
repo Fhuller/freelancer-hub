@@ -4,35 +4,61 @@ import { signUp, signIn, signOut, getSession } from '../services/supabase'
 import type { Session } from '@supabase/supabase-js'
 import router from '@/router'
 import { useToast } from 'vue-toast-notification'
-import { createUser } from '../services/users'
+import { createUser, fetchCurrentUser, updateUserLanguage } from '../services/users'
 import { createClient } from '@supabase/supabase-js'
+import { useI18n } from 'vue-i18n'
 
 export const useAuthStore = defineStore('auth', () => {
   const toast = useToast()
+  const { locale } = useI18n()
   const session = ref<Session | null>(null)
+  const user = ref<{ id: string; name: string; email: string; language: string } | null>(null)
   const isLoading = ref(false)
   const error = ref<string>('')
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
   const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
   const isAuthenticated = computed(() => !!session.value)
   const accessToken = computed(() => session.value?.access_token)
 
+  const loadCurrentUser = async () => {
+    try {
+      const response = await fetchCurrentUser()
+      if (response) {
+        user.value = response
+        if (user.value?.language) {
+          locale.value = user.value.language
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao carregar usuário:', err)
+    }
+  }
+
+  const setLanguage = async (lang: string) => {
+    locale.value = lang
+    if (user.value?.id) {
+      try {
+        await updateUserLanguage(user.value.id, lang)
+        user.value.language = lang
+      } catch (err) {
+        console.error('Erro ao atualizar idioma no backend:', err)
+      }
+    }
+  }
+
   const login = async (email: string, password: string) => {
     try {
       isLoading.value = true
       error.value = ''
-
       const { data, error: authError } = await signIn(email, password)
       if (authError) {
         error.value = authError.message
         toast.error(authError.message)
         return false
       }
-
       session.value = data.session
       toast.success('Login realizado com sucesso!')
 
@@ -43,37 +69,13 @@ export const useAuthStore = defineStore('auth', () => {
         })
       } catch (backendErr: any) {
         console.error('Erro ao criar usuário no backend:', backendErr)
-        toast.error('Erro ao sincronizar usuário com o backend')
       }
 
+      await loadCurrentUser()
       return true
     } catch (err: any) {
       error.value = 'Erro inesperado ao fazer login'
       toast.error(err?.message || 'Erro inesperado ao fazer login')
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const register = async (email: string, password: string) => {
-    try {
-      isLoading.value = true
-      error.value = ''
-
-      const { data, error: authError } = await signUp(email, password)
-
-      if (authError) {
-        error.value = authError.message
-        toast.error(authError.message)
-        return false
-      }
-
-      toast.success('Cadastro realizado com sucesso, um email de confirmação de conta foi enviado!')
-      return true
-    } catch (err: any) {
-      error.value = 'Erro inesperado ao registrar'
-      toast.error(err?.message || 'Erro inesperado ao registrar')
       return false
     } finally {
       isLoading.value = false
@@ -92,6 +94,10 @@ export const useAuthStore = defineStore('auth', () => {
       await supabase.auth.signOut()
 
       session.value = null
+      user.value = null
+
+      locale.value = 'pt'
+
       router.push('/login')
       toast.info('Você saiu da conta.')
     } catch (err: any) {
@@ -100,59 +106,29 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-
   const checkAuth = async () => {
     try {
       const { data: { session: currentSession } } = await getSession()
       session.value = currentSession
+      if (session.value) await loadCurrentUser()
     } catch (err: any) {
       console.error('Erro ao verificar autenticação:', err)
       session.value = null
-      toast.error('Erro ao verificar autenticação.')
+      user.value = null
     }
-  }
-
-  const resetPassword = async (email: string) => {
-    try {
-      isLoading.value = true
-      error.value = ''
-
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
-      })
-
-      if (resetError) {
-        error.value = resetError.message
-        toast.error(resetError.message)
-        return false
-      }
-
-      toast.success('Um link para redefinir sua senha foi enviado para o seu e-mail.')
-      return true
-    } catch (err: any) {
-      error.value = 'Erro inesperado ao solicitar redefinição de senha'
-      toast.error(err?.message || 'Erro inesperado ao solicitar redefinição de senha')
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const clearError = () => {
-    error.value = ''
   }
 
   return {
     session,
+    user,
     isLoading,
     error,
     isAuthenticated,
     accessToken,
     login,
-    register,
     logout,
     checkAuth,
-    clearError,
-    resetPassword
+    setLanguage,
+    loadCurrentUser
   }
 })
