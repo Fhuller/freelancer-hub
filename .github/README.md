@@ -6,8 +6,8 @@ Um sistema completo para gerenciamento de clientes, projetos e finanças desenvo
 
 FreelanceHub é uma solução integrada que permite aos freelancers manter controle total sobre seus negócios. O sistema oferece ferramentas para gerenciar clientes, acompanhar projetos, gerar faturas, monitorar pagamentos e analisar o desempenho através de relatórios detalhados.
 
-RFC: https://www.overleaf.com/read/xthqfscqnfrw#653fbd
-Projeto em prod: https://freelancer-hub-tau.vercel.app
+- RFC: https://www.overleaf.com/read/xthqfscqnfrw#653fbd
+- Projeto em prod: https://freelancer-hub-tau.vercel.app
 
 ## 🚀 Tecnologias
 
@@ -55,3 +55,4 @@ Projeto em prod: https://freelancer-hub-tau.vercel.app
 - Sistema de cobrança integrado
 
 - Extensão de funcionalidades de gestão financeira
+
