@@ -14,6 +14,11 @@ RFC: https://www.overleaf.com/read/xthqfscqnfrw#653fbd
 - **Frontend**: Vue.js
 - **Banco de Dados**: PostgreSQL
 
+## Estrutura do Projeto
+
+- [Frontend](front-end/README.md) – Detalhes do frontend, como setup, dependências e execução.
+- [Backend](back-end/README.md) – Detalhes do backend, APIs, banco de dados e execução.
+
 ## 🔑 Funcionalidades Principais
 
 ### Módulo de Gestão de Clientes
@@ -42,8 +47,6 @@ RFC: https://www.overleaf.com/read/xthqfscqnfrw#653fbd
 - Análise financeira por período
 - Relatórios de clientes e projetos
 - Exportação em vários formatos
-
-![Diagrama ER](docs/UML.png)
 
 ## 📝 Planos Futuros
 
