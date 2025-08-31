@@ -19,14 +19,14 @@ Link API: https://freelancer-hub-backend-exe7f6cygggae0db.eastus2-01.azurewebsit
 
 ### 1. Clonando o repositório
 ```bash
-git clone [URL_DO_REPOSITORIO]
-cd [NOME_DO_PROJETO]
+git clone https://github.com/Fhuller/freelancer-hub
+cd ./back-end/freelancer-hub-backend/
 ```
 
 ### 2. Configuração no Visual Studio Community
 1. Abra o **Visual Studio Community**
 2. Selecione **"Abrir um projeto ou solução"**
-3. Navegue até a pasta do projeto e selecione o arquivo `.sln`
+3. Navegue até a pasta do projeto e selecione o arquivo `freelancer-hub-backend.sln`
 4. Aguarde o carregamento completo da solução
 
 ### 3. Configuração do banco de dados
@@ -58,14 +58,19 @@ Para configurar localmente:
 ## 🔧 Estrutura do projeto
 
 ```
-📁 [NOME_DO_PROJETO]/
-├── 📁 Controllers/          # Controladores da API
-├── 📁 Models/              # Modelos de dados
-├── 📁 Services/            # Serviços e lógica de negócio
-├── 📁 Data/                # Contexto do Entity Framework
-├── 📄 Program.cs           # Ponto de entrada da aplicação
-├── 📄 appsettings.json     # Configurações da aplicação
-└── 📄 [PROJETO].csproj     # Arquivo de projeto
+📁 back-end/
+├── 📁 freelancer-hub-backend/
+|    ├── 📁 Controllers/         # Controladores da API
+|    ├── 📁 DTO's/               # Data transfer objects pra API
+|    ├── 📁 Migrations/          # Historico de criação do banco
+|    ├── 📁 Models/              # Modelos de dados
+|    ├── 📁 Repository/          # CRUD direto no context
+|    ├── 📁 Utils/               # Funções úteis em toda aplicação
+|    ├── 📁 Services/            # Serviços e lógica de negócio
+|    ├── 📄 Program.cs           # Ponto de entrada da aplicação
+|    ├── 📄 Context.cs           # Definiçao do banco no EF
+|    └── 📄 appsettings.json     # Configurações da aplicação
+└── 📄 README.md                 # Este arquivo 
 ```
 
 ## 🚀 CI/CD - Deploy Automatizado
@@ -74,9 +79,8 @@ Para configurar localmente:
 O projeto possui pipeline de CI/CD configurado com **GitHub Actions** para deploy automatizado no **Azure App Service**.
 
 #### Workflow automático:
-- **Trigger**: Push na branch `main` ou `master`
+- **Trigger**: Push na branch `main`
 - **Build**: Compila o projeto .NET 8
-- **Testes**: Executa testes unitários (se configurados)
 - **Deploy**: Publica automaticamente no Azure App Service
 
 #### Arquivos de configuração:
@@ -85,56 +89,3 @@ O projeto possui pipeline de CI/CD configurado com **GitHub Actions** para deplo
 └── 📁 workflows/
     └── 📄 azure-deploy.yml    # Pipeline de deploy
 ```
-
-### Variáveis de ambiente (GitHub Secrets)
-Configure as seguintes secrets no repositório GitHub:
-
-- `AZURE_WEBAPP_PUBLISH_PROFILE`: Profile de publicação do App Service
-- `AZURE_WEBAPP_NAME`: Nome do App Service no Azure
-- `SQL_CONNECTION_STRING`: Connection string do banco (para produção)
-
-## 🔐 Segurança
-
-### Secrets Management
-- **Desenvolvimento**: User Secrets do Visual Studio
-- **Produção**: Azure Key Vault ou App Service Configuration
-
-### Boas práticas implementadas:
-- Connection strings não expostas no código
-- Configurações sensíveis em variáveis de ambiente
-- Deploy seguro via GitHub Actions
-
-## 📦 Dependências principais
-
-```xml
-<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.x" />
-<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.x" />
-<PackageReference Include="Microsoft.AspNetCore.Authentication" Version="8.0.x" />
-```
-
-## 🐛 Troubleshooting
-
-### Problemas comuns:
-
-1. **Erro de conexão com o banco**
-   - Verifique se a connection string está correta nos User Secrets
-   - Confirme se o firewall do Azure SQL permite conexões
-
-2. **Falha no deploy**
-   - Verifique se as GitHub Secrets estão configuradas
-   - Confirme se o publish profile está válido
-
-3. **Projeto não carrega no Visual Studio**
-   - Verifique se o .NET 8 SDK está instalado
-   - Execute `dotnet restore` no terminal
-
-## 📞 Suporte
-
-Para dúvidas ou problemas:
-1. Verifique a documentação do projeto
-2. Consulte os logs de build no GitHub Actions
-3. Entre em contato com a equipe de desenvolvimento
-
----
-
-**Desenvolvido com .NET 8 + Azure + GitHub Actions** 🚀
