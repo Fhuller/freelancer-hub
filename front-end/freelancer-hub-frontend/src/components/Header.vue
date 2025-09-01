@@ -44,16 +44,16 @@ const breadcrumbs = computed(() => {
     const params = route.params;
 
     const items = [
-        { name: 'Dashboard', path: '/dashboard', clickable: true }
+        { name: 'Dashboard', path: '/app/dashboard', clickable: true }
     ];
 
     if (currentRoute === 'Clients') {
-        items.push({ name: 'Clientes', path: '/clients', clickable: true });
+        items.push({ name: 'Clientes', path: '/app/clients', clickable: true });
     } else if (currentRoute === 'Client') {
-        items.push({ name: 'Clientes', path: '/clients', clickable: true });
-        items.push({ name: `Cliente #${params.id}`, path: `/clients/${params.id}`, clickable: true });
+        items.push({ name: 'Clientes', path: '/app/clients', clickable: true });
+        items.push({ name: `Cliente #${params.id}`, path: `/app/clients/${params.id}`, clickable: true });
     } else if (currentRoute === 'Finance') {
-        items.push({ name: 'Financeiro', path: '/finance', clickable: true });
+        items.push({ name: 'Financeiro', path: '/app/finance', clickable: true });
     }
 
     return items;

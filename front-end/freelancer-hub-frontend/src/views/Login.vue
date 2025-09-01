@@ -67,10 +67,18 @@ const toggleForgotMode = () => {
   password.value = ''
   confirmPassword.value = ''
 }
+
+const goToLanding = () => {
+  router.push('/')
+}
+
 </script>
 
 <template>
   <div class="login-container">
+    <button class="back-btn" @click="goToLanding">
+      &larr; Voltar à Landing Page
+    </button>
     <div class="login-card">
       <div class="logo-section">
         <img alt="Freelancer Icon" src="@/assets/logo_icon.png"/>
@@ -173,6 +181,23 @@ const toggleForgotMode = () => {
 </template>
 
 <style scoped>
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.back-btn:hover {
+  color: #f0f0f0;
+}
+
 .google-signin-btn {
   /* Estilo geral do botão */
   background-color: #fff;
