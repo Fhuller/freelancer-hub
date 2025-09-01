@@ -165,13 +165,6 @@ const toggleForgotMode = () => {
           @click="authStore.loginWithGoogle"
           :disabled="authStore.isLoading"
         >
-          <div class="google-icon-wrapper">
-            <img
-              class="google-icon"
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/512px-Google_%22G%22_logo.svg.png"
-              alt="Google Icon"
-            />
-          </div>
           <span class="btn-text">Entrar com Google</span>
         </button>
       </form>
