@@ -22,13 +22,13 @@ const emit = defineEmits(['close']);
     <nav class="sidebar-nav">
       <ul>
         <li>
-          <RouterLink to="/" class="nav-link" active-class="active" @click="emit('close')">Dashboard</RouterLink>
+          <RouterLink to="/app/dashboard" class="nav-link" active-class="active" @click="emit('close')">Dashboard</RouterLink>
         </li>
         <li>
-          <RouterLink to="/clients" class="nav-link" active-class="active" @click="emit('close')">Clientes</RouterLink>
+          <RouterLink to="/app/clients" class="nav-link" active-class="active" @click="emit('close')">Clientes</RouterLink>
         </li>
         <li>
-          <RouterLink to="/finance" class="nav-link" active-class="active" @click="emit('close')">Financeiro</RouterLink>
+          <RouterLink to="/app/finance" class="nav-link" active-class="active" @click="emit('close')">Financeiro</RouterLink>
         </li>
       </ul>
     </nav>

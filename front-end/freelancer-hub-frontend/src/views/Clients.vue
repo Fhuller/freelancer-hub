@@ -26,15 +26,15 @@ const loadClients = async () => {
 };
 
 const viewClient = (clientId: string) => {
-  router.push(`/clients/${clientId}`);
+  router.push(`clients/${clientId}`);
 };
 
 const editClient = (clientId: string) => {
-  router.push(`/clients/${clientId}/edit`);
+  router.push(`clients/${clientId}/edit`);
 };
 
 const createClient = () => {
-  router.push('/clients/new');
+  router.push('clients/new');
 };
 
 const confirmDeleteClient = (clientId: string) => {
