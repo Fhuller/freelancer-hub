@@ -6,7 +6,7 @@ namespace freelancer_hub_backend.Controllers
     [Route("api/[controller]")]
     public class HealthController : ControllerBase
     {
-        [HttpGet]
+        [HttpGet, HttpHead]
         public ActionResult Get()
         {
             return Ok("OK");
