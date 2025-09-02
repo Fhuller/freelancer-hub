@@ -56,35 +56,49 @@ export default {
               <a 
                 href="https://www.overleaf.com/read/xthqfscqnfrw#653fbd" 
                 target="_blank"
-                class="bg-white/20 backdrop-blur-md hover:bg-white/30 text-purple-700 font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 border border-white/30"
+                class="bg-white hover:bg-purple-50 text-purple-700 font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 border border-purple-300"
               >
                 📄 RFC Completa
+              </a>
+              <a 
+                href="https://github.com/Fhuller/freelancer-hub" 
+                target="_blank"
+                class="bg-white hover:bg-purple-50 text-purple-700 font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 border border-purple-300"
+              >
+                💻 Código Fonte (GitHub)
+              </a>
+              <a 
+                href="https://freelancer-hub-backend-exe7f6cygggae0db.eastus2-01.azurewebsites.net/swagger/index.html" 
+                target="_blank"
+                class="bg-white hover:bg-purple-50 text-purple-700 font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 border border-purple-300"
+              >
+                🔗 API - Swagger Docs
               </a>
             </div>
           </div>
 
-          <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/20">
+          <div class="bg-white rounded-lg p-8 border border-purple-300 shadow">
             <h3 class="text-2xl font-bold text-purple-700 mb-6 text-center">Informações Acadêmicas</h3>
             <div class="space-y-4">
-              <div class="flex justify-between items-center py-2 border-b border-purple-300/20">
+              <div class="flex justify-between items-center py-2 border-b border-purple-200">
                 <span class="text-purple-500">Instituição:</span>
                 <span class="text-purple-700 font-semibold">Católica SC</span>
               </div>
-              <div class="flex justify-between items-center py-2 border-b border-purple-300/20">
+              <div class="flex justify-between items-center py-2 border-b border-purple-200">
                 <span class="text-purple-500">Curso:</span>
                 <span class="text-purple-700 font-semibold">Eng. de Software</span>
               </div>
-              <div class="flex justify-between items-center py-2 border-b border-purple-300/20">
+              <div class="flex justify-between items-center py-2 border-b border-purple-200">
                 <span class="text-purple-500">Tipo:</span>
                 <span class="text-purple-700 font-semibold">TCC</span>
               </div>
-              <div class="flex justify-between items-center py-2 border-b border-purple-300/20">
+              <div class="flex justify-between items-center py-2 border-b border-purple-200">
                 <span class="text-purple-500">Status:</span>
-                <span class="text-green-400 font-semibold">✓ Concluído</span>
+                <span class="text-yellow-500 font-semibold">Em desenvolvimento</span>
               </div>
               <div class="flex justify-between items-center py-2">
                 <span class="text-purple-500">Deploy:</span>
-                <span class="text-green-400 font-semibold">✓ Em Produção</span>
+                <span class="text-green-500 font-semibold">✓ Em Produção</span>
               </div>
             </div>
           </div>
@@ -97,8 +111,8 @@ export default {
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-4xl font-bold text-purple-700 text-center mb-16">Módulos do Sistema</h2>
         <div class="grid md:grid-cols-2 gap-8 mb-12">
-          <!-- Módulos (Clientes, Projetos, Financeiro, Relatórios) -->
-          <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/30 transform hover:scale-105 transition-all duration-300">
+          <!-- Módulos -->
+          <div class="bg-white rounded-lg p-8 border border-purple-300 shadow transform hover:scale-105 transition-all duration-300">
             <div class="flex items-center mb-6">
               <div class="text-4xl mr-4 text-purple-700">👥</div>
               <h3 class="text-2xl font-bold text-purple-700">Gestão de Clientes</h3>
@@ -111,7 +125,7 @@ export default {
             </ul>
           </div>
 
-          <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/30 transform hover:scale-105 transition-all duration-300">
+          <div class="bg-white rounded-lg p-8 border border-purple-300 shadow transform hover:scale-105 transition-all duration-300">
             <div class="flex items-center mb-6">
               <div class="text-4xl mr-4 text-purple-700">📋</div>
               <h3 class="text-2xl font-bold text-purple-700">Projetos e Entregas</h3>
@@ -124,7 +138,7 @@ export default {
             </ul>
           </div>
 
-          <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/30 transform hover:scale-105 transition-all duration-300">
+          <div class="bg-white rounded-lg p-8 border border-purple-300 shadow transform hover:scale-105 transition-all duration-300">
             <div class="flex items-center mb-6">
               <div class="text-4xl mr-4 text-purple-700">💰</div>
               <h3 class="text-2xl font-bold text-purple-700">Gestão Financeira</h3>
@@ -137,7 +151,7 @@ export default {
             </ul>
           </div>
 
-          <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/30 transform hover:scale-105 transition-all duration-300">
+          <div class="bg-white rounded-lg p-8 border border-purple-300 shadow transform hover:scale-105 transition-all duration-300">
             <div class="flex items-center mb-6">
               <div class="text-4xl mr-4 text-purple-700">📊</div>
               <h3 class="text-2xl font-bold text-purple-700">Relatórios e Analytics</h3>
@@ -148,63 +162,6 @@ export default {
               <li>• Análise financeira por período</li>
               <li>• Exportação em múltiplos formatos</li>
             </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Technical Stack & Architecture -->
-    <section class="py-20 bg-white/90">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-4xl font-bold text-purple-700 text-center mb-16">Arquitetura Técnica</h2>
-        <div class="grid md:grid-cols-3 gap-8 mb-16">
-          <!-- Frontend -->
-          <div class="text-center">
-            <div class="bg-purple-200/30 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center text-4xl text-purple-700 font-bold">
-              Vue
-            </div>
-            <h3 class="text-2xl font-bold text-purple-700 mb-4">Frontend</h3>
-            <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-6 border border-purple-300/20">
-              <ul class="text-purple-500 space-y-2">
-                <li><strong>Vue.js 3</strong></li>
-                <li>Vue Router</li>
-                <li>Pinia</li>
-                <li>Tailwind CSS</li>
-                <li>Interface Responsiva</li>
-              </ul>
-            </div>
-          </div>
-          <!-- Backend -->
-          <div class="text-center">
-            <div class="bg-purple-200/30 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center text-4xl text-purple-700 font-bold">
-              .NET
-            </div>
-            <h3 class="text-2xl font-bold text-purple-700 mb-4">Backend</h3>
-            <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-6 border border-purple-300/20">
-              <ul class="text-purple-500 space-y-2">
-                <li><strong>.NET Core</strong></li>
-                <li>Entity Framework</li>
-                <li>APIs RESTful</li>
-                <li>JWT Authentication</li>
-                <li>Clean Architecture</li>
-              </ul>
-            </div>
-          </div>
-          <!-- Database -->
-          <div class="text-center">
-            <div class="bg-purple-200/30 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center text-4xl text-purple-700 font-bold">
-              SQL
-            </div>
-            <h3 class="text-2xl font-bold text-purple-700 mb-4">Banco de Dados</h3>
-            <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-6 border border-purple-300/20">
-              <ul class="text-purple-500 space-y-2">
-                <li><strong>SQL Server</strong></li>
-                <li>Entity Framework Core</li>
-                <li>Code First Migrations</li>
-                <li>Relational Design</li>
-                <li>Performance Optimization</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>

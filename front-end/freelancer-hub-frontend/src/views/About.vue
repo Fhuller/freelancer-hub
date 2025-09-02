@@ -19,6 +19,9 @@ export default {
           Sobre Mim
         </h1>
         <p class="text-xl text-purple-500 mb-8">
+          Felipe Beppler Huller
+        </p>
+        <p class="text-xl text-purple-500 mb-8">
           Desenvolvedor back-end, estudante de Engenharia de Software e apaixonado por música
         </p>
       </div>
@@ -51,13 +54,13 @@ export default {
 
           <!-- Description -->
           <div class="space-y-8">
-            <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/20">
+            <div class="bg-white backdrop-blur-md rounded-lg p-8 border border-purple-300/20">
               <h2 class="text-3xl font-bold text-purple-700 mb-6 flex items-center">
                 <span class="mr-3">🚀</span>
                 Desenvolvedor em Formação
               </h2>
               <p class="text-purple-500 leading-relaxed mb-4">
-                Olá! Sou um entusiasta da programação com foco em desenvolvimento back-end, atualmente cursando 
+                Olá! Sou um entusiasta da programação com foco em desenvolvimento fullstack, atualmente cursando 
                 <strong class="text-purple-700">Engenharia de Software</strong>. Minha jornada profissional já me levou por duas 
                 empolgantes experiências como desenvolvedor, onde pude aprimorar minhas habilidades e paixão pela tecnologia.
               </p>
@@ -68,7 +71,7 @@ export default {
               </p>
             </div>
 
-            <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/20">
+            <div class="bg-white backdrop-blur-md rounded-lg p-8 border border-purple-300/20">
               <h3 class="text-2xl font-bold text-purple-700 mb-4 flex items-center">
                 <span class="mr-3">💡</span>
                 Filosofia & Abordagem
@@ -93,7 +96,7 @@ export default {
         <h2 class="text-4xl font-bold text-purple-700 text-center mb-16">Habilidades & Interesses</h2>
         
         <div class="grid md:grid-cols-3 gap-8">
-          <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/30 text-center transform hover:scale-105 transition-all duration-300">
+          <div class="bg-white backdrop-blur-md rounded-lg p-8 border border-purple-300/30 text-center transform hover:scale-105 transition-all duration-300">
             <div class="text-6xl mb-4 text-purple-700">💻</div>
             <h3 class="text-2xl font-bold text-purple-700 mb-4">Desenvolvimento</h3>
             <ul class="text-purple-500 space-y-2">
@@ -105,7 +108,7 @@ export default {
             </ul>
           </div>
 
-          <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/30 text-center transform hover:scale-105 transition-all duration-300">
+          <div class="bg-white backdrop-blur-md rounded-lg p-8 border border-purple-300/30 text-center transform hover:scale-105 transition-all duration-300">
             <div class="text-6xl mb-4 text-purple-700">🎸</div>
             <h3 class="text-2xl font-bold text-purple-700 mb-4">Música</h3>
             <ul class="text-purple-500 space-y-2">
@@ -117,7 +120,7 @@ export default {
             </ul>
           </div>
 
-          <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/30 text-center transform hover:scale-105 transition-all duration-300">
+          <div class="bg-white backdrop-blur-md rounded-lg p-8 border border-purple-300/30 text-center transform hover:scale-105 transition-all duration-300">
             <div class="text-6xl mb-4 text-purple-700">🌐</div>
             <h3 class="text-2xl font-bold text-purple-700 mb-4">Soft Skills</h3>
             <ul class="text-purple-500 space-y-2">
@@ -136,19 +139,13 @@ export default {
     <section class="py-20 bg-white/90 text-center">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-4xl font-bold text-purple-700 mb-8">Experiência Profissional</h2>
-        <div class="bg-purple-100/20 backdrop-blur-md rounded-lg p-8 border border-purple-300/20 mb-8">
-          <h3 class="text-2xl font-bold text-purple-700 mb-4">Desenvolvedor Back-end</h3>
-          <p class="text-purple-500 text-lg mb-4">Duas experiências profissionais enriquecedoras</p>
+        <div class="bg-white backdrop-blur-md rounded-lg p-8 border border-purple-300/20 mb-8">
+          <h3 class="text-2xl font-bold text-purple-700 mb-4">Desenvolvedor FullStack</h3>
+          <p class="text-purple-500 text-lg mb-4">3 experiências profissionais enriquecedoras</p>
           <p class="text-purple-500 leading-relaxed">
-            Durante minha jornada profissional, trabalhei em duas experiências como desenvolvedor, aprimorando habilidades técnicas, colaborando em equipes multidisciplinares e contribuindo para soluções robustas e escaláveis.
+            Durante minha jornada profissional, trabalhei em 3 experiências como desenvolvedor, aprimorando habilidades técnicas, colaborando em equipes multidisciplinares e contribuindo para soluções robustas e escaláveis.
           </p>
         </div>
-        <router-link 
-          to="/portfolio"
-          class="bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl inline-block"
-        >
-          Ver Meu Portfólio
-        </router-link>
       </div>
     </section>
   </Layout>

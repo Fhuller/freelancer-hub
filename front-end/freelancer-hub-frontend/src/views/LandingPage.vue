@@ -30,25 +30,25 @@ export default {
 
         <!-- Feature Cards -->
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <div class="bg-white/20 backdrop-blur-md rounded-lg p-6 border border-purple-300/20 hover:bg-white/30 transition-all duration-300 transform hover:scale-105">
+          <div class="bg-white backdrop-blur-md rounded-lg p-6 border border-purple-300/20 hover:bg-white transition-all duration-300 transform hover:scale-105">
             <div class="text-purple-700 text-3xl mb-4">👥</div>
             <h3 class="text-purple-700 font-semibold mb-2">Gestão de Clientes</h3>
             <p class="text-purple-500 text-sm">Organize e mantenha histórico completo de seus clientes</p>
           </div>
 
-          <div class="bg-white/20 backdrop-blur-md rounded-lg p-6 border border-purple-300/20 hover:bg-white/30 transition-all duration-300 transform hover:scale-105">
+          <div class="bg-white backdrop-blur-md rounded-lg p-6 border border-purple-300/20 hover:bg-white transition-all duration-300 transform hover:scale-105">
             <div class="text-purple-700 text-3xl mb-4">📋</div>
             <h3 class="text-purple-700 font-semibold mb-2">Projetos</h3>
             <p class="text-purple-500 text-sm">Acompanhe entregas, prazos e progresso dos projetos</p>
           </div>
 
-          <div class="bg-white/20 backdrop-blur-md rounded-lg p-6 border border-purple-300/20 hover:bg-white/30 transition-all duration-300 transform hover:scale-105">
+          <div class="bg-white backdrop-blur-md rounded-lg p-6 border border-purple-300/20 hover:bg-white transition-all duration-300 transform hover:scale-105">
             <div class="text-purple-700 text-3xl mb-4">💰</div>
             <h3 class="text-purple-700 font-semibold mb-2">Finanças</h3>
             <p class="text-purple-500 text-sm">Controle faturas, pagamentos e despesas</p>
           </div>
 
-          <div class="bg-white/20 backdrop-blur-md rounded-lg p-6 border border-purple-300/20 hover:bg-white/30 transition-all duration-300 transform hover:scale-105">
+          <div class="bg-white backdrop-blur-md rounded-lg p-6 border border-purple-300/20 hover:bg-white transition-all duration-300 transform hover:scale-105">
             <div class="text-purple-700 text-3xl mb-4">📊</div>
             <h3 class="text-purple-700 font-semibold mb-2">Relatórios</h3>
             <p class="text-purple-500 text-sm">Dashboard e análises para acompanhar performance</p>
@@ -57,16 +57,9 @@ export default {
 
         <!-- CTA Buttons -->
         <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
-          <a 
-            href="https://freelancer-hub-tau.vercel.app" 
-            target="_blank"
-            class="w-full sm:w-auto bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl inline-block"
-          >
-            🚀 Acessar Sistema
-          </a>
           <router-link 
-            to="/about"
-            class="w-full sm:w-auto bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 border border-purple-300 inline-block"
+            to="/portfolio"
+            class="w-full sm:w-auto bg-white hover:bg-purple-200 text-purple-700 font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 border border-purple-300 inline-block"
           >
             Saiba Mais
           </router-link>
@@ -83,19 +76,19 @@ export default {
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
-          <div class="text-center p-8 bg-purple-100 rounded-lg border border-purple-300">
+          <div class="text-center p-8 bg-white rounded-lg border border-purple-300">
             <div class="text-6xl mb-4 text-purple-700">🖥️</div>
             <h3 class="text-2xl font-bold text-purple-700 mb-4">Frontend</h3>
             <p class="text-purple-500 text-lg">Vue.js</p>
           </div>
 
-          <div class="text-center p-8 bg-purple-100 rounded-lg border border-purple-300">
+          <div class="text-center p-8 bg-white rounded-lg border border-purple-300">
             <div class="text-6xl mb-4 text-purple-700">⚙️</div>
             <h3 class="text-2xl font-bold text-purple-700 mb-4">Backend</h3>
             <p class="text-purple-500 text-lg">.NET Core</p>
           </div>
 
-          <div class="text-center p-8 bg-purple-100 rounded-lg border border-purple-300">
+          <div class="text-center p-8 bg-white rounded-lg border border-purple-300">
             <div class="text-6xl mb-4 text-purple-700">🗄️</div>
             <h3 class="text-2xl font-bold text-purple-700 mb-4">Banco de Dados</h3>
             <p class="text-purple-500 text-lg">SQL Server</p>

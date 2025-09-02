@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-white/90 py-12 border-t border-purple-500/20">
+  <footer class="bg-white py-12 border-t border-purple-500/20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid md:grid-cols-3 gap-8 text-center md:text-left">
         <!-- Logo e descrição -->

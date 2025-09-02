@@ -1,5 +1,5 @@
 <template>
-  <header class="fixed w-full top-0 z-50 bg-white/90 backdrop-blur-md border-b border-purple-500/20">
+  <header class="fixed w-full top-0 z-50 bg-white backdrop-blur-md border-b border-purple-500/20">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <router-link to="/" class="text-2xl font-bold text-purple-700">
