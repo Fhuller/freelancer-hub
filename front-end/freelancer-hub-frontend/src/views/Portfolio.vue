@@ -38,7 +38,7 @@ export default {
             <p class="text-purple-500 leading-relaxed mb-6">
               O FreelanceHub é uma solução integrada desenvolvida como Trabalho de Conclusão de Curso (TCC) 
               para o curso de <strong class="text-purple-700">Engenharia de Software</strong> na 
-              <strong class="text-purple-700">Católica de Santa Catarina</strong>.
+              <strong class="text-purple-700">Católica de Santa Catarina</strong>, também chamado de Portfólio.
             </p>
             <p class="text-purple-500 leading-relaxed mb-8">
               O sistema oferece ferramentas completas para freelancers manterem controle total sobre seus 

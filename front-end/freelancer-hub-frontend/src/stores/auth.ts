@@ -45,7 +45,7 @@ export const useAuthStore = defineStore('auth', () => {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/dashboard'
+          redirectTo: window.location.origin + '/app/dashboard'
         }
       })
 
@@ -163,27 +163,32 @@ export const useAuthStore = defineStore('auth', () => {
   const checkAuth = async () => {
     try {
       const { data: { session: currentSession } } = await getSession()
+      if (!currentSession) {
+        session.value = null
+        user.value = null
+        return
+      }
+
+      const firstLoad = !session.value || session.value.access_token !== currentSession.access_token
       session.value = currentSession
 
-      if (session.value) {
+      if (firstLoad) {
         try {
           await createUser({
-            name: session.value.user?.email?.split('@')[0] || 'Usuário',
-            email: session.value.user?.email || ''
+            name: currentSession.user?.email?.split('@')[0] || 'Usuário',
+            email: currentSession.user?.email || ''
           })
         } catch (backendErr: any) {
           console.error('Erro ao criar/verificar usuário no backend:', backendErr)
         }
-
         await loadCurrentUser()
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao verificar autenticação:', err)
       session.value = null
       user.value = null
     }
   }
-
 
   const register = async (email: string, password: string) => {
     try {

@@ -22,7 +22,7 @@ export default {
           Felipe Beppler Huller
         </p>
         <p class="text-xl text-purple-500 mb-8">
-          Desenvolvedor back-end, estudante de Engenharia de Software e apaixonado por música
+          Desenvolvedor full stack, estudante de Engenharia de Software e apaixonado por música
         </p>
       </div>
     </section>
@@ -61,7 +61,7 @@ export default {
               </h2>
               <p class="text-purple-500 leading-relaxed mb-4">
                 Olá! Sou um entusiasta da programação com foco em desenvolvimento fullstack, atualmente cursando 
-                <strong class="text-purple-700">Engenharia de Software</strong>. Minha jornada profissional já me levou por duas 
+                <strong class="text-purple-700">Engenharia de Software</strong>. Minha jornada profissional já me levou por três 
                 empolgantes experiências como desenvolvedor, onde pude aprimorar minhas habilidades e paixão pela tecnologia.
               </p>
               <p class="text-purple-500 leading-relaxed">
@@ -82,7 +82,7 @@ export default {
               </p>
               <p class="text-purple-500 leading-relaxed">
                 Estou animado para continuar aprendendo, crescendo e contribuindo para projetos empolgantes no mundo do 
-                desenvolvimento back-end.
+                desenvolvimento.
               </p>
             </div>
           </div>
@@ -114,9 +114,6 @@ export default {
             <ul class="text-purple-500 space-y-2">
               <li>Guitarra</li>
               <li>Rock Music</li>
-              <li>Composição</li>
-              <li>Produção Musical</li>
-              <li>Performance</li>
             </ul>
           </div>
 

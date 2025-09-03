@@ -250,6 +250,8 @@ const goToLanding = () => {
   box-shadow: none;
 }
 
+/* Mantém o layout atual em telas grandes */
+
 .login-container {
   display: flex;
   justify-content: center;
@@ -268,6 +270,88 @@ const goToLanding = () => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 20px;
+  }
+
+  .login-card {
+    width: 100%;
+    grid-template-columns: 1fr;   /* vira uma coluna */
+    gap: 20px;
+    padding: 30px 20px;
+  }
+
+  .logo-section {
+    border-right: none;
+    padding-right: 0!important;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+  }
+
+  .logo-section img {
+    width: 100px;
+    height: 90px;
+  }
+
+  .logo-section h1 {
+    font-size: 20px;
+  }
+
+  .login-form {
+    padding-left: 0;
+  }
+
+  .form-group input {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .submit-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .back-btn {
+    font-size: 14px;
+    top: 10px;
+    left: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 20px 15px;
+  }
+
+  .logo-section img {
+    width: 80px;
+    height: 70px;
+  }
+
+  .logo-section h1 {
+    font-size: 18px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-group input {
+    font-size: 13px;
+  }
+
+  .toggle-mode,
+  .forgot-password {
+    font-size: 13px;
+  }
+
+  .link-btn {
+    font-size: 13px;
+  }
 }
 
 .logo-section {

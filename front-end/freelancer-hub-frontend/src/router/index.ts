@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useToast } from 'vue-toast-notification'
 
 import LandingPage from '../views/LandingPage.vue'
 import About from '../views/About.vue'
@@ -11,7 +12,8 @@ import Clients from '../views/Clients.vue'
 import Client from '../views/Client.vue'
 import Finance from '../views/Finance.vue'
 import ResetPassword from '../views/ResetPassword.vue'
-
+  
+const toast = useToast()
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -31,14 +33,14 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
-  try {
+  if (to.meta.requiresAuth) {
     await authStore.checkAuth()
-  } catch (err) {
-    console.error(err)
-  }
 
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next({ name: 'Login' })
+    if (!authStore.isAuthenticated) {
+      authStore.error = 'Sua sessão expirou. Faça login novamente.'
+      toast.warning(authStore.error)
+      return next({ name: 'Login' })
+    }
   }
 
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
@@ -47,5 +49,6 @@ router.beforeEach(async (to, from, next) => {
 
   next()
 })
+
 
 export default router
