@@ -1,6 +1,9 @@
 :root {
   --color-purple: #7e22ce;
   --color-purple-light: #a855f7;
+  --color-gray: #e5e7eb;
+  --color-white: #ffffff;
+  --color-light-gray: #f8f9fa;
   --gradient-purple: linear-gradient(135deg, var(--color-purple), var(--color-purple-light));
 
   --shadow-default: 0px 5px 15px rgba(0, 0, 0, 0.15);
