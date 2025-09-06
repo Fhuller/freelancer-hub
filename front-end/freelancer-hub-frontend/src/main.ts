@@ -1,4 +1,4 @@
-import './assets/main.css'
+import './assets/base.css'
 import 'flag-icons/css/flag-icons.min.css';
 import 'vue-toast-notification/dist/theme-default.css';
 import ToastPlugin from 'vue-toast-notification';

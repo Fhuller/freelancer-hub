@@ -253,7 +253,7 @@ onMounted(() => {
     background: white;
     border-radius: 8px;
     padding: 30px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-default);
 }
 
 .section-header {
@@ -413,7 +413,7 @@ onMounted(() => {
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-default);
 }
 
 .card-header {
@@ -426,7 +426,7 @@ onMounted(() => {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    background: var(--gradient-purple);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -582,7 +582,7 @@ onMounted(() => {
     padding: 24px;
     max-width: 400px;
     width: 100%;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-default);
 }
 
 .modal-content h3 {

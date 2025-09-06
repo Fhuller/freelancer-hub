@@ -131,7 +131,7 @@ onMounted(() => {
   background: white;
   border-radius: 8px;
   padding: 30px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-default);
 }
 
 .section-header {
@@ -285,7 +285,7 @@ onMounted(() => {
   padding: 24px;
   max-width: 400px;
   width: 100%;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-default);
 }
 
 .modal-content h3 {
