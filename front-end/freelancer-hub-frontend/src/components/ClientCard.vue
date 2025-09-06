@@ -87,14 +87,14 @@ const deleteClient = () => {
     background: white;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-default);
     border: 1px solid #e5e7eb;
     transition: all 0.2s ease;
     cursor: pointer;
 }
 
 .client-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-default);
     transform: translateY(-2px);
 }
 
@@ -109,7 +109,7 @@ const deleteClient = () => {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    background: var(--gradient-purple);
     display: flex;
     align-items: center;
     justify-content: center;

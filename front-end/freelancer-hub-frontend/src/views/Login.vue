@@ -220,8 +220,7 @@ const goToLanding = () => {
 /* Estado de hover */
 .google-signin-btn:hover {
   background-color: #f6f6f6;
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3),
-    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  box-shadow: var(--shadow-default);
 }
 
 /* Ícone do Google */
@@ -257,7 +256,7 @@ const goToLanding = () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-purple);
   padding: 40px;
 }
 
@@ -265,7 +264,7 @@ const goToLanding = () => {
   background: white;
   padding: 50px;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-default);
   width: 50%;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -424,7 +423,7 @@ const goToLanding = () => {
 }
 
 .submit-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-purple);
   color: white;
   border: none;
   padding: 14px;

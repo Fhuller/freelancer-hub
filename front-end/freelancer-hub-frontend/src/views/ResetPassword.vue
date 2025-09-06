@@ -196,7 +196,7 @@ const goToLogin = () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-purple);
   padding: 40px;
 }
 
@@ -204,7 +204,7 @@ const goToLogin = () => {
   background: white;
   padding: 50px;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-default);
   width: 50%;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -303,7 +303,7 @@ const goToLogin = () => {
 }
 
 .submit-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-purple);
   color: white;
   border: none;
   padding: 14px;

@@ -248,7 +248,7 @@ onUnmounted(() => {
 }
 
 .breadcrumb-item.current {
-    color: #7c3aed;
+    color: var(--color-purple);
     font-weight: 600;
 }
 
@@ -296,7 +296,7 @@ onUnmounted(() => {
     background: white;
     border: 1px solid #d1d9e0;
     border-radius: 12px;
-    box-shadow: 0 16px 32px rgba(1, 4, 9, 0.85);
+    box-shadow: var(--shadow-default);
     min-width: 200px;
     z-index: 100;
     animation: dropdown-appear 0.15s ease-out;

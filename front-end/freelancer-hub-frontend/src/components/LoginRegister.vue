@@ -189,7 +189,7 @@ const clearMessages = () => {
   border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #f9f9f9;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* leve sombra para estilo desktop */
+  box-shadow: var(--shadow-default); /* leve sombra para estilo desktop */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

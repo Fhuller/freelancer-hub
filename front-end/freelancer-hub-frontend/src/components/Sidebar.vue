@@ -54,7 +54,7 @@ const emit = defineEmits(['close']);
   width: 260px;
   background-color: #ffffff;
   z-index: 1000;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-default);
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
   display: flex;
@@ -76,7 +76,7 @@ const emit = defineEmits(['close']);
 .sidebar-header h3 {
   margin: 0;
   font-weight: 600;
-  color: #6f42c1;
+  color: var(--color-purple);
 }
 
 .close-btn {
@@ -84,13 +84,9 @@ const emit = defineEmits(['close']);
   border: none;
   font-size: 28px;
   line-height: 1;
-  color: #6f42c1;
+  color: var(--color-purple);
   cursor: pointer;
   transition: color 0.2s;
-}
-
-.close-btn:hover {
-  color: #4b2a85;
 }
 
 .sidebar-nav {
@@ -116,13 +112,13 @@ const emit = defineEmits(['close']);
 
 .nav-link:hover {
   background-color: #f3f0fa;
-  border-left-color: #6f42c1;
-  color: #6f42c1;
+  border-left-color: var(--color-purple);
+  color: var(--color-purple);
 }
 
 .nav-link.active {
   background-color: #f3f0fa;
-  color: #6f42c1;
-  border-left-color: #6f42c1;
+  color: var(--color-purple);
+  border-left-color: var(--color-purple);
 }
 </style>

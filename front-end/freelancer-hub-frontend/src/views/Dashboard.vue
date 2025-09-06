@@ -16,6 +16,6 @@ import AuthenticatedLayout from '../layouts/AuthenticatedLayout.vue';
   background: white;
   border-radius: 8px;
   padding: 30px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-default);
 }
 </style>
