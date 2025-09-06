@@ -12,6 +12,7 @@ import Clients from '../views/Clients.vue'
 import Client from '../views/Client.vue'
 import Finance from '../views/Finance.vue'
 import ResetPassword from '../views/ResetPassword.vue'
+import Reports from '../views/Reports.vue'
   
 const toast = useToast()
 const router = createRouter({
@@ -26,6 +27,7 @@ const router = createRouter({
     { path: '/app/clients', name: 'Clients', component: Clients, meta: { requiresAuth: true } },
     { path: '/app/clients/:id', name: 'Client', component: Client, meta: { requiresAuth: true }, props: true },
     { path: '/app/finance', name: 'Finance', component: Finance, meta: { requiresAuth: true } },
+    { path: '/app/reports', name: 'Reports', component: Reports, meta: { requiresAuth: true } },
     { path: '/:pathMatch(.*)*', redirect: '/' }
   ]
 })

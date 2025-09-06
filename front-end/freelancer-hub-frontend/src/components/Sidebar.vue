@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
 
-// O componente recebe uma prop booleana para saber se deve se mostrar
 defineProps<{
   isOpen: boolean;
 }>();
 
-// E emite um evento quando o usuário clica no botão de fechar
 const emit = defineEmits(['close']);
 </script>
 
@@ -16,8 +14,7 @@ const emit = defineEmits(['close']);
   <aside class="sidebar" :class="{ 'sidebar--open': isOpen }">
     <div class="sidebar-header">
       <h3>Navegação</h3>
-      <button class="close-btn" @click="emit('close')">
-        &times; </button>
+      <button class="close-btn" @click="emit('close')">&times;</button>
     </div>
     <nav class="sidebar-nav">
       <ul>
@@ -30,21 +27,22 @@ const emit = defineEmits(['close']);
         <li>
           <RouterLink to="/app/finance" class="nav-link" active-class="active" @click="emit('close')">Financeiro</RouterLink>
         </li>
+        <li>
+          <RouterLink to="/app/reports" class="nav-link" active-class="active" @click="emit('close')">Relatórios</RouterLink>
+        </li>
       </ul>
     </nav>
   </aside>
 </template>
 
 <style scoped>
-/* Estilos para o menu lateral */
 .sidebar-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 99;
+  background-color: rgba(50, 50, 50, 0.4); 
+  z-index: 1000;
   transition: opacity 0.3s ease;
 }
 
@@ -53,21 +51,23 @@ const emit = defineEmits(['close']);
   top: 0;
   left: 0;
   height: 100%;
-  width: 250px;
-  background-color: white;
-  z-index: 100;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-  transform: translateX(-100%); /* Esconde o menu inicialmente */
+  width: 260px;
+  background-color: #ffffff;
+  z-index: 1000;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.25);
+  transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar--open {
-  transform: translateX(0); /* Mostra o menu */
+  transform: translateX(0);
 }
 
 .sidebar-header {
   padding: 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #e5e5e5;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -75,36 +75,54 @@ const emit = defineEmits(['close']);
 
 .sidebar-header h3 {
   margin: 0;
+  font-weight: 600;
+  color: #6f42c1;
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 28px;
+  line-height: 1;
+  color: #6f42c1;
   cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #4b2a85;
 }
 
 .sidebar-nav {
-  padding: 20px;
+  padding: 15px 0;
+  flex: 1;
 }
 
 .sidebar-nav ul {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
 .nav-link {
   display: block;
-  padding: 10px 15px;
-  color: #333;
+  padding: 10px 20px;
+  color: #4b4b4b;
   text-decoration: none;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
+  border-left: 4px solid transparent;
 }
 
-.nav-link:hover, .nav-link.active {
-  background-color: #007bff;
-  color: white;
+.nav-link:hover {
+  background-color: #f3f0fa;
+  border-left-color: #6f42c1;
+  color: #6f42c1;
+}
+
+.nav-link.active {
+  background-color: #f3f0fa;
+  color: #6f42c1;
+  border-left-color: #6f42c1;
 }
 </style>

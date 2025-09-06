@@ -54,6 +54,8 @@ const breadcrumbs = computed(() => {
         items.push({ name: `Cliente #${params.id}`, path: `/app/clients/${params.id}`, clickable: true });
     } else if (currentRoute === 'Finance') {
         items.push({ name: 'Financeiro', path: '/app/finance', clickable: true });
+    } else if (currentRoute === 'Reports') {
+        items.push({ name: 'Relatórios', path: '/app/reports', clickable: true });
     }
 
     return items;
