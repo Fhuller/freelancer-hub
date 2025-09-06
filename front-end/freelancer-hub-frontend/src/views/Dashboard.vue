@@ -5,17 +5,9 @@ import AuthenticatedLayout from '../layouts/AuthenticatedLayout.vue';
 
 <template>
   <AuthenticatedLayout> 
-    <div class="content-section">
-      <UnderConstruction />
-    </div>
+    <UnderConstruction />
   </AuthenticatedLayout>
 </template>
 
 <style scoped>
-.content-section {
-  background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: var(--shadow-default);
-}
 </style>

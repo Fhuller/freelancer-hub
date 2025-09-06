@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'; 
+import { ref } from 'vue'; 
 import { useAuthStore } from '../stores/auth';
 import Header from '../components/Header.vue';
 import Sidebar from '../components/Sidebar.vue';
+import ContentSection from '../components/ContentSection.vue';
 
 const authStore = useAuthStore();
 const isSidebarOpen = ref(false); 
@@ -18,9 +19,9 @@ function toggleSidebar() {
     
     <Sidebar :is-open="isSidebarOpen" @close="toggleSidebar" />
 
-    <main class="content-wrapper">
+    <ContentSection>
       <slot />
-    </main>
+    </ContentSection>
   </div>
 </template>
 
@@ -30,13 +31,5 @@ function toggleSidebar() {
   background-color: #f8f9fa;
   display: flex;
   flex-direction: column;
-}
-
-.content-wrapper {
-  flex-grow: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
-  width: 100%;
 }
 </style>
