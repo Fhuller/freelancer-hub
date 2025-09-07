@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import AuthenticatedLayout from '../layouts/AuthenticatedLayout.vue';
-import ClientCard from '../components/ClientCard.vue';
+import ContentCard from '../components/ContentCard.vue';
 import AddCard from '../components/AddCard.vue';
 import { fetchClients, deleteClient, type ClientReadDto } from '../services/clients';
 
@@ -26,6 +26,18 @@ function novoItem() {
   alert('Cliquei no card de adicionar!');
 }
 
+function abrirCard() {
+  console.log('clicou no conteúdo');
+}
+
+function editar() {
+  console.log('editar item');
+}
+
+function excluir() {
+  console.log('excluir item');
+}
+
 onMounted(() => {
   loadClients();
 });
@@ -34,10 +46,13 @@ onMounted(() => {
 <template>
   <AuthenticatedLayout>
     <AddCard label="Novo Cliente" :onClick="novoItem" />
+    <ContentCard
+      label="Projeto A"
+      :onMainClick="abrirCard"
+      :onEdit="editar"
+      :onDelete="excluir"
+    />
   </AuthenticatedLayout>
 </template>
 
-<style scoped>
-
-
-</style>
+<style scoped></style>
