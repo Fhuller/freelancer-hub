@@ -3,13 +3,22 @@ import { ref, onMounted } from 'vue';
 import AuthenticatedLayout from '../layouts/AuthenticatedLayout.vue';
 import ContentCard from '../components/ContentCard.vue';
 import AddCard from '../components/AddCard.vue';
-import { fetchClients, deleteClient, type ClientReadDto } from '../services/clients';
+import BaseModal from '../components/BaseModal.vue';
+import { fetchClients, createClient, deleteClient, type ClientReadDto, type ClientCreateDto } from '../services/clients';
 
 const clients = ref<ClientReadDto[]>([]);
 const isLoadingClients = ref(false);
 const error = ref('');
+const showModal = ref(false);
 
-const loadClients = async () => {
+const clientTemplate: ClientCreateDto = {
+  name: '',
+  email: '',
+  phone: undefined,
+  company: undefined
+};
+
+async function loadClients() {
   try {
     isLoadingClients.value = true;
     error.value = '';
@@ -20,24 +29,34 @@ const loadClients = async () => {
   } finally {
     isLoadingClients.value = false;
   }
-};
-
-function novoItem() {
-  alert('Cliquei no card de adicionar!');
 }
 
-function abrirCard() {
-  console.log('clicou no conteúdo');
+function abrirModalNovoCliente() {
+  showModal.value = true;
 }
 
-function editar() {
-  console.log('editar item');
+function abrirCard(cliente: ClientReadDto) {
+  console.log('clicou no conteúdo', cliente);
 }
 
-function excluir() {
-  console.log('excluir item');
+function editar(cliente: ClientReadDto) {
+  console.log('editar item', cliente);
 }
 
+function excluir(cliente: ClientReadDto) {
+  console.log('excluir item', cliente);
+}
+
+async function saveNewClient(data: Record<string, any>) {
+  const dto: ClientCreateDto = {
+    name: data.name,
+    email: data.email,
+    phone: data.phone || undefined,
+    company: data.company || undefined
+  };
+  await createClient(dto);
+  await loadClients();
+}
 onMounted(() => {
   loadClients();
 });
@@ -45,14 +64,29 @@ onMounted(() => {
 
 <template>
   <AuthenticatedLayout>
-    <AddCard label="Novo Cliente" :onClick="novoItem" />
+    <AddCard label="Novo Cliente" :onClick="abrirModalNovoCliente" />
+
+    <div v-if="isLoadingClients">Carregando clientes...</div>
+    <div v-else-if="error">{{ error }}</div>
+
     <ContentCard
-      label="Projeto A"
-      :onMainClick="abrirCard"
-      :onEdit="editar"
-      :onDelete="excluir"
+      v-for="cliente in clients"
+      :key="cliente.id"
+      :label="cliente.name"
+      :onMainClick="() => abrirCard(cliente)"
+      :onEdit="() => editar(cliente)"
+      :onDelete="() => excluir(cliente)"
+    />
+
+    <BaseModal
+      :visible="showModal"
+      :model="clientTemplate"
+      :onSave="saveNewClient"
+      :model-name="'client'"
+      @close="showModal = false"
     />
   </AuthenticatedLayout>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>
