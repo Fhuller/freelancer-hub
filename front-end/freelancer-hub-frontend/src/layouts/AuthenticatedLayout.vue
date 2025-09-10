@@ -7,6 +7,7 @@ import ContentSection from '../components/ContentSection.vue';
 
 const authStore = useAuthStore();
 const isSidebarOpen = ref(false); 
+const props = defineProps<{ loading?: boolean }>();
 
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value;
@@ -16,11 +17,17 @@ function toggleSidebar() {
 <template>
   <div class="authenticated-layout">
     <Header @toggle-sidebar="toggleSidebar" />
-    
     <Sidebar :is-open="isSidebarOpen" @close="toggleSidebar" />
 
     <ContentSection>
-      <slot />
+      <template v-if="!loading">
+        <slot />
+      </template>
+      <template v-else>
+        <div class="loading-container">
+          <img src="@/assets/loading.gif" alt="Carregando..." class="loading-image" />
+        </div>
+      </template>
     </ContentSection>
   </div>
 </template>
@@ -31,5 +38,25 @@ function toggleSidebar() {
   background-color: #f8f9fa;
   display: flex;
   flex-direction: column;
+}
+
+.loading-placeholder {
+  width: 100%;
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+}
+
+.loading-container{
+  width: 100%;
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-image {
+  width: 80px; 
+  height: 80px;
 }
 </style>

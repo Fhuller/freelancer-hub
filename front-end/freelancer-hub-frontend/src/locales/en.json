@@ -5,7 +5,7 @@
   "name": "Name",
   "email": "Email",
   "phone": "Phone",
-  "company": "Company",
+  "companyName": "Company",
   "cancel": "Cancel",
   "save": "Save",
   "client": "Client"

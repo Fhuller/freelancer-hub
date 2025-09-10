@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
+import { reactive, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toast-notification'
 
@@ -16,18 +16,21 @@ const { t } = useI18n()
 
 const formData = reactive<Record<string, any>>({})
 
-watch(
-  () => props.model,
-  (val) => {
-    Object.keys(val).forEach((k) => (formData[k] = val[k]))
-  },
-  { immediate: true, deep: true }
-)
+watchEffect(() => {
+  if (props.visible && props.model) {
+    Object.keys(props.model).forEach(k => formData[k] = props.model[k])
+  }
+})
+
+function resetForm() {
+  Object.keys(formData).forEach((k) => (formData[k] = ''))
+}
 
 async function handleSave() {
   try {
     await props.onSave({ ...formData })
     toast.success(t('saved') || 'Salvo com sucesso!')
+    resetForm()
     emit('close')
   } catch (err) {
     console.error(err)
@@ -58,7 +61,9 @@ async function handleSave() {
       </div>
 
       <div class="modal-footer">
-        <button class="cancel-btn" @click="emit('close')">{{ t('cancel') }}</button>
+        <button class="cancel-btn" @click="() => { resetForm(); emit('close') }">
+          {{ t('cancel') }}
+        </button>
         <button class="save-btn" @click="handleSave">{{ t('save') }}</button>
       </div>
     </div>

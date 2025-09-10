@@ -45,7 +45,12 @@ export async function apiFetch(
       throw new Error(`HTTP error: ${response.status}`)
     }
 
-    return await response.json()
+    if (response.status === 204 || response.headers.get('Content-Length') === '0') {
+      return
+    }
+
+    const text = await response.text()
+    return text ? JSON.parse(text) : undefined
   } catch (err) {
     throw err
   }
