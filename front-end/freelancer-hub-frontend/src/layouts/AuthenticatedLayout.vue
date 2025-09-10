@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'; 
+import { ref } from 'vue'; 
 import { useAuthStore } from '../stores/auth';
 import Header from '../components/Header.vue';
 import Sidebar from '../components/Sidebar.vue';
+import ContentSection from '../components/ContentSection.vue';
 
 const authStore = useAuthStore();
 const isSidebarOpen = ref(false); 
+const props = defineProps<{ loading?: boolean }>();
 
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value;
@@ -15,12 +17,18 @@ function toggleSidebar() {
 <template>
   <div class="authenticated-layout">
     <Header @toggle-sidebar="toggleSidebar" />
-    
     <Sidebar :is-open="isSidebarOpen" @close="toggleSidebar" />
 
-    <main class="content-wrapper">
-      <slot />
-    </main>
+    <ContentSection>
+      <template v-if="!loading">
+        <slot />
+      </template>
+      <template v-else>
+        <div class="loading-container">
+          <img src="@/assets/loading.gif" alt="Carregando..." class="loading-image" />
+        </div>
+      </template>
+    </ContentSection>
   </div>
 </template>
 
@@ -32,11 +40,23 @@ function toggleSidebar() {
   flex-direction: column;
 }
 
-.content-wrapper {
-  flex-grow: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
+.loading-placeholder {
   width: 100%;
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+}
+
+.loading-container{
+  width: 100%;
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-image {
+  width: 80px; 
+  height: 80px;
 }
 </style>

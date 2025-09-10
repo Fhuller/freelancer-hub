@@ -5,7 +5,7 @@ export interface ClientReadDto {
   name: string;
   email: string;
   phone?: string;
-  company?: string;
+  companyName?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,14 +14,14 @@ export interface ClientCreateDto {
   name: string;
   email: string;
   phone?: string;
-  company?: string;
+  companyName?: string;
 }
 
 export interface ClientUpdateDto {
   name?: string;
   email?: string;
   phone?: string;
-  company?: string;
+  companyName?: string;
 }
 
 export function fetchClients(): Promise<ClientReadDto[]> {

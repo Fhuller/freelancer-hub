@@ -22,6 +22,8 @@
   padding: 40px 20px;
   text-align: center;
   color: #495057;
+  grid-column: 1/-1;
+  width: 100%;
 }
 
 .under-construction .icon {

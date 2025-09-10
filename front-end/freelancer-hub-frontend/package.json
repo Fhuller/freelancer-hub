@@ -13,6 +13,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.0.1",
     "@supabase/supabase-js": "^2.56.0",
     "flag-icons": "^7.5.0",
     "pinia": "^3.0.3",

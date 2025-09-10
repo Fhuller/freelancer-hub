@@ -1,4 +1,12 @@
 {
   "hello": "Olá",
-  "welcome": "Bem-vindo ao sistema"
+  "welcome": "Bem-vindo ao sistema",
+  "ClientCreateDto": "Novo Cliente",
+  "name": "Nome",
+  "email": "E-mail",
+  "phone": "Telefone",
+  "companyName": "Empresa",
+  "cancel": "Cancelar",
+  "save": "Salvar",
+  "client": "Cliente"
 }
