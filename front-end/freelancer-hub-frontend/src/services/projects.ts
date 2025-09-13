@@ -1,5 +1,15 @@
 import { apiFetch } from './api'
 
+export interface ProjectReadDto {
+  id: string;
+  userId: string
+  clientId?: string
+  title: string
+  description?: string
+  status?: string
+  dueDate?: string
+}
+
 export function fetchProjects() {
   return apiFetch('/Project', { method: 'GET' })
 }
