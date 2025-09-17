@@ -2,59 +2,97 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { fetchClientById } from '../services/clients';
+import { fetchProjectById } from '../services/projects';
 import type { ClientReadDto } from '../services/clients';
 
 const route = useRoute();
 const router = useRouter();
 
 const clientName = ref<string | null>(null);
+const projectName = ref<string | null>(null);
 
 const navigateTo = (path: string) => {
-    router.push(path);
+  router.push(path);
 };
 
 const updateClientName = async (id: string) => {
-    try {
-        const client: ClientReadDto = await fetchClientById(id);
-        clientName.value = client.name;
-    } catch {
-        clientName.value = `Cliente #${id}`;
-    }
+  try {
+    const client: ClientReadDto = await fetchClientById(id);
+    clientName.value = client.name;
+  } catch {
+    clientName.value = `Cliente #${id}`;
+  }
 };
 
-// Observa mudança de rota para atualizar o nome do cliente
-watch(() => route.params.id, (id) => {
-    if (route.name === 'Client' && typeof id === 'string') {
-        updateClientName(id);
+const updateProjectName = async (id: string) => {
+  try {
+    const project = await fetchProjectById(id);
+    projectName.value = project.title;
+  } catch {
+    projectName.value = `Projeto #${id}`;
+  }
+};
+
+// Observa mudança de rota para atualizar cliente/projeto
+watch(
+  () => route.params,
+  (params) => {
+    if (route.name === 'Client' && typeof params.id === 'string') {
+      updateClientName(params.id);
     }
-}, { immediate: true });
+    if (route.name === 'ClientProject') {
+      if (typeof params.id === 'string') {
+        updateClientName(params.id);
+      }
+      if (typeof params.projectId === 'string') {
+        updateProjectName(params.projectId);
+      }
+    }
+  },
+  { immediate: true }
+);
 
 // Computed breadcrumbs
 const breadcrumbs = computed(() => {
-    const currentRoute = route.name as string;
-    const params = route.params;
+  const currentRoute = route.name as string;
+  const params = route.params;
 
-    const items = [
-        { name: 'Dashboard', path: '/app/dashboard', clickable: true }
-    ];
+  const items = [
+    { name: 'Dashboard', path: '/app/dashboard', clickable: true }
+  ];
 
-    if (currentRoute === 'Clients') {
-        items.push({ name: 'Clientes', path: '/app/clients', clickable: true });
-    } else if (currentRoute === 'Client') {
-        const clientId = params.id as string;
-        items.push({ name: 'Clientes', path: '/app/clients', clickable: true });
-        items.push({
-            name: clientName.value || `Cliente #${clientId}`,
-            path: `/app/clients/${clientId}`,
-            clickable: false
-        });
-    } else if (currentRoute === 'Finance') {
-        items.push({ name: 'Financeiro', path: '/app/finance', clickable: true });
-    } else if (currentRoute === 'Reports') {
-        items.push({ name: 'Relatórios', path: '/app/reports', clickable: true });
-    }
+  if (currentRoute === 'Clients') {
+    items.push({ name: 'Clientes', path: '/app/clients', clickable: true });
+  } else if (currentRoute === 'Client') {
+    const clientId = params.id as string;
+    items.push({ name: 'Clientes', path: '/app/clients', clickable: true });
+    items.push({
+      name: clientName.value || `Cliente #${clientId}`,
+      path: `/app/clients/${clientId}`,
+      clickable: false
+    });
+  } else if (currentRoute === 'ClientProject') {
+    const clientId = params.id as string;
+    const projectId = params.projectId as string;
 
-    return items;
+    items.push({ name: 'Clientes', path: '/app/clients', clickable: true });
+    items.push({
+      name: clientName.value || `Cliente #${clientId}`,
+      path: `/app/clients/${clientId}`,
+      clickable: true
+    });
+    items.push({
+      name: projectName.value || `Projeto #${projectId}`,
+      path: `/app/clients/${clientId}/projects/${projectId}`,
+      clickable: false
+    });
+  } else if (currentRoute === 'Finance') {
+    items.push({ name: 'Financeiro', path: '/app/finance', clickable: true });
+  } else if (currentRoute === 'Reports') {
+    items.push({ name: 'Relatórios', path: '/app/reports', clickable: true });
+  }
+
+  return items;
 });
 </script>
 

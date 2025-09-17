@@ -30,18 +30,31 @@ const taskTemplate = ref({
   title: '',
   description: '',
   status: 'Novo',
-  dueDate: undefined
+  dueDate: new Date()
 })
 
 // Status do kanban
-const statuses = ['Novo', 'Fazendo', 'Concluído', 'Cancelado']
+const statuses = [
+  { name: 'Pendente', color: 'pending' },
+  { name: 'Em Andamento', color: 'in-progress' },
+  { name: 'Concluída', color: 'done' },
+  { name: 'Cancelada', color: 'canceled' }
+];
+
+const projectName = ref('')
+const projectClientId = ref('')
+const clientName = ref('')
 
 // Carregar projeto
 async function loadProject() {
   try {
     isLoading.value = true
     error.value = ''
-    project.value = await fetchProjectById(route.params.id as string)
+    const data = await fetchProjectById(route.params.projectId as string)
+    project.value = data
+    projectName.value = data.title
+    projectClientId.value = data.clientId
+    clientName.value = data.client?.name || ''
   } catch (err) {
     console.error(err)
     error.value = 'Erro ao carregar projeto'
@@ -71,7 +84,7 @@ function openNewTaskModal(status: string) {
     title: '',
     description: '',
     status: status,
-    dueDate: undefined
+    dueDate: new Date()
   }
   editingTask.value = null
   showModal.value = true
@@ -146,14 +159,18 @@ onMounted(async () => {
       <div class="kanban">
         <div
           v-for="status in statuses"
-          :key="status"
+          :key="status.name"
           class="kanban-column"
+          :class="status.color"
         >
-          <h3>{{ status }}</h3>
-          <AddCard :label="`Nova Tarefa (${status})`" :onClick="() => openNewTaskModal(status)" />
+          <h3>{{ status.name }}</h3>
+          <AddCard
+            :label="`Nova Tarefa (${status.name})`"
+            :onClick="() => openNewTaskModal(status.name)"
+          />
 
           <ContentCard
-            v-for="task in tasks.filter(t => t.status === status)"
+            v-for="task in tasks.filter(t => t.status === status.name)"
             :key="task.id"
             :label="task.title"
             :onMainClick="() => {}"
@@ -183,13 +200,57 @@ onMounted(async () => {
 }
 
 .kanban-column {
-  background: #f9f9f9;
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  color: white;
 }
 
 .kanban-column h3 {
   margin-bottom: 0.75rem;
+  font-weight: bold;
+}
+
+.kanban-column.pending {
+  color: #facc15; /* amarelo */
+  border: 2px solid #facc15; /* amarelo */
+  background-color: #facc157a;
+}
+
+.kanban-column.in-progress {
+  color: #3b82f6; /* azul */
+  border: 2px solid #3b82f6; /* azul */
+  background-color: #3b83f67a;
+}
+
+.kanban-column.done {
+  color: #065f46; /* verde escuro */
+  border: 2px solid #065f46; /* verde escuro */
+  background-color: #065f467a; /* verde escuro */
+}
+
+.kanban-column.canceled {
+  color: #dc2626; /* vermelho */
+  border: 2px solid #dc2626; /* vermelho */
+  background-color: #dc26267a;
+}
+
+.content-card {
+  background: white;
+  color: #111;
+  border-radius: 6px;
+  padding: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  height: 50px;
+}
+
+.add-card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px dashed rgba(0, 0, 0, 0.2);
+  color: #111;
+  height: 85px;
 }
 </style>

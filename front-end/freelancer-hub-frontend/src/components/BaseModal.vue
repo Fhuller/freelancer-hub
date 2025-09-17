@@ -16,9 +16,18 @@ const { t } = useI18n()
 
 const formData = reactive<Record<string, any>>({})
 
+// helper para formatar Date em yyyy-MM-dd (aceito pelo input date)
+function formatDateForInput(value: Date | string): string {
+  const d = typeof value === 'string' ? new Date(value) : value
+  if (isNaN(d.getTime())) return ''
+  return d.toISOString().split('T')[0]
+}
+
 watchEffect(() => {
   if (props.visible && props.model) {
-    Object.keys(props.model).forEach(k => formData[k] = props.model[k])
+    Object.keys(props.model).forEach(k => {
+      formData[k] = props.model[k]
+    })
   }
 })
 
@@ -51,9 +60,20 @@ async function handleSave() {
           <template v-if="typeof value === 'boolean'">
             <input type="checkbox" :id="key" v-model="formData[key]" />
           </template>
+
           <template v-else-if="typeof value === 'number'">
             <input type="number" :id="key" v-model.number="formData[key]" />
           </template>
+
+          <template v-else-if="value instanceof Date">
+            <input
+              type="date"
+              :id="key"
+              :value="formatDateForInput(value)"
+              @input="formData[key] = ($event.target as HTMLInputElement).value"
+            />
+          </template>
+
           <template v-else>
             <input type="text" :id="key" v-model="formData[key]" />
           </template>

@@ -122,7 +122,14 @@ async function removeProject(project: any) {
 }
 
 function openProjectDetails(project: any) {
-  router.push({ name: 'ClientProject', params: { id: project.id } })
+  if (!client.value) return
+  router.push({ 
+    name: 'ClientProject', 
+    params: { 
+      id: client.value.id,       // id do cliente
+      projectId: project.id      // id do projeto
+    } 
+  })
 }
 
 // Lifecycle
