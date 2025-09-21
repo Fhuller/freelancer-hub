@@ -26,12 +26,22 @@ const error = ref('')
 // Modal
 const showModal = ref(false)
 const editingTask = ref<any | null>(null)
+
+// Valores reais do form
 const taskTemplate = ref({
   title: '',
   description: '',
-  status: 'Novo',
+  status: 'Pendente',
   dueDate: new Date()
 })
+
+// Mock/display para o BaseModal
+const taskTemplateDisplay = {
+  title: 'Título da Tarefa',
+  description: 'Descrição da tarefa',
+  status: ['Pendente', 'Em Andamento', 'Concluída', 'Cancelada'],
+  dueDate: new Date('2001-01-01')
+}
 
 // Status do kanban
 const statuses = [
@@ -39,11 +49,7 @@ const statuses = [
   { name: 'Em Andamento', color: 'in-progress' },
   { name: 'Concluída', color: 'done' },
   { name: 'Cancelada', color: 'canceled' }
-];
-
-const projectName = ref('')
-const projectClientId = ref('')
-const clientName = ref('')
+]
 
 // Carregar projeto
 async function loadProject() {
@@ -52,9 +58,6 @@ async function loadProject() {
     error.value = ''
     const data = await fetchProjectById(route.params.projectId as string)
     project.value = data
-    projectName.value = data.title
-    projectClientId.value = data.clientId
-    clientName.value = data.client?.name || ''
   } catch (err) {
     console.error(err)
     error.value = 'Erro ao carregar projeto'
@@ -96,7 +99,7 @@ function editTask(task: any) {
   taskTemplate.value = {
     title: task.title,
     description: task.description || '',
-    status: task.status || 'Novo',
+    status: task.status || 'Pendente',
     dueDate: task.dueDate || undefined
   }
   showModal.value = true
@@ -183,7 +186,8 @@ onMounted(async () => {
       <!-- Modal de tarefas -->
       <BaseModal
         :visible="showModal"
-        :model="taskTemplate"
+        :model-values="taskTemplate"
+        :model-display="taskTemplateDisplay"
         :onSave="saveTask"
         :model-name="'task'"
         @close="showModal = false"

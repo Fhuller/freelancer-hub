@@ -18,7 +18,16 @@ const clientTemplate: ClientCreateDto = {
   name: '',
   email: '',
   phone: undefined,
-  companyName: undefined
+  companyName: undefined,
+  notes: ''
+};
+
+const clientTemplateDisplay = {
+  name: 'Nome do Cliente',
+  email: 'email@exemplo.com',
+  phone: '(11) 99999-9999',
+  companyName: 'Empresa Exemplo',
+  notes: 'Observações sobre o cliente'
 };
 
 async function loadClients() {
@@ -39,6 +48,7 @@ function openNewClientModal() {
   clientTemplate.email = ''
   clientTemplate.phone = undefined
   clientTemplate.companyName = undefined
+  clientTemplate.notes = ''
 
   editingClient.value = null
   showModal.value = true
@@ -54,6 +64,7 @@ function editClient(client: ClientReadDto) {
   clientTemplate.email = client.email
   clientTemplate.phone = client.phone || undefined
   clientTemplate.companyName = client.companyName || undefined
+  clientTemplate.notes = client.notes
 
   showModal.value = true
 }
@@ -74,7 +85,8 @@ async function saveNewClient(data: Record<string, any>) {
       name: data.name,
       email: data.email,
       phone: data.phone || undefined,
-      companyName: data.companyName || undefined
+      companyName: data.companyName || undefined,
+      notes: data.notes
     }
     await updateClient(editingClient.value.id, dto)
     editingClient.value = null
@@ -83,7 +95,8 @@ async function saveNewClient(data: Record<string, any>) {
       name: data.name,
       email: data.email,
       phone: data.phone || undefined,
-      companyName: data.companyName || undefined
+      companyName: data.companyName || undefined,
+      notes: data.notes
     }
     await createClient(dto)
   }
@@ -94,6 +107,7 @@ async function saveNewClient(data: Record<string, any>) {
   clientTemplate.email = ''
   clientTemplate.phone = undefined
   clientTemplate.companyName = undefined
+  clientTemplate.notes = ''
   showModal.value = false
 }
 
@@ -120,7 +134,8 @@ onMounted(() => {
 
     <BaseModal
       :visible="showModal"
-      :model="clientTemplate"
+      :model-values="clientTemplate"
+      :model-display="clientTemplateDisplay"
       :onSave="saveNewClient"
       :model-name="'client'"
       @close="showModal = false"

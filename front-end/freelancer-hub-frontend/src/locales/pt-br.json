@@ -8,5 +8,13 @@
   "companyName": "Empresa",
   "cancel": "Cancelar",
   "save": "Salvar",
-  "client": "Cliente"
+  "client": "Cliente",
+  "createdAt": "Criado em",
+  "notes": "Anotações",
+  "title": "Título",
+  "description": "Descrição",
+  "status": "Status",
+  "dueDate": "Data de entrega",
+  "project": "Projeto",
+  "saved": "Salvo"
 }

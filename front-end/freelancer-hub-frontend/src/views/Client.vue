@@ -17,12 +17,22 @@ const client = ref<ClientReadDto | null>(null)
 // Projetos
 const projects = ref<any[]>([])
 const editingProject = ref<any | null>(null)
+
+// valores reais
 const projectTemplate = ref({
   title: '',
   description: '',
   status: 'Pendente',
   dueDate: undefined
 })
+
+// mock/display
+const projectTemplateDisplay = {
+  title: 'Título do Projeto',
+  description: 'Descrição breve',
+  status: ['Pendente', 'Em Andamento', 'Concluído', 'Cancelado'], // select
+  dueDate: new Date('2001-01-01')
+}
 
 // Controle de estado
 const isLoading = ref(false)
@@ -166,7 +176,8 @@ onMounted(async () => {
       <!-- Modal de projeto -->
       <BaseModal
         :visible="showModal"
-        :model="projectTemplate"
+        :model-values="projectTemplate"
+        :model-display="projectTemplateDisplay"
         :onSave="saveProject"
         :model-name="'project'"
         @close="showModal = false"

@@ -7,15 +7,50 @@ const props = defineProps<{
   modelName?: string
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+function formatValue(value: any) {
+  if (!value) return ''
+
+  if (value instanceof Date) {
+    return new Intl.DateTimeFormat(locale.value, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(value)
+  }
+
+  if (typeof value === 'string') {
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}(T.*)?$/
+    if (isoDateRegex.test(value)) {
+      return new Intl.DateTimeFormat(locale.value, {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(new Date(value))
+    }
+  }
+
+  return value
+}
+
+function isIdField(key: string) {
+  return (
+    key.toLowerCase() === 'id' ||
+    key.toLowerCase().endsWith('_id') ||
+    key.endsWith('Id')
+  )
+}
 
 const fields = computed(() => {
   if (!props.model) return []
-  return Object.entries(props.model).map(([key, value]) => ({
-    key,
-    label: t(key),
-    value
-  }))
+  return Object.entries(props.model)
+    .filter(([key]) => !isIdField(key))
+    .map(([key, value]) => ({
+      key,
+      label: t(key),
+      value: formatValue(value)
+    }))
 })
 </script>
 
