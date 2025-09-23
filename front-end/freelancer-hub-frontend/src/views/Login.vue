@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { useToast} from 'vue-toast-notification'
+import { useToast } from 'vue-toast-notification'
 
 const toast = useToast()
 const router = useRouter()

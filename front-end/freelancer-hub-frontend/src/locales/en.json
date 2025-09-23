@@ -16,5 +16,17 @@
   "status": "Status",
   "dueDate": "Due date",
   "project": "Project",
-  "saved": "Saved"
+  "saved": "Saved",
+  "loadingClients": "Loading clients...",
+  "clientCreated": "Client created successfully",
+  "clientUpdated": "Client updated successfully",
+  "clientDeleted": "Client deleted successfully",
+  "clientNamePlaceholder": "Client Name",
+  "clientEmailPlaceholder": "email@example.com",
+  "clientPhonePlaceholder": "(555) 123-4567",
+  "clientCompanyPlaceholder": "Example Company",
+  "clientNotesPlaceholder": "Notes about the client",
+  "ProjectCreateDto": "New Project",
+  "projectTitlePlaceholder": "Project title",
+  "projectDescriptionPlaceholder": "Brief description"
 }

@@ -23,11 +23,9 @@ const isLoading = ref(false)
 const isLoadingTasks = ref(false)
 const error = ref('')
 
-// Modal
 const showModal = ref(false)
 const editingTask = ref<any | null>(null)
 
-// Valores reais do form
 const taskTemplate = ref({
   title: '',
   description: '',
@@ -35,7 +33,6 @@ const taskTemplate = ref({
   dueDate: new Date()
 })
 
-// Mock/display para o BaseModal
 const taskTemplateDisplay = {
   title: 'Título da Tarefa',
   description: 'Descrição da tarefa',
@@ -43,7 +40,6 @@ const taskTemplateDisplay = {
   dueDate: new Date('2001-01-01')
 }
 
-// Status do kanban
 const statuses = [
   { name: 'Pendente', color: 'pending' },
   { name: 'Em Andamento', color: 'in-progress' },
@@ -51,7 +47,6 @@ const statuses = [
   { name: 'Cancelada', color: 'canceled' }
 ]
 
-// Carregar projeto
 async function loadProject() {
   try {
     isLoading.value = true
@@ -66,7 +61,6 @@ async function loadProject() {
   }
 }
 
-// Carregar tarefas
 async function loadTasks() {
   if (!project.value) return
   try {
@@ -81,7 +75,6 @@ async function loadTasks() {
   }
 }
 
-// Abrir modal para nova tarefa
 function openNewTaskModal(status: string) {
   taskTemplate.value = {
     title: '',
@@ -93,7 +86,6 @@ function openNewTaskModal(status: string) {
   showModal.value = true
 }
 
-// Editar tarefa existente
 function editTask(task: any) {
   editingTask.value = task
   taskTemplate.value = {
@@ -105,7 +97,6 @@ function editTask(task: any) {
   showModal.value = true
 }
 
-// Salvar tarefa
 async function saveTask(data: Record<string, any>) {
   if (!project.value) return
   if (editingTask.value) {
@@ -129,7 +120,6 @@ async function saveTask(data: Record<string, any>) {
   showModal.value = false
 }
 
-// Remover tarefa
 async function removeTask(task: any) {
   try {
     await deleteTaskItem(task.id)
@@ -151,14 +141,12 @@ onMounted(async () => {
     <div v-if="error">{{ error }}</div>
 
     <template v-else>
-      <!-- Cabeçalho do projeto -->
       <BaseHeader
         v-if="project"
         :model="project"
         model-name="project"
       />
 
-      <!-- Kanban -->
       <div class="kanban">
         <div
           v-for="status in statuses"
@@ -183,7 +171,6 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Modal de tarefas -->
       <BaseModal
         :visible="showModal"
         :model-values="taskTemplate"

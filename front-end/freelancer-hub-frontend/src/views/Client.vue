@@ -8,17 +8,17 @@ import ContentCard from '../components/ContentCard.vue'
 import AddCard from '../components/AddCard.vue'
 import BaseModal from '../components/BaseModal.vue'
 import BaseHeader from '../components/BaseHeader.vue'
+import { useI18n } from 'vue-i18n'
 
-// Route e cliente
+const { t } = useI18n()
+
 const route = useRoute()
 const router = useRouter()
 const client = ref<ClientReadDto | null>(null)
 
-// Projetos
 const projects = ref<any[]>([])
 const editingProject = ref<any | null>(null)
 
-// valores reais
 const projectTemplate = ref({
   title: '',
   description: '',
@@ -26,21 +26,20 @@ const projectTemplate = ref({
   dueDate: undefined
 })
 
-// mock/display
-const projectTemplateDisplay = {
-  title: 'Título do Projeto',
-  description: 'Descrição breve',
-  status: ['Pendente', 'Em Andamento', 'Concluído', 'Cancelado'], // select
-  dueDate: new Date('2001-01-01')
+function getProjectTemplateDisplay() {
+  return {
+    title: t('projectTitlePlaceholder'),
+    description: t('projectDescriptionPlaceholder'),
+    status: ['Pendente', 'Em Andamento', 'Concluído', 'Cancelado'],
+    dueDate: new Date('2001-01-01')
+  }
 }
 
-// Controle de estado
 const isLoading = ref(false)
 const isLoadingProjects = ref(false)
 const error = ref('')
 const showModal = ref(false)
 
-// Carregar cliente
 async function loadClient() {
   try {
     isLoading.value = true
@@ -48,13 +47,12 @@ async function loadClient() {
     client.value = await fetchClientById(route.params.id as string)
   } catch (err) {
     console.error(err)
-    error.value = 'Erro ao carregar cliente'
+    error.value = (err as string) || ''
   } finally {
     isLoading.value = false
   }
 }
 
-// Carregar projetos
 async function loadProjects() {
   if (!client.value) return
   try {
@@ -64,13 +62,12 @@ async function loadProjects() {
     projects.value = allProjects.filter((p: any) => p.clientId === client.value?.id)
   } catch (err) {
     console.error(err)
-    error.value = 'Erro ao carregar projetos'
+    error.value = (err as string) || ''
   } finally {
     isLoadingProjects.value = false
   }
 }
 
-// Criar novo projeto
 function openNewProjectModal() {
   projectTemplate.value = {
     title: '',
@@ -82,7 +79,6 @@ function openNewProjectModal() {
   showModal.value = true
 }
 
-// Editar projeto
 function editProject(project: any) {
   editingProject.value = project
   projectTemplate.value = {
@@ -94,7 +90,6 @@ function editProject(project: any) {
   showModal.value = true
 }
 
-// Salvar projeto (novo ou edição)
 async function saveProject(data: Record<string, any>) {
   if (!client.value) return
   if (editingProject.value) {
@@ -108,7 +103,7 @@ async function saveProject(data: Record<string, any>) {
     editingProject.value = null
   } else {
     await createProject({
-      userId: '1', // ajustar de acordo com seu contexto
+      userId: '1',
       clientId: client.value.id,
       title: data.title,
       description: data.description || '',
@@ -120,14 +115,13 @@ async function saveProject(data: Record<string, any>) {
   showModal.value = false
 }
 
-// Remover projeto
 async function removeProject(project: any) {
   try {
     await deleteProject(project.id)
     await loadProjects()
   } catch (err) {
     console.error('Erro ao excluir projeto:', err)
-    error.value = 'Erro ao excluir projeto'
+    error.value = (err as string) || ''
   }
 }
 
@@ -136,13 +130,12 @@ function openProjectDetails(project: any) {
   router.push({ 
     name: 'ClientProject', 
     params: { 
-      id: client.value.id,       // id do cliente
-      projectId: project.id      // id do projeto
+      id: client.value.id,
+      projectId: project.id
     } 
   })
 }
 
-// Lifecycle
 onMounted(async () => {
   await loadClient()
   await loadProjects()
@@ -160,10 +153,8 @@ onMounted(async () => {
         model-name="client"
       />
 
-      <!-- Ações -->
-      <AddCard label="Novo Projeto" :onClick="openNewProjectModal" />
+      <AddCard :label="t('ProjectCreateDto')" :onClick="openNewProjectModal" />
 
-      <!-- Projetos -->
       <ContentCard
         v-for="project in projects"
         :key="project.id"
@@ -173,11 +164,10 @@ onMounted(async () => {
         :onDelete="() => removeProject(project)"
       />
 
-      <!-- Modal de projeto -->
       <BaseModal
         :visible="showModal"
         :model-values="projectTemplate"
-        :model-display="projectTemplateDisplay"
+        :model-display="getProjectTemplateDisplay()"
         :onSave="saveProject"
         :model-name="'project'"
         @close="showModal = false"
@@ -188,7 +178,7 @@ onMounted(async () => {
 
 <style scoped>
 .client-header {
-  grid-column: 1 / -1; /* ocupa todas as colunas do grid do layout */
+  grid-column: 1 / -1; 
   background: #f9f9f9;
   padding: 1.5rem;
   margin-bottom: 1.5rem;

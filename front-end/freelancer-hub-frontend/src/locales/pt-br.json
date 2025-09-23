@@ -16,5 +16,20 @@
   "status": "Status",
   "dueDate": "Data de entrega",
   "project": "Projeto",
-  "saved": "Salvo"
+  "saved": "Salvo",
+  "loadingClients": "Carregando clientes...",
+  "errorUnknown": "Ocorreu um erro desconhecido",
+  "clientCreated": "Cliente cadastrado com sucesso",
+  "clientUpdated": "Cliente atualizado com sucesso",
+  "clientDeleted": "Cliente excluído com sucesso",
+  "clientNamePlaceholder": "Nome do Cliente",
+  "clientEmailPlaceholder": "email@exemplo.com",
+  "clientPhonePlaceholder": "(11) 99999-9999",
+  "clientCompanyPlaceholder": "Empresa Exemplo",
+  "clientNotesPlaceholder": "Observações sobre o cliente",
+  "loggedOut": "Você saiu da conta.",
+  "accountCreatedConfirmationSent": "Cadastro realizado com sucesso, um email de confirmação de conta foi enviado!",
+  "ProjectCreateDto": "Novo Projeto",
+  "projectTitlePlaceholder": "Título do Projeto",
+  "projectDescriptionPlaceholder": "Descrição breve"
 }

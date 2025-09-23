@@ -39,12 +39,11 @@ function resetForm() {
 async function handleSave() {
   try {
     await props.onSave({ ...formData })
-    toast.success(t('saved') || 'Salvo com sucesso!')
+    toast.success(t('saved'))
     resetForm()
     emit('close')
   } catch (err) {
     console.error(err)
-    toast.error(t('errorSaving') || 'Erro ao salvar')
   }
 }
 </script>
