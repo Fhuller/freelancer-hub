@@ -24,12 +24,10 @@
   {\LARGE \textbf{Freelancer Hub: Sistema Integrado de Gestão para Profissionais Autônomos}}\\[1.5cm]
   {\Large \emph{Felipe Beppler Huller}}\\[0.5cm]
   {\large Curso: Engenharia de Software}\\[0.5cm]
-  % Removido "Data de Entrega" daqui
   
   \vfill
   {\large \today}
 \end{titlepage}
-
 
 %----- Sumário -----
 \tableofcontents
@@ -37,7 +35,7 @@
 
 %----- Resumo -----
 \begin{abstract}
-Este projeto apresenta o desenvolvimento de uma solução SaaS voltada à gestão integrada de atividades realizadas por profissionais autônomos. O sistema proposto, denominado \textit{Freelancer Hub}, visa centralizar operações essenciais como controle de clientes, gerenciamento de projetos, organização financeira e emissão de cobranças. Atualmente, freelancers enfrentam uma fragmentação de ferramentas, utilizando diferentes plataformas para cada atividade administrativa, o que impacta negativamente na produtividade. O \textit{Freelancer Hub} busca mitigar esse problema ao integrar tais funcionalidades em uma única plataforma, com recursos de automação como geração de faturas e lembretes de pagamento. A aplicação foi desenvolvida utilizando arquitetura em camadas com padrão MVC, adotando .NET Core no backend e Vue.js no frontend. Este documento apresenta os requisitos do sistema, especificações técnicas e um roadmap de implementação, com foco nas demandas reais do mercado de trabalho autônomo.
+Neste projeto é apresentado o desenvolvimento de uma solução SaaS voltada à gestão integrada de atividades realizadas por profissionais autônomos. O sistema proposto, denominado \textit{Freelancer Hub}, visa centralizar operações essenciais como controle de clientes, gerenciamento de projetos, organização financeira e emissão de cobranças. Atualmente, freelancers enfrentam uma fragmentação de ferramentas, utilizando diferentes plataformas para cada atividade administrativa, o que impacta negativamente na produtividade. O \textit{Freelancer Hub} busca mitigar esse problema ao integrar tais funcionalidades em uma única plataforma, com recursos de automação como geração de faturas e lembretes de pagamento. A aplicação foi desenvolvida utilizando arquitetura em camadas com padrão MVC, adotando .NET Core no backend e Vue.js no frontend. Este documento apresenta os requisitos do sistema, especificações técnicas e um roadmap de implementação, com foco nas demandas reais do mercado de trabalho autônomo.
 \end{abstract}
 \newpage
 
@@ -45,10 +43,10 @@ Este projeto apresenta o desenvolvimento de uma solução SaaS voltada à gestã
 \section{Introdução}
 
 \subsection{Contexto}
-Imagine você como um freelancer iniciando um novo projeto. Para organizar suas tarefas, usa um serviço como Notion ou Trello. O controle financeiro fica em planilhas do Excel, enquanto os contratos são armazenados no Google Drive. As faturas são geradas em um site específico, os pagamentos monitorados em outro aplicativo, e o contato com clientes acontece através de e-mails e mensagens dispersas. Essa realidade fragmentada - comum para a maioria dos profissionais autônomos - consome valiosas horas de trabalho em tarefas administrativas. O Freelancer Hub surge como resposta a essa dor moderna: uma plataforma unificada onde gestão de projetos, finanças, documentação e relacionamento com clientes coexistem em um ecossistema integrado, eliminando a necessidade de saltos entre múltiplas ferramentas e garantindo que você possa focar no que realmente importa - seu trabalho.
+Imagine você como um freelancer iniciando um novo projeto. Para organizar suas tarefas, usa um serviço como Notion ou Trello. O controle financeiro fica em planilhas do Excel, enquanto os contratos são armazenados no Google Drive. As faturas são geradas em um site específico, os pagamentos monitorados em outro aplicativo, e o contato com clientes acontece através de e-mails e mensagens dispersas. Essa realidade fragmentada - comum para a maioria dos profissionais autônomos - consome valiosas horas de trabalho em tarefas administrativas. O Freelancer Hub surge como resposta a essa dor moderna: uma plataforma unificada onde gestão de projetos, finanças, documentação e relacionamento com clientes coexistem em um ecossistema integrado, eliminando a necessidade de saltos entre múltiplas ferramentas e garantindo que você possa focar no que realmente importa.
 
 \subsection{Justificativa}
-Profissionais autônomos ainda enfrentam dificuldades para encontrar ferramentas que atendam bem suas necessidades. De um lado, há sistemas complexos voltados para empresas, com muitos recursos desnecessários e difíceis de usar. De outro, existem ferramentas muito específicas, criadas para nichos como design ou redação, que não cobrem todas as demandas do trabalho autônomo. Isso deixa de fora grande parte dos freelancers — como desenvolvedores, consultores, tradutores e profissionais de marketing — que precisam de uma solução prática e completa. O \textit{Freelancer Hub} surge para preencher essa lacuna: uma plataforma que une a profundidade das ferramentas especializadas com a flexibilidade para diferentes modelos de trabalho, reunindo gestão de projetos, finanças e clientes em um só lugar.
+Profissionais autônomos ainda enfrentam dificuldades para encontrar ferramentas que atendam bem suas necessidades. De um lado, há sistemas complexos voltados para empresas, com muitos recursos desnecessários e difíceis de usar. De outro, existem ferramentas específicas, criadas para nichos como design ou redação, que não cobrem todas as demandas do trabalho autônomo. Isso deixa de fora grande parte dos freelancers — como desenvolvedores, consultores, tradutores e profissionais de marketing — que precisam de uma solução prática e completa. O \textit{Freelancer Hub} surge para preencher essa lacuna: uma plataforma que une a profundidade das ferramentas especializadas com a flexibilidade para diferentes modelos de trabalho, reunindo gestão de projetos, finanças e clientes em um só lugar.
 
 \subsection{Objetivos}
 \begin{itemize}[nosep]
@@ -59,7 +57,7 @@ Profissionais autônomos ainda enfrentam dificuldades para encontrar ferramentas
       \item Gerar relatórios consolidados de desempenho financeiro
       \item Implementar lembretes automáticos para prazos e pagamentos
       \item Centralizar informações de clientes, projetos e finanças em um único ambiente
-      \item Reduzir o tempo gasto com tarefas administrativas por meio da automação
+      \item Reduzir o tempo gasto com tarefas administrativas por meio da unificação das informações e automação de processos
     \end{itemize}
 \end{itemize}
 
@@ -67,7 +65,7 @@ Profissionais autônomos ainda enfrentam dificuldades para encontrar ferramentas
 \section{Descrição do Projeto}
 
 \subsection{Tema do Projeto}
-Sistema web integrado para gestão operacional e financeira de profissionais autônomos, contemplando:
+O tema deste projeto consiste no desenvolvimento do sistema \textit{Freelancer Hub} - uma plataforma web integrada para gestão operacional e financeira de profissionais autônomos, contemplando:
 
 \begin{itemize}[nosep]
   \item Cadastro centralizado de clientes e projetos
@@ -157,8 +155,14 @@ Sistema web integrado para gestão operacional e financeira de profissionais aut
     \begin{itemize}[nosep]
       \item RNF3.1: Interface responsiva (mobile/desktop)
       \item RNF3.2: Tempo de aprendizado < 15 minutos
+      \item RNF3.3: Exportação de dados em formatos comuns (CSV, PDF, Excel)
     \end{itemize}
   
+  \item \textbf{Confiabilidade}
+    \begin{itemize}[nosep]
+      \item RNF4.1: Backup automático diário dos dados
+      \item RNF4.2: Disponibilidade de 99\% do sistema
+    \end{itemize}
 \end{enumerate}
 
 Para ilustrar os principais pontos de interação entre o freelancer e o sistema, apresenta-se a Figura~\ref{fig:caso-uso}, que mostra o diagrama de caso de uso com as funcionalidades principais.
@@ -169,7 +173,6 @@ Para ilustrar os principais pontos de interação entre o freelancer e o sistema
   \caption{Diagrama de Caso de Uso - Visão Geral}
   \label{fig:caso-uso}
 \end{figure}
-
 
 A estrutura de dados do sistema é representada no Diagrama Entidade-Relacionamento (Figura~\ref{fig:der}), que detalha as principais entidades, seus atributos e relacionamentos.
 
@@ -203,7 +206,7 @@ Este diagrama apresenta uma visão geral das interações do sistema com seus us
 
 \subsubsection*{Nível 2 — Diagrama de Contêineres}
 
-Neste nível, é detalhada a divisão do sistema em contêineres lógicos. O frontend, implementado em Vue.js, interage com a API REST desenvolvida em .NET Core, que por sua vez se comunica com o banco de dados PostgreSQL e serviços externos. Cada contêiner possui responsabilidades específicas que se complementam para entregar as funcionalidades ao usuário.
+Neste nível, é detalhada a divisão do sistema em contêineres lógicos. O frontend, implementado em Vue.js, interage com a API REST desenvolvida em .NET Core, que por sua vez se comunica com o banco de dados SQL Server e serviços externos. Cada contêiner possui responsabilidades específicas que se complementam para entregar as funcionalidades ao usuário.
 
 \begin{figure}[H]
   \centering
@@ -219,7 +222,6 @@ O diagrama de componentes foca na estrutura interna do backend. São representad
 \afterpage{\clearpage}
 \begin{landscape}
 \subsubsection*{Nível 3 — Diagrama de Componentes}
-% Conteúdo do diagrama
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\linewidth]{DC4_3.png}
@@ -230,16 +232,28 @@ O diagrama de componentes foca na estrutura interna do backend. São representad
 
 \subsubsection*{Nível 4 — Código}
 
-Embora o Modelo C4 preveja também o nível de código, essa representação foi omitida neste projeto. No entanto, a estrutura segue o padrão arquitetural MVC com repositórios, entidades, DTOs e serviços bem definidos, utilizando o Entity Framework para abstração de acesso a dados.
+Embora o Modelo C4 preveja também o nível de código, essa representação foi omitida neste projeto por se tratar de um documento de arquitetura de alto nível. O nível de código seria excessivamente detalhado para os propósitos desta documentação, focando em implementações específicas de métodos e classes que não agregam valor à compreensão da arquitetura geral do sistema. A estrutura segue o padrão arquitetural MVC com repositórios, entidades, DTOs e serviços bem definidos, utilizando o Entity Framework para abstração de acesso a dados.
 
 \subsection{Stack Tecnológica}
 \begin{itemize}[nosep]
   \item \textbf{Backend:} C\# / .NET 8 (ASP.NET Core)
   \item \textbf{Frontend:} TypeScript / Vue 3 (Composition API)
-  \item \textbf{Database:} PostgreSQL (Entity Framework Core)
+  \item \textbf{Database:} SQL Server - A escolha pelo SQL Server em substituição ao PostgreSQL inicialmente planejado. Foi motivada pela obtenção de créditos educacionais através do programa Microsoft Azure for Students. Essa oportunidade permitiu o acesso a um banco de dados enterprise-grade com melhor desempenho, ferramentas de monitoramento mais avançadas e maior confiabilidade para o ambiente de produção, sem custos adicionais para o projeto.
   \item \textbf{Infraestrutura:} Docker, Azure App Service
   \item \textbf{Ferramentas:} GitHub Actions (CI/CD), Sentry (monitoramento)
 \end{itemize}
+
+\subsection{Mudança de Banco de Dados}
+Inicialmente, o projeto foi planejado para utilizar PostgreSQL como sistema de banco de dados. No entanto, através da conta de estudante Microsoft Azure for Students, foi possível obter créditos que permitiram a migração para o SQL Server. Esta mudança traz benefícios significativos:
+
+\begin{itemize}[nosep]
+  \item \textbf{Melhor integração com o ecossistema Microsoft:} Maior compatibilidade com .NET Core e Entity Framework
+  \item \textbf{Ferramentas de administração mais robustas:} SQL Server Management Studio oferece funcionalidades avançadas de monitoramento e otimização
+  \item \textbf{Desempenho superior:} Para cargas de trabalho transacionais típicas de sistemas SaaS
+  \item \textbf{Sem custos adicionais:} Utilização dos créditos educacionais disponibilizados pela Microsoft
+\end{itemize}
+
+A migração foi realizada sem impactar a arquitetura geral do sistema, mantendo a abstração provida pelo Entity Framework Core.
 
 \subsection{Considerações de Segurança}
 \begin{itemize}[nosep]
@@ -268,9 +282,10 @@ Embora o Modelo C4 preveja também o nível de código, essa representação foi
   \item Sentry. \emph{Application Monitoring and Error Tracking}. Disponível em: \url{https://sentry.io/}
   \item Docker. \emph{Documentation}. Disponível em: \url{https://docs.docker.com/}
   \item GitHub Docs. \emph{GitHub Actions Documentation}. Disponível em: \url{https://docs.github.com/en/actions}
-  \item PostgreSQL Global Development Group. \emph{PostgreSQL Documentation}. Disponível em: \url{https://www.postgresql.org/docs/}
+  \item Microsoft. \emph{SQL Server Documentation}. Disponível em: \url{https://docs.microsoft.com/sql/}
   \item Vue.js Core Team. \emph{Vue 3 Documentation}. Disponível em: \url{https://vuejs.org/guide/introduction.html}
   \item Microsoft. \emph{Entity Framework Core Documentation}. Disponível em: \url{https://learn.microsoft.com/en-us/ef/core/}
+  \item Microsoft Azure for Students. \emph{Azure Education Hub}. Disponível em: \url{https://azure.microsoft.com/education/}
 \end{enumerate}
 
 %===== 7. AVALIAÇÕES DE PROFESSORES =====
