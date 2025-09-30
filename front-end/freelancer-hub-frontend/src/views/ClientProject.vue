@@ -26,18 +26,59 @@ const error = ref('')
 const showModal = ref(false)
 const editingTask = ref<any | null>(null)
 
+// Variáveis para drag and drop
+const draggedTask = ref<any>(null)
+const dragOverColumn = ref<string | null>(null)
+
+// Helper para formatar data no formato ISO string (sem timezone issues)
+const formatDateForAPI = (dateString: string): string | null => {
+  if (!dateString) return null
+  
+  const date = new Date(dateString)
+  // Garantir que a data seja interpretada como UTC para evitar problemas de fuso horário
+  const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  return utcDate.toISOString()
+}
+
+// Helper para criar data de amanhã (para evitar data anterior à atual)
+const getTomorrowDate = (): string => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow.toISOString().split('T')[0] // Formato YYYY-MM-DD
+}
+
+// Helper para formatar data para input (YYYY-MM-DD)
+const formatDateForInput = (date: Date | string): string => {
+  if (!date) return getTomorrowDate()
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  return dateObj.toISOString().split('T')[0]
+}
+
+// Helper para validar se a data é válida (não é passada)
+const validateDueDate = (dateString: string): boolean => {
+  if (!dateString) return true // Data vazia é válida (será tratada no backend)
+  
+  const selectedDate = new Date(dateString)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // Zerar horas para comparar apenas a data
+  selectedDate.setHours(0, 0, 0, 0)
+  
+  return selectedDate >= today
+}
+
 const taskTemplate = ref({
   title: '',
   description: '',
   status: 'Pendente',
-  dueDate: new Date()
+  dueDate: getTomorrowDate()
 })
 
 const taskTemplateDisplay = {
   title: 'Título da Tarefa',
   description: 'Descrição da tarefa',
   status: ['Pendente', 'Em Andamento', 'Concluída', 'Cancelada'],
-  dueDate: new Date('2001-01-01')
+  dueDate: 'Data de Vencimento'
 }
 
 const statuses = [
@@ -80,7 +121,7 @@ function openNewTaskModal(status: string) {
     title: '',
     description: '',
     status: status,
-    dueDate: new Date()
+    dueDate: getTomorrowDate()
   }
   editingTask.value = null
   showModal.value = true
@@ -88,36 +129,69 @@ function openNewTaskModal(status: string) {
 
 function editTask(task: any) {
   editingTask.value = task
+  
+  // Formatar a data corretamente para o input
+  let dueDate = getTomorrowDate()
+  if (task.dueDate) {
+    const taskDate = new Date(task.dueDate)
+    // Se a data for anterior a hoje, usar amanhã
+    if (taskDate < new Date()) {
+      dueDate = getTomorrowDate()
+    } else {
+      dueDate = formatDateForInput(taskDate)
+    }
+  }
+  
   taskTemplate.value = {
     title: task.title,
     description: task.description || '',
     status: task.status || 'Pendente',
-    dueDate: task.dueDate || undefined
+    dueDate: dueDate
   }
   showModal.value = true
 }
 
 async function saveTask(data: Record<string, any>) {
   if (!project.value) return
-  if (editingTask.value) {
-    await updateTaskItem(editingTask.value.id, {
-      title: data.title,
-      description: data.description || '',
-      status: data.status,
-      dueDate: data.dueDate || undefined
-    })
-    editingTask.value = null
-  } else {
-    await createTaskItem({
-      projectId: project.value.id,
-      title: data.title,
-      description: data.description || '',
-      status: data.status,
-      dueDate: data.dueDate || undefined
-    })
+  
+  // Validar a data de vencimento
+  if (data.dueDate && !validateDueDate(data.dueDate)) {
+    error.value = 'A data de vencimento não pode ser anterior à data atual'
+    return
   }
-  await loadTasks()
-  showModal.value = false
+  
+  try {
+    // Formatar os dados para a API
+    const taskData = {
+      title: data.title,
+      description: data.description || '',
+      status: data.status,
+      dueDate: data.dueDate ? formatDateForAPI(data.dueDate) : null
+    }
+    
+    if (editingTask.value) {
+      await updateTaskItem(editingTask.value.id, taskData)
+      editingTask.value = null
+    } else {
+      await createTaskItem({
+        projectId: project.value.id,
+        ...taskData
+      })
+    }
+    
+    await loadTasks()
+    showModal.value = false
+    error.value = '' // Limpar erro se sucesso
+  } catch (err: any) {
+    console.error('Erro ao salvar tarefa:', err)
+    
+    // Verificar se o erro é específico sobre a data
+    if (err.message && err.message.includes('data de vencimento')) {
+      error.value = 'A data de vencimento não pode ser anterior à data atual'
+    } else {
+      error.value = 'Erro ao salvar tarefa: ' + (err.message || 'Erro desconhecido')
+    }
+  }
 }
 
 async function removeTask(task: any) {
@@ -130,6 +204,64 @@ async function removeTask(task: any) {
   }
 }
 
+// Funções de Drag and Drop
+function onDragStart(task: any) {
+  draggedTask.value = task
+}
+
+function onDragOver(event: DragEvent, status: string) {
+  event.preventDefault()
+  dragOverColumn.value = status
+}
+
+function onDragLeave() {
+  dragOverColumn.value = null
+}
+
+async function onDrop(status: string) {
+  if (!draggedTask.value) return
+  
+  // Se a tarefa já está na mesma coluna, não faz nada
+  if (draggedTask.value.status === status) {
+    draggedTask.value = null
+    dragOverColumn.value = null
+    return
+  }
+  
+  try {
+    // Formatar a data corretamente para a API
+    const dueDate = draggedTask.value.dueDate 
+      ? formatDateForAPI(draggedTask.value.dueDate)
+      : null
+    
+    // Formatar os dados para a API
+    const updateData = {
+      title: draggedTask.value.title,
+      description: draggedTask.value.description || '',
+      status: status,
+      dueDate: dueDate
+    }
+    
+    // Atualiza o status da tarefa
+    await updateTaskItem(draggedTask.value.id, updateData)
+    
+    // Recarrega as tarefas para refletir a mudança
+    await loadTasks()
+  } catch (err: any) {
+    console.error('Erro ao atualizar status da tarefa:', err)
+    
+    // Verificar se o erro é sobre data
+    if (err.message && err.message.includes('data de vencimento')) {
+      error.value = 'Erro: A tarefa possui uma data de vencimento inválida'
+    } else {
+      error.value = 'Erro ao mover tarefa: ' + (err.message || 'Erro desconhecido')
+    }
+  } finally {
+    draggedTask.value = null
+    dragOverColumn.value = null
+  }
+}
+
 onMounted(async () => {
   await loadProject()
   await loadTasks()
@@ -138,7 +270,7 @@ onMounted(async () => {
 
 <template>
   <AuthenticatedLayout :loading="isLoading || isLoadingTasks">
-    <div v-if="error">{{ error }}</div>
+    <div v-if="error" class="error-message">{{ error }}</div>
 
     <template v-else>
       <BaseHeader
@@ -153,6 +285,10 @@ onMounted(async () => {
             v-for="status in statuses"
             :key="status.name"
             class="kanban-column"
+            :class="{ 'drag-over': dragOverColumn === status.name }"
+            @dragover="(e) => onDragOver(e, status.name)"
+            @dragleave="onDragLeave"
+            @drop="() => onDrop(status.name)"
           >
             <div class="column-header">
               <span class="status-dot" :class="status.color"></span>
@@ -176,6 +312,9 @@ onMounted(async () => {
                   :onEdit="() => editTask(task)"
                   :onDelete="() => removeTask(task)"
                   class="task-card"
+                  draggable="true"
+                  @dragstart="() => onDragStart(task)"
+                  @dragend="draggedTask = null"
                 />
               </div>
             </div>
@@ -197,7 +336,7 @@ onMounted(async () => {
 
 <style scoped>
 .kanban-board {
-  grid-column: 1 / -1; /* ocupa todas as colunas do grid */
+  grid-column: 1 / -1;
   width: 100%;
   margin-top: 1rem;
 }
@@ -217,6 +356,13 @@ onMounted(async () => {
   border-radius: 8px;
   border: 1px solid #e1e5e9;
   min-height: 500px;
+  transition: all 0.2s ease;
+}
+
+.kanban-column.drag-over {
+  background: #e3f2fd;
+  border: 2px dashed #2196f3;
+  transform: scale(1.02);
 }
 
 .column-header {
@@ -296,13 +442,23 @@ onMounted(async () => {
   padding: 0.75rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
-  cursor: pointer;
+  cursor: grab;
   margin: 0;
 }
 
 :deep(.task-card:hover) {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-color: #cbd5e0;
+}
+
+:deep(.task-card:active) {
+  cursor: grabbing;
+  transform: rotate(2deg);
+  opacity: 0.8;
+}
+
+:deep(.task-card.dragging) {
+  opacity: 0.5;
 }
 
 :deep(.add-card) {
@@ -326,6 +482,15 @@ onMounted(async () => {
   background: rgba(247, 250, 252, 0.9);
   border-color: #3182ce;
   color: #3182ce;
+}
+
+.error-message {
+  background: #fed7d7;
+  color: #c53030;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 /* Garantir que o conteúdo interno dos cards também ocupe toda a largura */
