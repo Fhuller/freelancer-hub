@@ -1,0 +1,293 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{pdflscape}
+\usepackage{afterpage}
+\geometry{margin=2.5cm}
+
+%----- Metadados -----
+\title{Freelancer Hub: Sistema Integrado de Gestão para Profissionais Autônomos}
+\author{Felipe Beppler Huller}
+
+\begin{document}
+
+%----- Capa -----
+\begin{titlepage}
+  \centering
+  \includegraphics[width=0.3\textwidth]{logo_catolica.png}\\[2cm]
+  {\LARGE \textbf{Freelancer Hub: Sistema Integrado de Gestão para Profissionais Autônomos}}\\[1.5cm]
+  {\Large \emph{Felipe Beppler Huller}}\\[0.5cm]
+  {\large Curso: Engenharia de Software}\\[0.5cm]
+  % Removido "Data de Entrega" daqui
+  
+  \vfill
+  {\large \today}
+\end{titlepage}
+
+
+%----- Sumário -----
+\tableofcontents
+\newpage
+
+%----- Resumo -----
+\begin{abstract}
+Este projeto apresenta o desenvolvimento de uma solução SaaS voltada à gestão integrada de atividades realizadas por profissionais autônomos. O sistema proposto, denominado \textit{Freelancer Hub}, visa centralizar operações essenciais como controle de clientes, gerenciamento de projetos, organização financeira e emissão de cobranças. Atualmente, freelancers enfrentam uma fragmentação de ferramentas, utilizando diferentes plataformas para cada atividade administrativa, o que impacta negativamente na produtividade. O \textit{Freelancer Hub} busca mitigar esse problema ao integrar tais funcionalidades em uma única plataforma, com recursos de automação como geração de faturas e lembretes de pagamento. A aplicação foi desenvolvida utilizando arquitetura em camadas com padrão MVC, adotando .NET Core no backend e Vue.js no frontend. Este documento apresenta os requisitos do sistema, especificações técnicas e um roadmap de implementação, com foco nas demandas reais do mercado de trabalho autônomo.
+\end{abstract}
+\newpage
+
+%===== 1. INTRODUÇÃO =====
+\section{Introdução}
+
+\subsection{Contexto}
+Imagine você como um freelancer iniciando um novo projeto. Para organizar suas tarefas, usa um serviço como Notion ou Trello. O controle financeiro fica em planilhas do Excel, enquanto os contratos são armazenados no Google Drive. As faturas são geradas em um site específico, os pagamentos monitorados em outro aplicativo, e o contato com clientes acontece através de e-mails e mensagens dispersas. Essa realidade fragmentada - comum para a maioria dos profissionais autônomos - consome valiosas horas de trabalho em tarefas administrativas. O Freelancer Hub surge como resposta a essa dor moderna: uma plataforma unificada onde gestão de projetos, finanças, documentação e relacionamento com clientes coexistem em um ecossistema integrado, eliminando a necessidade de saltos entre múltiplas ferramentas e garantindo que você possa focar no que realmente importa - seu trabalho.
+
+\subsection{Justificativa}
+Profissionais autônomos ainda enfrentam dificuldades para encontrar ferramentas que atendam bem suas necessidades. De um lado, há sistemas complexos voltados para empresas, com muitos recursos desnecessários e difíceis de usar. De outro, existem ferramentas muito específicas, criadas para nichos como design ou redação, que não cobrem todas as demandas do trabalho autônomo. Isso deixa de fora grande parte dos freelancers — como desenvolvedores, consultores, tradutores e profissionais de marketing — que precisam de uma solução prática e completa. O \textit{Freelancer Hub} surge para preencher essa lacuna: uma plataforma que une a profundidade das ferramentas especializadas com a flexibilidade para diferentes modelos de trabalho, reunindo gestão de projetos, finanças e clientes em um só lugar.
+
+\subsection{Objetivos}
+\begin{itemize}[nosep]
+  \item \textbf{Principal:} Desenvolver plataforma SaaS unificada para gestão freelancer
+  \item \textbf{Secundários:}
+    \begin{itemize}[nosep]
+      \item Automatizar emissão de invoices e cobranças
+      \item Gerar relatórios consolidados de desempenho financeiro
+      \item Implementar lembretes automáticos para prazos e pagamentos
+      \item Centralizar informações de clientes, projetos e finanças em um único ambiente
+      \item Reduzir o tempo gasto com tarefas administrativas por meio da automação
+    \end{itemize}
+\end{itemize}
+
+%===== 2. DESCRIÇÃO DO PROJETO =====
+\section{Descrição do Projeto}
+
+\subsection{Tema do Projeto}
+Sistema web integrado para gestão operacional e financeira de profissionais autônomos, contemplando:
+
+\begin{itemize}[nosep]
+  \item Cadastro centralizado de clientes e projetos
+  \item Controle de tarefas e milestones
+  \item Módulo financeiro com emissão de faturas
+  \item Painéis analíticos para métricas de produtividade
+\end{itemize}
+
+\subsection{Problemas a Resolver}
+\begin{enumerate}[nosep]
+  \item Dispersão de informações entre diferentes plataformas (planilhas, e-mails, sistemas de gestão de tarefas, ferramentas de cobrança)
+  \item Necessidade de múltiplas assinaturas para cobrir funcionalidades básicas (ex.: organização de tarefas, controle financeiro, emissão de faturas)
+  \item Ausência de histórico consolidado de interações com clientes e andamento de projetos anteriores
+  \item Dificuldade em manter controle sobre prazos, pagamentos pendentes e entregas futuras de forma automatizada
+  \item Falta de integração entre gestão de tempo, faturamento e análise de desempenho financeiro
+\end{enumerate}
+
+\subsection{Limitações}
+\begin{itemize}[nosep]
+  \item Suporte apenas para usuários individuais (sem times)
+  \item Integrações externas limitadas a provedores de pagamento
+  \item Relatórios baseados apenas em dados primários do sistema
+\end{itemize}
+
+%===== 3. ESPECIFICAÇÃO TÉCNICA =====
+\section{Especificação Técnica}
+
+\subsection{Requisitos de Software}
+
+\begin{enumerate}[label=\textbf{RF\arabic*}, leftmargin=2.5cm]
+  \item \textbf{Gestão de Usuários}
+    \begin{itemize}[nosep]
+      \item RF1.1: Cadastro inicial com e-mail e senha
+      \item RF1.2: Recuperação de senha com token temporário
+      \item RF1.3: Atualização de perfil (foto, dados profissionais)
+    \end{itemize}
+  
+  \item \textbf{Gestão de Clientes}
+    \begin{itemize}[nosep]
+      \item RF2.1: Cadastro completo (nome, contatos, documentos)
+      \item RF2.2: Classificação por setor/segmento
+      \item RF2.3: Histórico de interações (reuniões, contatos)
+    \end{itemize}
+  
+  \item \textbf{Gestão de Projetos}
+    \begin{itemize}[nosep]
+      \item RF3.1: Vinculação de múltiplos projetos
+      \item RF3.2: Criação com detalhamento (escopo, entregáveis)
+      \item RF3.3: Divisão em tarefas/milestones
+      \item RF3.4: Atribuição de prazos e prioridades
+      \item RF3.5: Registro de horas trabalhadas
+    \end{itemize}
+  
+  \item \textbf{Controle Financeiro}
+    \begin{itemize}[nosep]
+      \item RF4.1: Definição de modelos de precificação (hora/projeto)
+      \item RF4.2: Emissão automática de invoices
+      \item RF4.3: Registro de despesas categorizadas
+      \item RF4.4: Acompanhamento de fluxo de caixa
+      \item RF4.5: Projeção de recebíveis
+    \end{itemize}
+  
+  \item \textbf{Relatórios e Análises}
+    \begin{itemize}[nosep]
+      \item RF5.1: Dashboard financeiro (receitas/despesas)
+      \item RF5.2: Relatório de produtividade (horas/projetos)
+      \item RF5.3: Análise de rentabilidade por cliente/projeto
+      \item RF5.4: Exportação de dados (CSV/PDF)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Requisitos Não-Funcionais:}
+\begin{enumerate}[label=\textbf{RNF\arabic*}, leftmargin=2.5cm]
+  \item \textbf{Desempenho}
+    \begin{itemize}[nosep]
+      \item RNF1.1: Tempo de resposta < 2s para 95\% das requisições
+      \item RNF1.2: Suporte a 100 usuários concorrentes
+    \end{itemize}
+  
+  \item \textbf{Segurança}
+    \begin{itemize}[nosep]
+      \item RNF2.1: Autenticação multifatorial opcional
+      \item RNF2.2: Autenticação via OAuth2 (Google/GitHub)
+    \end{itemize}
+  
+  \item \textbf{Usabilidade}
+    \begin{itemize}[nosep]
+      \item RNF3.1: Interface responsiva (mobile/desktop)
+      \item RNF3.2: Tempo de aprendizado < 15 minutos
+    \end{itemize}
+  
+\end{enumerate}
+
+Para ilustrar os principais pontos de interação entre o freelancer e o sistema, apresenta-se a Figura~\ref{fig:caso-uso}, que mostra o diagrama de caso de uso com as funcionalidades principais.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\linewidth]{DCU.png}
+  \caption{Diagrama de Caso de Uso - Visão Geral}
+  \label{fig:caso-uso}
+\end{figure}
+
+
+A estrutura de dados do sistema é representada no Diagrama Entidade-Relacionamento (Figura~\ref{fig:der}), que detalha as principais entidades, seus atributos e relacionamentos.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\linewidth]{DER.png}
+  \caption{Diagrama Entidade-Relacionamento - Visão Geral}
+  \label{fig:der}
+\end{figure}
+
+\subsection{Considerações de Design}
+\begin{itemize}[nosep]
+  \item \textbf{Padrão MVC:} Separação clara entre Model (entidades), View (Vue.js) e Controller (API .NET Core).
+  \item \textbf{Arquitetura em Camadas:} Apresentação, aplicação, domínio e infraestrutura.
+\end{itemize}
+
+\subsection{Modelo C4}
+
+O Modelo C4 (Context, Containers, Components, Code) foi utilizado para representar graficamente a arquitetura do sistema \textit{Freelancer Hub}, em diferentes níveis de abstração. A seguir, são apresentados os três primeiros níveis do modelo, com seus respectivos diagramas.
+
+\subsubsection*{Nível 1 — Diagrama de Contexto}
+
+Este diagrama apresenta uma visão geral das interações do sistema com seus usuários e serviços externos. O usuário principal (freelancer) acessa o sistema por meio de um navegador web, interagindo com as funcionalidades principais, enquanto serviços de autenticação, pagamentos e envio de e-mails são utilizados pelo backend.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\linewidth]{DC4_1.png}
+  \caption{Diagrama C4 – Nível 1: Contexto}
+  \label{fig:c4-contexto}
+\end{figure}
+
+\subsubsection*{Nível 2 — Diagrama de Contêineres}
+
+Neste nível, é detalhada a divisão do sistema em contêineres lógicos. O frontend, implementado em Vue.js, interage com a API REST desenvolvida em .NET Core, que por sua vez se comunica com o banco de dados PostgreSQL e serviços externos. Cada contêiner possui responsabilidades específicas que se complementam para entregar as funcionalidades ao usuário.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\linewidth]{DC4_2.png}
+  \caption{Diagrama C4 – Nível 2: Contêineres}
+  \label{fig:c4-container}
+\end{figure}
+
+\subsubsection*{Nível 3 — Diagrama de Componentes}
+
+O diagrama de componentes foca na estrutura interna do backend. São representados os principais controladores (Controllers) e serviços (Services) responsáveis pela lógica de negócio, organizados segundo as funcionalidades do sistema: autenticação, gestão de clientes, projetos, faturas e relatórios. A arquitetura em camadas permite manter uma separação clara entre responsabilidades, facilitando manutenção e evolução do sistema.
+
+\afterpage{\clearpage}
+\begin{landscape}
+\subsubsection*{Nível 3 — Diagrama de Componentes}
+% Conteúdo do diagrama
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\linewidth]{DC4_3.png}
+  \caption{Diagrama C4 – Nível 3: Componentes do Backend}
+  \label{fig:c4-componentes}
+\end{figure}
+\end{landscape}
+
+\subsubsection*{Nível 4 — Código}
+
+Embora o Modelo C4 preveja também o nível de código, essa representação foi omitida neste projeto. No entanto, a estrutura segue o padrão arquitetural MVC com repositórios, entidades, DTOs e serviços bem definidos, utilizando o Entity Framework para abstração de acesso a dados.
+
+\subsection{Stack Tecnológica}
+\begin{itemize}[nosep]
+  \item \textbf{Backend:} C\# / .NET 8 (ASP.NET Core)
+  \item \textbf{Frontend:} TypeScript / Vue 3 (Composition API)
+  \item \textbf{Database:} PostgreSQL (Entity Framework Core)
+  \item \textbf{Infraestrutura:} Docker, Azure App Service
+  \item \textbf{Ferramentas:} GitHub Actions (CI/CD), Sentry (monitoramento)
+\end{itemize}
+
+\subsection{Considerações de Segurança}
+\begin{itemize}[nosep]
+  \item Implementação de RBAC (Role-Based Access Control), com admin e users
+  \item Validação rigorosa de inputs contra XSS e SQL Injection
+  \item Tokens JWT com expiração curta
+\end{itemize}
+
+\section{Próximos Passos}
+\begin{itemize}[nosep]
+  \item Implementação MVP — entidades, API CRUD, autenticação. Frontend, geração de PDFs (invoices), relatórios básicos.  
+  \item Fase futura: Integrações externas com outras plataformas.
+  \item Fase futura: Adição de kanban e gráficos personalizados.
+\end{itemize}
+
+%===== 5. REFERÊNCIAS =====
+\section{Referências}
+\begin{enumerate}[nosep]
+  \item FOWLER, M. \emph{Patterns of Enterprise Application Architecture}. Addison-Wesley, 2002.
+  \item Microsoft. \emph{.NET Documentation}. Disponível em: \url{https://learn.microsoft.com/dotnet/}
+  \item RICHARDSON, C. \emph{Microservices Patterns}. Manning, 2018.
+  \item OWASP Foundation. \emph{Application Security Verification Standard}. 2021. Disponível em: \url{https://owasp.org/www-project-application-security-verification-standard/}
+  \item PlantUML. \emph{Diagrams as Code}. Disponível em: \url{https://plantuml.com/}
+  \item dbdiagram.io. \emph{Draw Entity-Relationship Diagrams (ERD) Easily}. Disponível em: \url{https://dbdiagram.io}
+  \item C4 Model. \emph{Visualising software architecture}. Disponível em: \url{https://c4model.com/}
+  \item Sentry. \emph{Application Monitoring and Error Tracking}. Disponível em: \url{https://sentry.io/}
+  \item Docker. \emph{Documentation}. Disponível em: \url{https://docs.docker.com/}
+  \item GitHub Docs. \emph{GitHub Actions Documentation}. Disponível em: \url{https://docs.github.com/en/actions}
+  \item PostgreSQL Global Development Group. \emph{PostgreSQL Documentation}. Disponível em: \url{https://www.postgresql.org/docs/}
+  \item Vue.js Core Team. \emph{Vue 3 Documentation}. Disponível em: \url{https://vuejs.org/guide/introduction.html}
+  \item Microsoft. \emph{Entity Framework Core Documentation}. Disponível em: \url{https://learn.microsoft.com/en-us/ef/core/}
+\end{enumerate}
+
+%===== 7. AVALIAÇÕES DE PROFESSORES =====
+\newpage
+\section*{Avaliações de Professores}
+\noindent\textbf{Professor(a) 1 – Considerações:}\\[3cm]
+\noindent\rule{\linewidth}{0.5pt}\\
+\noindent Nome: \hfill Assinatura: \hspace{4cm}
+
+\vspace{20cm}
+\noindent\textbf{Professor(a) 2 – Considerações:}\\[3cm]
+\noindent\rule{\linewidth}{0.5pt}\\
+\noindent Nome: \hfill Assinatura: \hspace{4cm}
+
+\vspace{20cm}
+\noindent\textbf{Professor(a) 3 – Considerações:}\\[3cm]
+\noindent\rule{\linewidth}{0.5pt}\\
+\noindent Nome: \hfill Assinatura: \hspace{4cm}
+
+\end{document}
