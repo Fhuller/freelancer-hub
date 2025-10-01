@@ -30,48 +30,23 @@ const editingTask = ref<any | null>(null)
 const draggedTask = ref<any>(null)
 const dragOverColumn = ref<string | null>(null)
 
-// Helper para formatar data no formato ISO string (sem timezone issues)
-const formatDateForAPI = (dateString: string): string | null => {
-  if (!dateString) return null
-  
-  const date = new Date(dateString)
-  // Garantir que a data seja interpretada como UTC para evitar problemas de fuso horário
-  const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
-  return utcDate.toISOString()
+// Helper para formatar data no formato YYYY-MM-DD
+const formatDateForInput = (date: Date) => {
+  return date.toISOString().split('T')[0]
 }
 
 // Helper para criar data de amanhã (para evitar data anterior à atual)
-const getTomorrowDate = (): string => {
+const getTomorrowDate = () => {
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
-  return tomorrow.toISOString().split('T')[0] // Formato YYYY-MM-DD
-}
-
-// Helper para formatar data para input (YYYY-MM-DD)
-const formatDateForInput = (date: Date | string): string => {
-  if (!date) return getTomorrowDate()
-  
-  const dateObj = typeof date === 'string' ? new Date(date) : date
-  return dateObj.toISOString().split('T')[0]
-}
-
-// Helper para validar se a data é válida (não é passada)
-const validateDueDate = (dateString: string): boolean => {
-  if (!dateString) return true // Data vazia é válida (será tratada no backend)
-  
-  const selectedDate = new Date(dateString)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0) // Zerar horas para comparar apenas a data
-  selectedDate.setHours(0, 0, 0, 0)
-  
-  return selectedDate >= today
+  return tomorrow
 }
 
 const taskTemplate = ref({
   title: '',
   description: '',
   status: 'Pendente',
-  dueDate: getTomorrowDate()
+  dueDate: formatDateForInput(getTomorrowDate()) // Data padrão é amanhã
 })
 
 const taskTemplateDisplay = {
@@ -121,7 +96,7 @@ function openNewTaskModal(status: string) {
     title: '',
     description: '',
     status: status,
-    dueDate: getTomorrowDate()
+    dueDate: formatDateForInput(getTomorrowDate()) // Data padrão é amanhã
   }
   editingTask.value = null
   showModal.value = true
@@ -133,12 +108,10 @@ function editTask(task: any) {
   // Formatar a data corretamente para o input
   let dueDate = getTomorrowDate()
   if (task.dueDate) {
-    const taskDate = new Date(task.dueDate)
+    dueDate = new Date(task.dueDate)
     // Se a data for anterior a hoje, usar amanhã
-    if (taskDate < new Date()) {
+    if (dueDate < new Date()) {
       dueDate = getTomorrowDate()
-    } else {
-      dueDate = formatDateForInput(taskDate)
     }
   }
   
@@ -146,9 +119,18 @@ function editTask(task: any) {
     title: task.title,
     description: task.description || '',
     status: task.status || 'Pendente',
-    dueDate: dueDate
+    dueDate: formatDateForInput(dueDate)
   }
   showModal.value = true
+}
+
+// Função para validar se a data é válida (não é passada)
+function validateDueDate(dateString: string): boolean {
+  const selectedDate = new Date(dateString)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // Zerar horas para comparar apenas a data
+  
+  return selectedDate >= today
 }
 
 async function saveTask(data: Record<string, any>) {
@@ -166,7 +148,7 @@ async function saveTask(data: Record<string, any>) {
       title: data.title,
       description: data.description || '',
       status: data.status,
-      dueDate: data.dueDate ? formatDateForAPI(data.dueDate) : null
+      dueDate: data.dueDate || null
     }
     
     if (editingTask.value) {
@@ -189,7 +171,7 @@ async function saveTask(data: Record<string, any>) {
     if (err.message && err.message.includes('data de vencimento')) {
       error.value = 'A data de vencimento não pode ser anterior à data atual'
     } else {
-      error.value = 'Erro ao salvar tarefa: ' + (err.message || 'Erro desconhecido')
+      error.value = 'Erro ao salvar tarefa'
     }
   }
 }
@@ -229,17 +211,12 @@ async function onDrop(status: string) {
   }
   
   try {
-    // Formatar a data corretamente para a API
-    const dueDate = draggedTask.value.dueDate 
-      ? formatDateForAPI(draggedTask.value.dueDate)
-      : null
-    
     // Formatar os dados para a API
     const updateData = {
       title: draggedTask.value.title,
       description: draggedTask.value.description || '',
       status: status,
-      dueDate: dueDate
+      dueDate: draggedTask.value.dueDate || null
     }
     
     // Atualiza o status da tarefa
@@ -254,7 +231,7 @@ async function onDrop(status: string) {
     if (err.message && err.message.includes('data de vencimento')) {
       error.value = 'Erro: A tarefa possui uma data de vencimento inválida'
     } else {
-      error.value = 'Erro ao mover tarefa: ' + (err.message || 'Erro desconhecido')
+      error.value = 'Erro ao mover tarefa'
     }
   } finally {
     draggedTask.value = null
