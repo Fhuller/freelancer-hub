@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { fetchProjectById, type ProjectReadDto } from '../services/projects'
 import {
@@ -35,6 +35,16 @@ const fileError = ref('')
 
 const showModal = ref(false)
 const editingTask = ref<any | null>(null)
+
+// Variáveis para abas
+const activeTab = ref('kanban')
+
+// Variáveis para controle de tempo
+const isTimerRunning = ref(false)
+const totalSeconds = ref(0)
+const timerInterval = ref<NodeJS.Timeout | null>(null)
+const editingTime = ref(false)
+const tempHours = ref('0')
 
 // Variáveis para drag and drop
 const draggedTask = ref<any>(null)
@@ -72,6 +82,63 @@ const statuses = [
   { name: 'Concluída', color: 'done' },
   { name: 'Cancelada', color: 'canceled' }
 ]
+
+// Computed para formatar o tempo
+const formattedTime = computed(() => {
+  const hours = Math.floor(totalSeconds.value / 3600)
+  const minutes = Math.floor((totalSeconds.value % 3600) / 60)
+  const seconds = totalSeconds.value % 60
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+})
+
+const totalHours = computed(() => {
+  return (totalSeconds.value / 3600).toFixed(2)
+})
+
+// Funções do timer
+function toggleTimer() {
+  if (isTimerRunning.value) {
+    // Pausar
+    if (timerInterval.value) {
+      clearInterval(timerInterval.value)
+      timerInterval.value = null
+    }
+  } else {
+    // Iniciar
+    timerInterval.value = setInterval(() => {
+      totalSeconds.value += 1
+    }, 1000)
+  }
+  isTimerRunning.value = !isTimerRunning.value
+}
+
+function resetTimer() {
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value)
+    timerInterval.value = null
+  }
+  isTimerRunning.value = false
+  totalSeconds.value = 0
+}
+
+function editTime() {
+  editingTime.value = true
+  tempHours.value = totalHours.value
+}
+
+function saveTime() {
+  const hours = parseFloat(tempHours.value)
+  if (!isNaN(hours) && hours >= 0) {
+    totalSeconds.value = Math.round(hours * 3600)
+  }
+  editingTime.value = false
+}
+
+function cancelEditTime() {
+  editingTime.value = false
+  tempHours.value = totalHours.value
+}
 
 async function loadProject() {
   try {
@@ -374,129 +441,234 @@ onMounted(async () => {
         model-name="project"
       />
 
-      <!-- SEÇÃO DE ARQUIVOS - NOVO ESTILO -->
-      <div class="files-section">
-        <div class="files-header">
-          <h3 class="section-title">
-            <i class="fas fa-folder-open"></i>
-            Arquivos do Projeto
-            <span class="files-count" v-if="files.length > 0">({{ files.length }})</span>
-          </h3>
-          <div class="file-actions">
-            <input
-              type="file"
-              id="file-upload"
-              class="file-input"
-              @change="handleFileUpload"
-              :disabled="isLoadingFiles"
-            />
-            <label for="file-upload" class="upload-button">
-              <i class="fas fa-plus"></i>
-              <span v-if="isLoadingFiles">Enviando...</span>
-              <span v-else>Adicionar Arquivo</span>
-            </label>
-          </div>
-        </div>
-
-        <div v-if="fileError" class="error-message file-error">
-          <i class="fas fa-exclamation-triangle"></i>
-          {{ fileError }}
-        </div>
-
-        <div v-if="isLoadingFiles" class="loading-files">
-          <i class="fas fa-spinner fa-spin"></i>
-          Carregando arquivos...
-        </div>
-
-        <div v-else-if="files.length === 0" class="no-files">
-          <i class="fas fa-folder-open"></i>
-          <p>Nenhum arquivo adicionado ao projeto</p>
-        </div>
-
-        <div v-else class="files-container">
-          <div class="files-list">
-            <div
-              v-for="file in files"
-              :key="file.id"
-              class="file-card"
-            >
-              <div class="file-icon">
-                <i :class="['fas', getFileIcon(file.fileExtension)]"></i>
-              </div>
-              <div class="file-content">
-                <div class="file-info">
-                  <h4 class="file-name">{{ file.fileName }}{{ file.fileExtension }}</h4>
-                  <p class="file-meta">
-                    <span class="file-size">
-                      <i class="fas fa-hdd"></i>
-                      {{ formatFileSize(file.fileSize) }}
-                    </span>
-                    <span class="file-date">
-                      <i class="fas fa-calendar"></i>
-                      {{ new Date(file.createdAt).toLocaleDateString('pt-BR') }}
-                    </span>
-                  </p>
-                </div>
-                <div class="file-actions">
-                  <button
-                    class="action-button download-button"
-                    @click="handleDownloadFile(file)"
-                    title="Download"
-                  >
-                    <i class="fas fa-download"></i>
-                  </button>
-                  <button
-                    class="action-button delete-button"
-                    @click="handleDeleteFile(file.id)"
-                    title="Excluir"
-                  >
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- KANBAN -->
-      <div class="kanban-board">
-        <div class="kanban-grid">
-          <div
-            v-for="status in statuses"
-            :key="status.name"
-            class="kanban-column"
-            :class="{ 'drag-over': dragOverColumn === status.name }"
-            @dragover="(e) => onDragOver(e, status.name)"
-            @dragleave="onDragLeave"
-            @drop="() => onDrop(status.name)"
+      <!-- ABA DE CONTEÚDO -->
+      <div class="content-tabs" style="grid-column: 1 / -1;">
+        <div class="tabs-header">
+          <button 
+            class="tab-button" 
+            :class="{ active: activeTab === 'kanban' }"
+            @click="activeTab = 'kanban'"
           >
-            <div class="column-header">
-              <span class="status-dot" :class="status.color"></span>
-              <h3 class="column-title">{{ status.name }}</h3>
-              <span class="task-count">{{ tasks.filter(t => t.status === status.name).length }}</span>
-            </div>
-            
-            <div class="column-content">
-              <AddCard
-                :label="`Nova Tarefa`"
-                :onClick="() => openNewTaskModal(status.name)"
-                class="add-card"
-              />
+            <i class="fas fa-columns"></i>
+            Kanban
+          </button>
+          <button 
+            class="tab-button" 
+            :class="{ active: activeTab === 'files' }"
+            @click="activeTab = 'files'"
+          >
+            <i class="fas fa-folder-open"></i>
+            Arquivos
+            <span class="tab-badge" v-if="files.length > 0">{{ files.length }}</span>
+          </button>
+          <button 
+            class="tab-button" 
+            :class="{ active: activeTab === 'time' }"
+            @click="activeTab = 'time'"
+          >
+            <i class="fas fa-clock"></i>
+            Rastreamento de Horas
+          </button>
+        </div>
 
-              <div class="tasks-list">
-                <ContentCard
-                  v-for="task in tasks.filter(t => t.status === status.name)"
-                  :key="task.id"
-                  :label="task.title"
-                  :onMainClick="() => {}"
-                  :onEdit="() => editTask(task)"
-                  :onDelete="() => removeTask(task)"
-                  class="task-card"
-                  draggable="true"
-                  @dragstart="() => onDragStart(task)"
-                  @dragend="draggedTask = null"
-                />
+        <div class="tab-content">
+          <!-- ABA KANBAN -->
+          <div v-if="activeTab === 'kanban'" class="tab-pane">
+            <div class="kanban-board">
+              <div class="kanban-grid">
+                <div
+                  v-for="status in statuses"
+                  :key="status.name"
+                  class="kanban-column"
+                  :class="{ 'drag-over': dragOverColumn === status.name }"
+                  @dragover="(e) => onDragOver(e, status.name)"
+                  @dragleave="onDragLeave"
+                  @drop="() => onDrop(status.name)"
+                >
+                  <div class="column-header">
+                    <span class="status-dot" :class="status.color"></span>
+                    <h3 class="column-title">{{ status.name }}</h3>
+                    <span class="task-count">{{ tasks.filter(t => t.status === status.name).length }}</span>
+                  </div>
+                  
+                  <div class="column-content">
+                    <AddCard
+                      :label="`Nova Tarefa`"
+                      :onClick="() => openNewTaskModal(status.name)"
+                      class="add-card"
+                    />
+
+                    <div class="tasks-list">
+                      <ContentCard
+                        v-for="task in tasks.filter(t => t.status === status.name)"
+                        :key="task.id"
+                        :label="task.title"
+                        :onMainClick="() => {}"
+                        :onEdit="() => editTask(task)"
+                        :onDelete="() => removeTask(task)"
+                        class="task-card"
+                        draggable="true"
+                        @dragstart="() => onDragStart(task)"
+                        @dragend="draggedTask = null"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ABA ARQUIVOS -->
+          <div v-if="activeTab === 'files'" class="tab-pane">
+            <div class="files-section">
+              <div class="files-header">
+                <h3 class="section-title">
+                  <i class="fas fa-folder-open"></i>
+                  Arquivos do Projeto
+                  <span class="files-count" v-if="files.length > 0">({{ files.length }})</span>
+                </h3>
+                <div class="file-actions">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    class="file-input"
+                    @change="handleFileUpload"
+                    :disabled="isLoadingFiles"
+                  />
+                  <label for="file-upload" class="upload-button">
+                    <i class="fas fa-plus"></i>
+                    <span v-if="isLoadingFiles">Enviando...</span>
+                    <span v-else>Adicionar Arquivo</span>
+                  </label>
+                </div>
+              </div>
+
+              <div v-if="fileError" class="error-message file-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ fileError }}
+              </div>
+
+              <div v-if="isLoadingFiles" class="loading-files">
+                <i class="fas fa-spinner fa-spin"></i>
+                Carregando arquivos...
+              </div>
+
+              <div v-else-if="files.length === 0" class="no-files">
+                <i class="fas fa-folder-open"></i>
+                <p>Nenhum arquivo adicionado ao projeto</p>
+              </div>
+
+              <div v-else class="files-container">
+                <div class="files-list">
+                  <div
+                    v-for="file in files"
+                    :key="file.id"
+                    class="file-card"
+                  >
+                    <div class="file-icon">
+                      <i :class="['fas', getFileIcon(file.fileExtension)]"></i>
+                    </div>
+                    <div class="file-content">
+                      <div class="file-info">
+                        <h4 class="file-name">{{ file.fileName }}{{ file.fileExtension }}</h4>
+                        <p class="file-meta">
+                          <span class="file-size">
+                            <i class="fas fa-hdd"></i>
+                            {{ formatFileSize(file.fileSize) }}
+                          </span>
+                          <span class="file-date">
+                            <i class="fas fa-calendar"></i>
+                            {{ new Date(file.createdAt).toLocaleDateString('pt-BR') }}
+                          </span>
+                        </p>
+                      </div>
+                      <div class="file-actions">
+                        <button
+                          class="action-button download-button"
+                          @click="handleDownloadFile(file)"
+                          title="Download"
+                        >
+                          <i class="fas fa-download"></i>
+                        </button>
+                        <button
+                          class="action-button delete-button"
+                          @click="handleDeleteFile(file.id)"
+                          title="Excluir"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ABA RASTREAMENTO DE HORAS -->
+          <div v-if="activeTab === 'time'" class="tab-pane">
+            <div class="time-tracking-section">
+              <div class="time-header">
+                <h3 class="section-title">
+                  <i class="fas fa-clock"></i>
+                  Rastreamento de Horas de Trabalho
+                </h3>
+                <p class="time-description">
+                  Acompanhe o tempo gasto neste projeto
+                </p>
+              </div>
+
+              <div class="time-display">
+                <div class="timer-container">
+                  <div class="timer">
+                    <div class="timer-time">{{ formattedTime }}</div>
+                    <div class="timer-hours" v-if="!editingTime">
+                      <span>{{ totalHours }} horas</span>
+                      <button class="edit-time-button" @click="editTime" title="Editar horas">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                    </div>
+                    <div class="timer-edit" v-else>
+                      <input 
+                        v-model="tempHours" 
+                        type="number" 
+                        step="0.01" 
+                        min="0"
+                        class="time-input"
+                        @keyup.enter="saveTime"
+                        @keyup.escape="cancelEditTime"
+                      />
+                      <span>horas</span>
+                      <div class="edit-actions">
+                        <button class="save-time-button" @click="saveTime" title="Salvar">
+                          <i class="fas fa-check"></i>
+                        </button>
+                        <button class="cancel-time-button" @click="cancelEditTime" title="Cancelar">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="timer-controls">
+                    <button 
+                      class="timer-button play-pause-button" 
+                      :class="{ 'paused': !isTimerRunning }"
+                      @click="toggleTimer"
+                    >
+                      <i :class="isTimerRunning ? 'fas fa-pause' : 'fas fa-play'"></i>
+                      {{ isTimerRunning ? 'Pausar' : 'Iniciar' }}
+                    </button>
+                    <button 
+                      class="timer-button reset-button" 
+                      @click="resetTimer"
+                      :disabled="totalSeconds === 0"
+                    >
+                      <i class="fas fa-redo"></i>
+                      Reiniciar
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -516,16 +688,322 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* NOVOS ESTILOS PARA A SEÇÃO DE ARQUIVOS */
+.add-card{
+  height: 100px;
+}
+
+.content-card{
+  height: 100px;
+}
+
+/* ESTILOS DAS ABAS */
+.content-tabs {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e1e5e9;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+
+.tabs-header {
+  display: flex;
+  background: #f8fafc;
+  border-bottom: 1px solid #e1e5e9;
+  padding: 0 1.5rem;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+.tab-button:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.tab-button.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  background: white;
+}
+
+.tab-badge {
+  background: #3b82f6;
+  color: white;
+  border-radius: 10px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+.tab-content {
+  padding: 0;
+}
+
+.tab-pane {
+  min-height: 500px;
+}
+
+/* ESTILOS DA ABA DE TEMPO */
+.time-tracking-section {
+  padding: 2rem;
+}
+
+.time-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.time-description {
+  color: #64748b;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.time-display {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.timer-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 2rem;
+  color: white;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.timer {
+  margin-bottom: 1.5rem;
+}
+
+.timer-time {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.timer-hours {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  opacity: 0.9;
+}
+
+.edit-time-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 6px;
+  padding: 0.375rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-time-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.timer-edit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.time-input {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  width: 100px;
+  text-align: center;
+  color: #1e293b;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: white;
+  background: white;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.save-time-button,
+.cancel-time-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-time-button:hover {
+  background: rgba(34, 197, 94, 0.7);
+}
+
+.cancel-time-button:hover {
+  background: rgba(239, 68, 68, 0.7);
+}
+
+.timer-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.timer-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.timer-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.timer-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.play-pause-button {
+  background: rgba(34, 197, 94, 0.7);
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.play-pause-button.paused {
+  background: rgba(59, 130, 246, 0.7);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.reset-button {
+  background: rgba(239, 68, 68, 0.7);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.time-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-notes {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.time-notes h4 {
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+}
+
+.time-notes p {
+  color: #64748b;
+  margin: 0 0 1rem 0;
+}
+
+.time-notes ul {
+  color: #64748b;
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.time-notes li {
+  margin-bottom: 0.25rem;
+}
+
+/* ESTILOS ORIGINAIS PARA ARQUIVOS RESTAURADOS */
 .files-section {
   background: white;
   border-radius: 12px;
   border: 1px solid #e1e5e9;
   padding: 1.5rem;
-  margin-bottom: 2rem;
+  margin: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 100%;
-  grid-column: 1 / -1;
 }
 
 .files-header {
@@ -535,6 +1013,7 @@ onMounted(async () => {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid #f1f5f9;
+  padding: 0 0 1rem 0;
 }
 
 .section-title {
@@ -768,11 +1247,10 @@ onMounted(async () => {
   color: #dc2626;
 }
 
-/* Estilos existentes do Kanban (mantidos) */
+/* ESTILOS EXISTENTES DO KANBAN (AJUSTADOS) */
 .kanban-board {
-  grid-column: 1 / -1;
   width: 100%;
-  margin-top: 1rem;
+  padding: 1.5rem;
 }
 
 .kanban-grid {
@@ -944,9 +1422,30 @@ onMounted(async () => {
   .kanban-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .time-display {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 }
 
 @media (max-width: 768px) {
+  .tabs-header {
+    flex-direction: column;
+    padding: 0;
+  }
+  
+  .tab-button {
+    justify-content: center;
+    border-bottom: 1px solid #e1e5e9;
+    border-left: 3px solid transparent;
+  }
+  
+  .tab-button.active {
+    border-bottom: 1px solid #e1e5e9;
+    border-left-color: #3b82f6;
+  }
+  
   .files-header {
     flex-direction: column;
     gap: 1rem;
@@ -976,6 +1475,14 @@ onMounted(async () => {
     flex-direction: column;
     gap: 0.5rem;
   }
+  
+  .timer-controls {
+    flex-direction: column;
+  }
+  
+  .time-tracking-section {
+    padding: 1rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -996,6 +1503,10 @@ onMounted(async () => {
 
   .file-actions {
     align-self: center;
+  }
+  
+  .timer-time {
+    font-size: 2rem;
   }
 }
 </style>

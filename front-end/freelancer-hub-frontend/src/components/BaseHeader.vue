@@ -78,7 +78,6 @@ const fields = computed(() => {
   grid-column: 1 / -1; /* ocupa todas as colunas do grid */
   background: #f9f9f9;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   width: 100%;
