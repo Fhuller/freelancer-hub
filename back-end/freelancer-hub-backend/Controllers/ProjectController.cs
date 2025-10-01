@@ -1,8 +1,12 @@
 ﻿using freelancer_hub_backend.DTO_s;
+using freelancer_hub_backend.Models;
 using freelancer_hub_backend.Services;
 using freelancer_hub_backend.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using File = freelancer_hub_backend.Models.File;
 
 namespace freelancer_hub_backend.Controllers
 {
@@ -12,10 +16,17 @@ namespace freelancer_hub_backend.Controllers
     public class ProjectController : ControllerBase
     {
         private readonly IProjectService _projectService;
+        private readonly BlobStorageService _blobStorageService;
+        private readonly FreelancerContext _context;
 
-        public ProjectController(IProjectService projectService)
+        public ProjectController(
+            IProjectService projectService,
+            BlobStorageService blobStorageService,
+            FreelancerContext context)
         {
             _projectService = projectService;
+            _blobStorageService = blobStorageService;
+            _context = context;
         }
 
         [HttpGet]
@@ -90,6 +101,127 @@ namespace freelancer_hub_backend.Controllers
             catch (KeyNotFoundException)
             {
                 return NotFound();
+            }
+        }
+
+        [HttpPost("{projectId}/files")]
+        public async Task<ActionResult<FileDto>> UploadFileToProject(Guid projectId, IFormFile file)
+        {
+            try
+            {
+                // Verificar se o projeto existe
+                var project = await _projectService.GetProjectByIdAsync(projectId);
+                if (project == null)
+                    return NotFound(new { message = "Projeto não encontrado" });
+
+                // Validar arquivo
+                if (file == null || file.Length == 0)
+                    return BadRequest(new { message = "Arquivo inválido" });
+
+                if (file.Length > 10 * 1024 * 1024) // 10MB
+                    return BadRequest(new { message = "Arquivo muito grande. Tamanho máximo: 10MB" });
+
+                // Upload para Azure Blob Storage
+                using var stream = file.OpenReadStream();
+                var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+                var fileUrl = await _blobStorageService.UploadFileAsync(stream, fileName);
+
+                // Criar entidade File
+                var fileEntity = new File
+                {
+                    Id = Guid.NewGuid(),
+                    FileName = Path.GetFileNameWithoutExtension(file.FileName),
+                    FileExtension = Path.GetExtension(file.FileName),
+                    FileUrl = fileUrl,
+                    FileSize = file.Length
+                };
+
+                // Criar relação ProjectFile
+                var projectFile = new ProjectFile
+                {
+                    ProjectId = projectId,
+                    FileId = fileEntity.Id
+                };
+
+                // Salvar no banco
+                await _context.Files.AddAsync(fileEntity);
+                await _context.ProjectFiles.AddAsync(projectFile);
+                await _context.SaveChangesAsync();
+
+                // Retornar DTO
+                var fileDto = new FileDto
+                {
+                    Id = fileEntity.Id,
+                    FileName = fileEntity.FileName,
+                    FileExtension = fileEntity.FileExtension,
+                    FileUrl = fileEntity.FileUrl,
+                    FileSize = fileEntity.FileSize,
+                    CreatedAt = fileEntity.CreatedAt
+                };
+
+                return Ok(fileDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro ao fazer upload do arquivo: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("{projectId}/files")]
+        public async Task<ActionResult<IEnumerable<FileDto>>> GetProjectFiles(Guid projectId)
+        {
+            try
+            {
+                var files = await (from pf in _context.ProjectFiles
+                                   join f in _context.Files on pf.FileId equals f.Id
+                                   where pf.ProjectId == projectId
+                                   select new FileDto
+                                   {
+                                       Id = f.Id,
+                                       FileName = f.FileName,
+                                       FileExtension = f.FileExtension,
+                                       FileUrl = f.FileUrl,
+                                       FileSize = f.FileSize,
+                                       CreatedAt = f.CreatedAt
+                                   }).ToListAsync();
+
+                return Ok(files);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro ao obter arquivos: {ex.Message}" });
+            }
+        }
+
+        [HttpDelete("{projectId}/files/{fileId}")]
+        public async Task<IActionResult> DeleteProjectFile(Guid projectId, Guid fileId)
+        {
+            try
+            {
+                var projectFile = await _context.ProjectFiles
+                    .FirstOrDefaultAsync(pf => pf.ProjectId == projectId && pf.FileId == fileId);
+
+                if (projectFile == null)
+                    return NotFound(new { message = "Arquivo não encontrado no projeto" });
+
+                var file = await _context.Files.FindAsync(fileId);
+                if (file == null)
+                    return NotFound(new { message = "Arquivo não encontrado" });
+
+                // Deletar do Azure Blob Storage
+                var fileName = Path.GetFileName(file.FileUrl);
+                await _blobStorageService.DeleteFileAsync(fileName);
+
+                // Deletar do banco
+                _context.ProjectFiles.Remove(projectFile);
+                _context.Files.Remove(file);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro ao deletar arquivo: {ex.Message}" });
             }
         }
     }
