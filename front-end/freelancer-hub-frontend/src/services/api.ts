@@ -11,17 +11,22 @@ export async function apiFetch(
   const toast = useToast()
   const token = auth.accessToken
 
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+  // Headers base - só adiciona Content-Type se NÃO for FormData
+  const baseHeaders: HeadersInit = {
     'Accept': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {})
+  }
+
+  // Se o body NÃO for FormData, adiciona Content-Type JSON
+  if (!(options.body instanceof FormData)) {
+    baseHeaders['Content-Type'] = 'application/json'
   }
 
   try {
     const response = await fetch(apiUrl + endpoint, {
       ...options,
       headers: {
-        ...headers,
+        ...baseHeaders,
         ...(options.headers || {})
       }
     })
@@ -40,6 +45,12 @@ export async function apiFetch(
         } catch {
           // se não for JSON, ignora
         }
+        
+        // Mensagens mais específicas para erros comuns
+        if (response.status === 415) {
+          message = 'Tipo de mídia não suportado. O servidor não aceitou o formato do arquivo.'
+        }
+        
         toast.error(message)
       }
       throw new Error(`HTTP error: ${response.status}`)

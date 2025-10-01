@@ -1,5 +1,6 @@
 ﻿using freelancer_hub_backend.Models;
 using Microsoft.EntityFrameworkCore;
+using File = freelancer_hub_backend.Models.File;
 
 public class FreelancerContext : DbContext
 {
@@ -10,6 +11,8 @@ public class FreelancerContext : DbContext
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Expense> Expenses { get; set; }
+    public DbSet<File> Files { get; set; }
+    public DbSet<ProjectFile> ProjectFiles { get; set; }
 
     public FreelancerContext(DbContextOptions<FreelancerContext> options)
         : base(options) { }
@@ -26,6 +29,10 @@ public class FreelancerContext : DbContext
 
         modelBuilder.Entity<Payment>()
             .Property(p => p.Amount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<File>()
+            .Property(p => p.FileSize)
             .HasPrecision(18, 2);
 
         base.OnModelCreating(modelBuilder);

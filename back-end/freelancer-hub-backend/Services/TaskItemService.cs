@@ -159,10 +159,6 @@ namespace freelancer_hub_backend.Services
             if (!validStatuses.Contains(dto.Status))
                 throw new ArgumentException($"Status inválido. Valores aceitos: {string.Join(", ", validStatuses)}");
 
-            // Validar data de vencimento
-            if (dto.DueDate.HasValue && dto.DueDate.Value.Date < DateTime.Today)
-                throw new ArgumentException("A data de vencimento não pode ser anterior à data atual.");
-
             // Validar tamanho do título
             if (dto.Title.Length > 200)
                 throw new ArgumentException("O título não pode ter mais de 200 caracteres.");

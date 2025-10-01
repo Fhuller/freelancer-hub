@@ -5,7 +5,8 @@ import { useToast } from 'vue-toast-notification'
 
 const props = defineProps<{
   visible: boolean
-  model: Record<string, any>
+  modelValues: Record<string, any>
+  modelDisplay: Record<string, any> 
   modelName?: string
   onSave: (data: Record<string, any>) => Promise<void> | void
 }>()
@@ -16,9 +17,18 @@ const { t } = useI18n()
 
 const formData = reactive<Record<string, any>>({})
 
+function formatDateForInput(value: Date | string | undefined): string {
+  if (!value) return ''
+  const d = typeof value === 'string' ? new Date(value) : value
+  if (!(d instanceof Date) || isNaN(d.getTime())) return ''
+  return d.toISOString().split('T')[0]
+}
+
 watchEffect(() => {
-  if (props.visible && props.model) {
-    Object.keys(props.model).forEach(k => formData[k] = props.model[k])
+  if (props.visible && props.modelValues) {
+    Object.keys(props.modelValues).forEach(k => {
+      formData[k] = props.modelValues[k]
+    })
   }
 })
 
@@ -29,12 +39,11 @@ function resetForm() {
 async function handleSave() {
   try {
     await props.onSave({ ...formData })
-    toast.success(t('saved') || 'Salvo com sucesso!')
+    toast.success(t('saved'))
     resetForm()
     emit('close')
   } catch (err) {
     console.error(err)
-    toast.error(t('errorSaving') || 'Erro ao salvar')
   }
 }
 </script>
@@ -45,17 +54,45 @@ async function handleSave() {
       <h3 class="modal-title">{{ t(modelName || 'edit') }}</h3>
 
       <div class="modal-body">
-        <div v-for="(value, key) in formData" :key="key" class="field">
+        <div
+          v-for="(mockValue, key) in modelDisplay"
+          :key="key"
+          class="field"
+        >
           <label :for="key">{{ t(key) }}</label>
 
-          <template v-if="typeof value === 'boolean'">
+          <template v-if="typeof mockValue === 'boolean'">
             <input type="checkbox" :id="key" v-model="formData[key]" />
           </template>
-          <template v-else-if="typeof value === 'number'">
+
+          <template v-else-if="typeof mockValue === 'number'">
             <input type="number" :id="key" v-model.number="formData[key]" />
           </template>
+
+          <template v-else-if="mockValue instanceof Date">
+            <input
+              type="date"
+              :id="key"
+              :value="formatDateForInput(formData[key])"
+              @input="formData[key] = ($event.target as HTMLInputElement).value"
+            />
+          </template>
+
+          <template v-else-if="Array.isArray(mockValue)">
+            <select :id="key" v-model="formData[key]">
+              <option v-for="option in mockValue" :key="option" :value="option">
+                {{ option }}
+              </option>
+            </select>
+          </template>
+
           <template v-else>
-            <input type="text" :id="key" v-model="formData[key]" />
+            <input
+              type="text"
+              :id="key"
+              v-model="formData[key]"
+              :placeholder="mockValue"
+            />
           </template>
         </div>
       </div>
@@ -141,4 +178,39 @@ async function handleSave() {
 .save-btn:hover {
   opacity: 0.9;
 }
+
+.field select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-gray);
+  border-radius: 4px;
+  background-color: var(--color-white);
+  font-size: 14px;
+  color: var(--color-dark-gray);
+  cursor: pointer;
+}
+
+.field select:focus {
+  outline: none;
+  border-color: var(--color-purple);
+  box-shadow: 0 0 0 2px rgba(128, 90, 213, 0.2); /* roxo suave */
+}
+
+.field input[type='date'] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-gray);
+  border-radius: 4px;
+  background-color: var(--color-white);
+  font-size: 14px;
+  color: var(--color-dark-gray);
+  cursor: pointer;
+}
+
+.field input[type='date']:focus {
+  outline: none;
+  border-color: var(--color-purple);
+  box-shadow: 0 0 0 2px rgba(128, 90, 213, 0.2);
+}
+
 </style>

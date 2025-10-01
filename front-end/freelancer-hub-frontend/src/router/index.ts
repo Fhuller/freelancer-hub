@@ -10,10 +10,11 @@ import Login from '../views/Login.vue'
 import Dashboard from '../views/Dashboard.vue'
 import Clients from '../views/Clients.vue'
 import Client from '../views/Client.vue'
+import ClientProject from '../views/ClientProject.vue'
 import Finance from '../views/Finance.vue'
 import ResetPassword from '../views/ResetPassword.vue'
 import Reports from '../views/Reports.vue'
-  
+
 const toast = useToast()
 const router = createRouter({
   history: createWebHistory(),
@@ -26,6 +27,13 @@ const router = createRouter({
     { path: '/app/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/app/clients', name: 'Clients', component: Clients, meta: { requiresAuth: true } },
     { path: '/app/clients/:id', name: 'Client', component: Client, meta: { requiresAuth: true }, props: true },
+    {
+      path: '/app/clients/:id/projects/:projectId',
+      name: 'ClientProject',
+      component: ClientProject,
+      meta: { requiresAuth: true },
+      props: true
+    },
     { path: '/app/finance', name: 'Finance', component: Finance, meta: { requiresAuth: true } },
     { path: '/app/reports', name: 'Reports', component: Reports, meta: { requiresAuth: true } },
     { path: '/:pathMatch(.*)*', redirect: '/' }
@@ -51,6 +59,5 @@ router.beforeEach(async (to, from, next) => {
 
   next()
 })
-
 
 export default router

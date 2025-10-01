@@ -17,7 +17,7 @@ defineProps<{
   border-radius: 8px;
   padding: 30px;
   box-shadow: var(--shadow-default);
-  height: 80vh;
+  min-height: 80vh;
   overflow: auto;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

@@ -9,11 +9,14 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  AZURE_STORAGE_CONNECTIONSTRING: ${{ secrets.AZURE_STORAGE_CONNECTIONSTRING }}
+
 jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -39,8 +42,8 @@ jobs:
     runs-on: windows-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact from build job
@@ -62,4 +65,3 @@ jobs:
           app-name: 'freelancer-hub-backend'
           slot-name: 'Production'
           package: .
-          
