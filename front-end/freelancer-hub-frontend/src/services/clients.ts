@@ -8,7 +8,7 @@ export interface ClientReadDto {
   notes: string;
   companyName?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface ClientCreateDto {
