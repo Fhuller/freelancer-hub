@@ -118,6 +118,7 @@ async function saveNewClient(data: Record<string, any>) {
 }
 
 onMounted(() => {
+  console.log('teste')
   loadClients();
 });
 </script>
