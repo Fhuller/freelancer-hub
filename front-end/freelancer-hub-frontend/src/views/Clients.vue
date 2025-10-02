@@ -30,11 +30,11 @@ const clientTemplate: ClientCreateDto = {
 
 function getclientTemplateDisplay() {
   return {
-    name: t('clientNamePlaceholder'),
-    email: t('clientEmailPlaceholder'),
-    phone: t('clientPhonePlaceholder'),
-    companyName: t('clientCompanyPlaceholder'),
-    notes: t('clientNotesPlaceholder')
+    name: t('clientNamePlaceholder') || 'Nome do cliente',
+    email: t('clientEmailPlaceholder') || 'Email',
+    phone: t('clientPhonePlaceholder') || 'Telefone',
+    companyName: t('clientCompanyPlaceholder') || 'Empresa',
+    notes: t('clientNotesPlaceholder') || 'Observações'
   }
 }
 
@@ -120,7 +120,11 @@ async function saveNewClient(data: Record<string, any>) {
 
 onMounted(() => {
   console.log('teste')
-  loadClients();
+  try {
+    loadClients();
+  } catch (err) {
+    console.error('Erro no mounted:', err);
+  }
 });
 </script>
 
