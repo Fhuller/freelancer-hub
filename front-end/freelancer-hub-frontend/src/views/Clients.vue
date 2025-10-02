@@ -46,6 +46,7 @@ async function loadClients() {
   } catch (err) {
     console.error('Erro ao carregar clientes:', err);
     error.value = t('errorLoadingClients');
+    isLoadingClients.value = false;
   } finally {
     isLoadingClients.value = false;
   }
