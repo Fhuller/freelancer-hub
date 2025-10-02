@@ -22,7 +22,7 @@
   "clientUpdated": "Client updated successfully",
   "clientDeleted": "Client deleted successfully",
   "clientNamePlaceholder": "Client Name",
-  "clientEmailPlaceholder": "email@example.com",
+  "clientEmailPlaceholder": "{'email@example.com'}",
   "clientPhonePlaceholder": "(555) 123-4567",
   "clientCompanyPlaceholder": "Example Company",
   "clientNotesPlaceholder": "Notes about the client",

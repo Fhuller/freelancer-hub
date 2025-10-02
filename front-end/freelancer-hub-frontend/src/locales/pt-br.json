@@ -23,7 +23,7 @@
   "clientUpdated": "Cliente atualizado com sucesso",
   "clientDeleted": "Cliente excluído com sucesso",
   "clientNamePlaceholder": "Nome do Cliente",
-  "clientEmailPlaceholder": "email@exemplo.com",
+  "clientEmailPlaceholder": "{'email@exemplo.com'}",
   "clientPhonePlaceholder": "(11) 99999-9999",
   "clientCompanyPlaceholder": "Empresa Exemplo",
   "clientNotesPlaceholder": "Observações sobre o cliente",
