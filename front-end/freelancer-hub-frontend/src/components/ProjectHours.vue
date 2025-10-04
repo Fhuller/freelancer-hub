@@ -26,14 +26,14 @@
       <div class="time-card timer-section">
         <h4 class="card-title">
           <i class="fas fa-stopwatch"></i>
-          Timer
+          Timer de Trabalho
         </h4>
         <div class="timer-container">
           <div class="timer">
             <div class="timer-time">{{ formattedTime }}</div>
             <div class="timer-hours" v-if="!editingTime">
               <span>{{ totalHours }} horas</span>
-              <button class="edit-time-button" @click="editTime" title="Editar horas">
+              <button class="edit-time-button" @click="startEditingTime" title="Editar horas">
                 <i class="fas fa-edit"></i>
               </button>
             </div>
@@ -44,15 +44,16 @@
                 step="0.01" 
                 min="0"
                 class="time-input"
-                @keyup.enter="saveTime"
-                @keyup.escape="cancelEditTime"
+                @keyup.enter="saveTimeEdit"
+                @keyup.escape="cancelTimeEdit"
+                placeholder="0.00"
               />
               <span>horas</span>
               <div class="edit-actions">
-                <button class="save-time-button" @click="saveTime" title="Salvar">
+                <button class="save-time-button" @click="saveTimeEdit" title="Salvar">
                   <i class="fas fa-check"></i>
                 </button>
-                <button class="cancel-time-button" @click="cancelEditTime" title="Cancelar">
+                <button class="cancel-time-button" @click="cancelTimeEdit" title="Cancelar">
                   <i class="fas fa-times"></i>
                 </button>
               </div>
@@ -64,6 +65,7 @@
               class="timer-button play-pause-button" 
               :class="{ 'paused': !isTimerRunning }"
               @click="toggleTimer"
+              :disabled="editingTime"
             >
               <i :class="isTimerRunning ? 'fas fa-pause' : 'fas fa-play'"></i>
               {{ isTimerRunning ? 'Pausar' : 'Iniciar' }}
@@ -71,52 +73,20 @@
             <button 
               class="timer-button reset-button" 
               @click="resetTimer"
-              :disabled="totalSeconds === 0"
+              :disabled="totalSeconds === 0 || editingTime"
             >
               <i class="fas fa-redo"></i>
               Reiniciar
             </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Horas Manuais -->
-      <div class="time-card manual-hours-section">
-        <h4 class="card-title">
-          <i class="fas fa-plus-circle"></i>
-          Adicionar Horas Manualmente
-        </h4>
-        <div class="manual-hours-form">
-          <div class="form-group">
-            <label for="manualHours">Horas:</label>
-            <input
-              id="manualHours"
-              v-model="manualHours"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="Ex: 2.5"
-              class="form-input"
+            <button 
+              class="timer-button save-button" 
+              @click="saveTimerHours"
+              :disabled="(totalSeconds === 0 && !editingTime) || isTimerRunning"
             >
+              <i class="fas fa-save"></i>
+              Salvar Horas
+            </button>
           </div>
-          <div class="form-group">
-            <label for="manualDescription">Descrição (opcional):</label>
-            <input
-              id="manualDescription"
-              v-model="manualDescription"
-              type="text"
-              placeholder="Descreva o trabalho realizado"
-              class="form-input"
-            >
-          </div>
-          <button 
-            class="add-hours-button"
-            @click="addManualHours"
-            :disabled="!manualHours || parseFloat(manualHours) <= 0"
-          >
-            <i class="fas fa-plus"></i>
-            Adicionar Horas
-          </button>
         </div>
       </div>
 
@@ -187,7 +157,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits } from 'vue'
+import { ref, computed, defineProps, defineEmits, onUnmounted, watch } from 'vue'
 import { formatCurrency } from '../services/projects'
 
 const props = defineProps<{
@@ -210,11 +180,9 @@ const isTimerRunning = ref(false)
 const totalSeconds = ref(0)
 const timerInterval = ref<NodeJS.Timeout | null>(null)
 const editingTime = ref(false)
-const tempHours = ref('0')
+const tempHours = ref('')
 
-// Variáveis para horas manuais
-const manualHours = ref('')
-const manualDescription = ref('')
+// Variáveis para edição da taxa horária
 const editingHourlyRate = ref(false)
 const tempHourlyRate = ref('')
 
@@ -244,22 +212,38 @@ const projectTotalEarned = computed(() => {
   return projectTotalHours.value * projectHourlyRate.value
 })
 
+// Watch para limpar mensagens de erro/sucesso quando mudar
+watch(() => props.hoursError, (newError) => {
+  if (!newError) return
+  // Auto-hide error after 5 seconds
+  setTimeout(() => {
+    if (props.hoursError === newError) {
+      // Você pode emitir um evento para limpar o erro ou deixar o pai controlar
+    }
+  }, 5000)
+})
+
+watch(() => props.hoursSuccess, (newSuccess) => {
+  if (!newSuccess) return
+  // Auto-hide success after 3 seconds
+  setTimeout(() => {
+    if (props.hoursSuccess === newSuccess) {
+      // Você pode emitir um evento para limpar o sucesso ou deixar o pai controlar
+    }
+  }, 3000)
+})
+
 // Funções do timer
 function toggleTimer() {
   if (isTimerRunning.value) {
-    // Pausar e salvar horas automaticamente
+    // Pausar timer
     if (timerInterval.value) {
       clearInterval(timerInterval.value)
       timerInterval.value = null
     }
     isTimerRunning.value = false
-    
-    // Salvar horas automaticamente quando pausar
-    if (parseFloat(totalHours.value) > 0) {
-      emit('save-timer-hours')
-    }
   } else {
-    // Iniciar
+    // Iniciar timer
     timerInterval.value = setInterval(() => {
       totalSeconds.value += 1
     }, 1000)
@@ -274,22 +258,43 @@ function resetTimer() {
   }
   isTimerRunning.value = false
   totalSeconds.value = 0
+  editingTime.value = false
 }
 
-function editTime() {
+function saveTimerHours() {
+  if (editingTime.value) {
+    // Se está editando, salva a edição primeiro
+    saveTimeEdit()
+  }
+  
+  const hoursToSave = parseFloat(totalHours.value)
+  if (hoursToSave > 0) {
+    // Usa o evento add-manual-hours para salvar as horas do timer
+    emit('add-manual-hours', hoursToSave, 'Horas trabalhadas via timer')
+    // Resetar o timer após salvar
+    resetTimer()
+  }
+}
+
+// Funções de edição de tempo
+function startEditingTime() {
+  // Pausar o timer ao editar
+  if (isTimerRunning.value) {
+    toggleTimer()
+  }
   editingTime.value = true
   tempHours.value = totalHours.value
 }
 
-function saveTime() {
+function saveTimeEdit() {
   const hours = parseFloat(tempHours.value)
   if (!isNaN(hours) && hours >= 0) {
     totalSeconds.value = Math.round(hours * 3600)
+    editingTime.value = false
   }
-  editingTime.value = false
 }
 
-function cancelEditTime() {
+function cancelTimeEdit() {
   editingTime.value = false
   tempHours.value = totalHours.value
 }
@@ -304,16 +309,6 @@ function cancelEditHourlyRate() {
   tempHourlyRate.value = projectHourlyRate.value.toString()
 }
 
-function addManualHours() {
-  const hours = parseFloat(manualHours.value)
-  if (isNaN(hours) || hours <= 0) {
-    return
-  }
-  emit('add-manual-hours', hours, manualDescription.value || 'Horas adicionadas manualmente')
-  manualHours.value = ''
-  manualDescription.value = ''
-}
-
 function updateHourlyRate() {
   const newRate = parseFloat(tempHourlyRate.value)
   if (isNaN(newRate) || newRate < 0) {
@@ -322,6 +317,13 @@ function updateHourlyRate() {
   emit('update-hourly-rate', newRate)
   editingHourlyRate.value = false
 }
+
+// Cleanup do timer quando o componente for destruído
+onUnmounted(() => {
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value)
+  }
+})
 </script>
 
 <style scoped>
@@ -388,7 +390,7 @@ function updateHourlyRate() {
 
 /* Timer Section */
 .timer-section {
-  grid-column: 1 / -1;
+  grid-column: 1;
 }
 
 .timer-container {
@@ -488,6 +490,7 @@ function updateHourlyRate() {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .timer-button {
@@ -531,68 +534,14 @@ function updateHourlyRate() {
   border-color: rgba(239, 68, 68, 0.5);
 }
 
-.manual-hours-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-weight: 600;
-  color: #374151;
-  font-size: 0.875rem;
-}
-
-.form-input {
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.add-hours-button {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.add-hours-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-}
-
-.add-hours-button:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+.save-button {
+  background: rgba(168, 85, 247, 0.7);
+  border-color: rgba(168, 85, 247, 0.5);
 }
 
 /* Summary Section */
 .summary-section {
-  grid-column: 1 / -1;
+  grid-column: 2;
 }
 
 .hourly-rate-section {
@@ -786,12 +735,17 @@ function updateHourlyRate() {
     padding: 1rem;
   }
   
-  .timer-controls {
-    flex-direction: column;
-  }
-  
   .time-content {
     grid-template-columns: 1fr;
+  }
+  
+  .timer-section,
+  .summary-section {
+    grid-column: 1;
+  }
+  
+  .timer-controls {
+    flex-direction: column;
   }
   
   .summary-stats {
