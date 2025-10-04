@@ -90,6 +90,81 @@ namespace freelancer_hub_backend.Controllers
             }
         }
 
+        [HttpPut("{projectId}/hours")]
+        public async Task<ActionResult<ProjectHoursSummaryDto>> UpdateProjectHours(
+            Guid projectId,
+            UpdateProjectHoursDto dto)
+        {
+            try
+            {
+                var project = await _context.Projects.FindAsync(projectId);
+                if (project == null)
+                    return NotFound(new { message = "Projeto não encontrado" });
+
+                if (dto.TotalHours.HasValue)
+                {
+                    project.TotalHours = dto.TotalHours.Value;
+                }
+
+                if (dto.HoursToAdd.HasValue)
+                {
+                    project.TotalHours += dto.HoursToAdd.Value;
+                }
+
+                if (dto.HourlyRate.HasValue)
+                {
+                    project.HourlyRate = dto.HourlyRate.Value;
+                }
+
+                await _context.SaveChangesAsync();
+
+                var summary = new ProjectHoursSummaryDto
+                {
+                    ProjectId = project.Id,
+                    ProjectTitle = project.Title,
+                    TotalHours = project.TotalHours,
+                    HourlyRate = project.HourlyRate,
+                    TotalEarned = project.TotalHours * project.HourlyRate,
+                    LastUpdated = DateTime.UtcNow
+                };
+
+                return Ok(summary);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro ao atualizar horas do projeto: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("{projectId}/hours-summary")]
+        public async Task<ActionResult<ProjectHoursSummaryDto>> GetProjectHoursSummary(Guid projectId)
+        {
+            try
+            {
+                var project = await _context.Projects
+                    .Where(p => p.Id == projectId)
+                    .Select(p => new ProjectHoursSummaryDto
+                    {
+                        ProjectId = p.Id,
+                        ProjectTitle = p.Title,
+                        TotalHours = p.TotalHours,
+                        HourlyRate = p.HourlyRate,
+                        TotalEarned = p.TotalHours * p.HourlyRate,
+                        LastUpdated = DateTime.UtcNow
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (project == null)
+                    return NotFound(new { message = "Projeto não encontrado" });
+
+                return Ok(project);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro ao obter resumo de horas: {ex.Message}" });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProject(Guid id)
         {
