@@ -97,6 +97,7 @@ async function loadHoursSummary() {
     if (project.value && hoursSummary.value) {
       project.value.totalHours = hoursSummary.value.totalHours
       project.value.hourlyRate = hoursSummary.value.hourlyRate
+      project.value.totalEarned = hoursSummary.value.totalEarned
     }
   } catch (err: any) {
     console.error('Erro ao carregar resumo de horas:', err)
@@ -435,6 +436,7 @@ onMounted(async () => {
   await loadProject()
   await loadTasks()
   await loadFiles()
+  await loadHoursSummary()
   // Não carregar horas summary aqui - será carregado quando a aba for ativada
 })
 </script>
