@@ -108,7 +108,8 @@ async function saveProject(data: Record<string, any>) {
       title: data.title,
       description: data.description || '',
       status: data.status,
-      dueDate: data.dueDate || undefined
+      dueDate: data.dueDate || undefined,
+      hourlyRate: 0
     })
   }
   await loadProjects()
