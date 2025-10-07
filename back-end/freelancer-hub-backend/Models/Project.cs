@@ -10,5 +10,7 @@
         public string Status { get; set; } = "pendente";
         public DateTime DueDate { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public decimal HourlyRate { get; set; } = 0;
+        public decimal TotalHours { get; set; } = 0;
     }
 }

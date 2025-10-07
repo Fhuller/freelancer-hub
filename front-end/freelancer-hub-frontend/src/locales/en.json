@@ -28,5 +28,8 @@
   "clientNotesPlaceholder": "Notes about the client",
   "ProjectCreateDto": "New Project",
   "projectTitlePlaceholder": "Project title",
-  "projectDescriptionPlaceholder": "Brief description"
+  "projectDescriptionPlaceholder": "Brief description",
+  "hourlyRate": "Hourly Rate",
+  "totalHours": "Total Hours",
+  "totalEarned": "Total Earned"
 }

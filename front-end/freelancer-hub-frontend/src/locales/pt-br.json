@@ -31,5 +31,8 @@
   "accountCreatedConfirmationSent": "Cadastro realizado com sucesso, um email de confirmação de conta foi enviado!",
   "ProjectCreateDto": "Novo Projeto",
   "projectTitlePlaceholder": "Título do Projeto",
-  "projectDescriptionPlaceholder": "Descrição breve"
+  "projectDescriptionPlaceholder": "Descrição breve",
+  "hourlyRate": "Taxa Horária",
+  "totalHours": "Total de Horas",
+  "totalEarned": "Valor Total"
 }
