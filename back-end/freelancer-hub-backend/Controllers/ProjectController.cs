@@ -91,9 +91,7 @@ namespace freelancer_hub_backend.Controllers
         }
 
         [HttpPut("{projectId}/hours")]
-        public async Task<ActionResult<ProjectHoursSummaryDto>> UpdateProjectHours(
-            Guid projectId,
-            UpdateProjectHoursDto dto)
+        public async Task<ActionResult<ProjectHoursSummaryDto>> UpdateProjectHours(Guid projectId, UpdateProjectHoursDto dto)
         {
             try
             {
@@ -103,17 +101,23 @@ namespace freelancer_hub_backend.Controllers
 
                 if (dto.TotalHours.HasValue)
                 {
-                    project.TotalHours = dto.TotalHours.Value;
+                    project.TotalHours = dto.TotalHours.Value >= 0 ? dto.TotalHours.Value : 0;
                 }
 
                 if (dto.HoursToAdd.HasValue)
                 {
-                    project.TotalHours += dto.HoursToAdd.Value;
+                    var hoursToAdd = dto.HoursToAdd.Value;
+                    project.TotalHours += hoursToAdd;
                 }
 
                 if (dto.HourlyRate.HasValue)
                 {
-                    project.HourlyRate = dto.HourlyRate.Value;
+                    project.HourlyRate = dto.HourlyRate.Value >= 0 ? dto.HourlyRate.Value : project.HourlyRate;
+                }
+
+                if (project.TotalHours < 0)
+                {
+                    project.TotalHours = 0;
                 }
 
                 await _context.SaveChangesAsync();

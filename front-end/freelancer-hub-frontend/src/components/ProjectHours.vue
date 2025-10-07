@@ -38,26 +38,25 @@
               </button>
             </div>
             <div class="timer-edit" v-else>
-              <input 
-                v-model="tempHours" 
-                type="number" 
-                step="0.01" 
-                min="0"
-                class="time-input"
-                @keyup.enter="saveTimeEdit"
-                @keyup.escape="cancelTimeEdit"
-                placeholder="0.00"
-              />
-              <span>horas</span>
-              <div class="edit-actions">
-                <button class="save-time-button" @click="saveTimeEdit" title="Salvar">
-                  <i class="fas fa-check"></i>
-                </button>
-                <button class="cancel-time-button" @click="cancelTimeEdit" title="Cancelar">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
+            <input 
+              v-model="tempHours" 
+              type="number" 
+              step="0.01" 
+              class="time-input"
+              @keyup.enter="saveTimeEdit"
+              @keyup.escape="cancelTimeEdit"
+              placeholder="0.00"
+            />
+            <span>horas</span>
+            <div class="edit-actions">
+              <button class="save-time-button" @click="saveTimeEdit" title="Salvar">
+                <i class="fas fa-check"></i>
+              </button>
+              <button class="cancel-time-button" @click="cancelTimeEdit" title="Cancelar">
+                <i class="fas fa-times"></i>
+              </button>
             </div>
+          </div>
           </div>
 
           <div class="timer-controls">
@@ -263,15 +262,12 @@ function resetTimer() {
 
 function saveTimerHours() {
   if (editingTime.value) {
-    // Se está editando, salva a edição primeiro
     saveTimeEdit()
   }
   
   const hoursToSave = parseFloat(totalHours.value)
-  if (hoursToSave > 0) {
-    // Usa o evento add-manual-hours para salvar as horas do timer
+  if (!isNaN(hoursToSave)) { // Removida a verificação de horasToSave > 0
     emit('add-manual-hours', hoursToSave, 'Horas trabalhadas via timer')
-    // Resetar o timer após salvar
     resetTimer()
   }
 }
@@ -288,7 +284,7 @@ function startEditingTime() {
 
 function saveTimeEdit() {
   const hours = parseFloat(tempHours.value)
-  if (!isNaN(hours) && hours >= 0) {
+  if (!isNaN(hours)) { // Removida a verificação de horas >= 0
     totalSeconds.value = Math.round(hours * 3600)
     editingTime.value = false
   }
