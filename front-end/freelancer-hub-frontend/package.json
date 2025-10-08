@@ -16,6 +16,7 @@
     "@fortawesome/fontawesome-free": "^7.0.1",
     "@supabase/supabase-js": "^2.56.0",
     "flag-icons": "^7.5.0",
+    "html2pdf.js": "^0.12.1",
     "pinia": "^3.0.3",
     "vue": "^3.5.13",
     "vue-i18n": "^11.1.11",

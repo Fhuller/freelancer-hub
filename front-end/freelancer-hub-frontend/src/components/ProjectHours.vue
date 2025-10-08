@@ -21,6 +21,17 @@
       {{ hoursSuccess }}
     </div>
 
+    <!-- Mensagens específicas para invoices -->
+    <div v-if="invoiceError" class="error-message invoice-error">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ invoiceError }}
+    </div>
+
+    <div v-if="invoiceSuccess" class="success-message invoice-success">
+      <i class="fas fa-check-circle"></i>
+      {{ invoiceSuccess }}
+    </div>
+
     <div class="time-content">
       <!-- Timer -->
       <div class="time-card timer-section">
@@ -145,6 +156,21 @@
             <div class="stat-label">Valor Total</div>
           </div>
         </div>
+
+        <!-- Botão para gerar invoice -->
+        <div class="invoice-section">
+          <button 
+            class="invoice-button" 
+            @click="generateInvoiceWithPdf"
+            :disabled="isGeneratingInvoice || projectTotalEarned <= 0"
+          >
+            <i class="fas fa-file-invoice-dollar"></i>
+            {{ isGeneratingInvoice ? 'Gerando Invoice...' : 'Gerar Invoice com PDF' }}
+          </button>
+          <p class="invoice-help">
+            Gere um invoice com o valor total de <strong>{{ formatCurrency(projectTotalEarned) }}</strong>
+          </p>
+        </div>
       </div>
     </div>
 
@@ -152,12 +178,95 @@
       <i class="fas fa-spinner fa-spin"></i>
       Carregando dados de horas...
     </div>
+
+    <!-- Template oculto para geração do PDF -->
+    <div v-if="false" class="pdf-template" id="invoice-pdf-template" ref="pdfTemplate">
+      <div class="invoice-pdf">
+        <div class="pdf-header">
+          <div class="company-info">
+            <h2>{{ companyName }}</h2>
+            <p>{{ companyAddress }}</p>
+            <p>{{ companyContact }}</p>
+          </div>
+          <div class="invoice-title">
+            <h1>FATURA</h1>
+            <p class="invoice-number">Nº: {{ currentInvoiceNumber }}</p>
+          </div>
+        </div>
+
+        <div class="pdf-client-info">
+          <div class="client-section">
+            <h3>Cliente</h3>
+            <p><strong>Nome:</strong> {{ clientName }}</p>
+            <p><strong>Email:</strong> {{ clientEmail }}</p>
+          </div>
+          <div class="invoice-details">
+            <h3>Detalhes da Fatura</h3>
+            <p><strong>Data de Emissão:</strong> {{ invoiceIssueDate }}</p>
+            <p><strong>Data de Vencimento:</strong> {{ invoiceDueDate }}</p>
+            <p><strong>Status:</strong> {{ invoiceStatus }}</p>
+          </div>
+        </div>
+
+        <div class="pdf-project-info">
+          <h3>Projeto</h3>
+          <p><strong>Nome do Projeto:</strong> {{ projectName }}</p>
+          <p><strong>Descrição:</strong> {{ projectDescription }}</p>
+        </div>
+
+        <div class="pdf-items">
+          <h3>Itens da Fatura</h3>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Descrição</th>
+                <th>Quantidade</th>
+                <th>Taxa</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Serviços de desenvolvimento - {{ projectName }}</td>
+                <td>{{ projectTotalHours.toFixed(2) }} horas</td>
+                <td>{{ formatCurrency(projectHourlyRate) }}/h</td>
+                <td>{{ formatCurrency(projectTotalEarned) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pdf-summary">
+          <div class="summary-total">
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <span>{{ formatCurrency(projectTotalEarned) }}</span>
+            </div>
+            <div class="total-row">
+              <span>Taxas:</span>
+              <span>{{ formatCurrency(0) }}</span>
+            </div>
+            <div class="total-row grand-total">
+              <span><strong>TOTAL:</strong></span>
+              <span><strong>{{ formatCurrency(projectTotalEarned) }}</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdf-footer">
+          <p><strong>Observações:</strong></p>
+          <p>Esta fatura refere-se aos serviços prestados no período indicado. Pagamento devido em {{ invoiceDueDate }}.</p>
+          <p class="thank-you">Obrigado pelo seu negócio!</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted, watch } from 'vue'
 import { formatCurrency } from '../services/projects'
+import { createInvoice, updateInvoice } from '../services/invoices'
 
 const props = defineProps<{
   project: any
@@ -185,6 +294,17 @@ const tempHours = ref('')
 const editingHourlyRate = ref(false)
 const tempHourlyRate = ref('')
 
+// Variáveis para geração de invoice
+const isGeneratingInvoice = ref(false)
+const invoiceError = ref('')
+const invoiceSuccess = ref('')
+const pdfTemplate = ref<HTMLElement | null>(null)
+
+// Informações da empresa (pode ser movido para configurações)
+const companyName = ref('Sua Empresa Ltda')
+const companyAddress = ref('Rua Exemplo, 123 - Cidade - Estado - CEP 12345-678')
+const companyContact = ref('contato@suaempresa.com - (11) 99999-9999')
+
 // Computed para formatar o tempo
 const formattedTime = computed(() => {
   const hours = Math.floor(totalSeconds.value / 3600)
@@ -211,6 +331,29 @@ const projectTotalEarned = computed(() => {
   return projectTotalHours.value * projectHourlyRate.value
 })
 
+// Computed para dados do cliente e projeto
+const clientName = computed(() => {
+  return props.project?.client?.name || 'Cliente'
+})
+
+const clientEmail = computed(() => {
+  return props.project?.client?.email || 'cliente@email.com'
+})
+
+const projectName = computed(() => {
+  return props.project?.name || 'Projeto'
+})
+
+const projectDescription = computed(() => {
+  return props.project?.description || 'Serviços de desenvolvimento'
+})
+
+// Variáveis para o PDF
+const currentInvoiceNumber = ref(`INV-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`)
+const invoiceIssueDate = ref(new Date().toLocaleDateString('pt-BR'))
+const invoiceDueDate = ref(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'))
+const invoiceStatus = ref('Pendente')
+
 // Watch para limpar mensagens de erro/sucesso quando mudar
 watch(() => props.hoursError, (newError) => {
   if (!newError) return
@@ -231,6 +374,315 @@ watch(() => props.hoursSuccess, (newSuccess) => {
     }
   }, 3000)
 })
+
+// Função para gerar PDF usando window.print() como alternativa
+async function generatePdf() {
+  return new Promise((resolve) => {
+    // Criar um novo elemento para o PDF
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      resolve(null)
+      return
+    }
+
+    // Conteúdo HTML do PDF
+    const pdfContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Fatura ${currentInvoiceNumber.value}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+          }
+          .invoice-pdf {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+          }
+          .pdf-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+          }
+          .company-info h2 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 18px;
+          }
+          .company-info p {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #666;
+          }
+          .invoice-title h1 {
+            margin: 0;
+            color: #333;
+            font-size: 24px;
+            text-align: right;
+          }
+          .invoice-number {
+            margin: 10px 0 0 0;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: right;
+          }
+          .pdf-client-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+          }
+          .client-section h3, .invoice-details h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+          }
+          .client-section p, .invoice-details p {
+            margin: 8px 0;
+            font-size: 14px;
+          }
+          .pdf-project-info {
+            margin-bottom: 30px;
+          }
+          .pdf-project-info h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+          }
+          .pdf-project-info p {
+            margin: 8px 0;
+            font-size: 14px;
+          }
+          .pdf-items {
+            margin-bottom: 30px;
+          }
+          .pdf-items h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+          }
+          .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+          }
+          .items-table th {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+          }
+          .items-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+          }
+          .pdf-summary {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 30px;
+          }
+          .summary-total {
+            width: 300px;
+          }
+          .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+          }
+          .grand-total {
+            border-top: 2px solid #333;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-size: 16px;
+          }
+          .pdf-footer {
+            border-top: 2px solid #333;
+            padding-top: 20px;
+            font-size: 12px;
+          }
+          .pdf-footer p {
+            margin: 8px 0;
+          }
+          .thank-you {
+            text-align: center;
+            font-style: italic;
+            margin-top: 30px !important;
+            color: #666;
+          }
+          @media print {
+            body { margin: 0; }
+            .invoice-pdf { box-shadow: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-pdf">
+          <div class="pdf-header">
+            <div class="company-info">
+              <h2>${companyName.value}</h2>
+              <p>${companyAddress.value}</p>
+              <p>${companyContact.value}</p>
+            </div>
+            <div class="invoice-title">
+              <h1>FATURA</h1>
+              <p class="invoice-number">Nº: ${currentInvoiceNumber.value}</p>
+            </div>
+          </div>
+
+          <div class="pdf-client-info">
+            <div class="client-section">
+              <h3>Cliente</h3>
+              <p><strong>Nome:</strong> ${clientName.value}</p>
+              <p><strong>Email:</strong> ${clientEmail.value}</p>
+            </div>
+            <div class="invoice-details">
+              <h3>Detalhes da Fatura</h3>
+              <p><strong>Data de Emissão:</strong> ${invoiceIssueDate.value}</p>
+              <p><strong>Data de Vencimento:</strong> ${invoiceDueDate.value}</p>
+              <p><strong>Status:</strong> ${invoiceStatus.value}</p>
+            </div>
+          </div>
+
+          <div class="pdf-project-info">
+            <h3>Projeto</h3>
+            <p><strong>Nome do Projeto:</strong> ${projectName.value}</p>
+            <p><strong>Descrição:</strong> ${projectDescription.value}</p>
+          </div>
+
+          <div class="pdf-items">
+            <h3>Itens da Fatura</h3>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Quantidade</th>
+                  <th>Taxa</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Serviços de desenvolvimento - ${projectName.value}</td>
+                  <td>${projectTotalHours.value.toFixed(2)} horas</td>
+                  <td>${formatCurrency(projectHourlyRate.value)}/h</td>
+                  <td>${formatCurrency(projectTotalEarned.value)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pdf-summary">
+            <div class="summary-total">
+              <div class="total-row">
+                <span>Subtotal:</span>
+                <span>${formatCurrency(projectTotalEarned.value)}</span>
+              </div>
+              <div class="total-row">
+                <span>Taxas:</span>
+                <span>${formatCurrency(0)}</span>
+              </div>
+              <div class="total-row grand-total">
+                <span><strong>TOTAL:</strong></span>
+                <span><strong>${formatCurrency(projectTotalEarned.value)}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pdf-footer">
+            <p><strong>Observações:</strong></p>
+            <p>Esta fatura refere-se aos serviços prestados no período indicado. Pagamento devido em ${invoiceDueDate.value}.</p>
+            <p class="thank-you">Obrigado pelo seu negócio!</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    printWindow.document.write(pdfContent)
+    printWindow.document.close()
+
+    // Aguardar o conteúdo carregar e então imprimir/baixar
+    printWindow.onload = () => {
+      printWindow.print()
+      printWindow.onafterprint = () => {
+        printWindow.close()
+        resolve(`fatura-${currentInvoiceNumber.value}.pdf`)
+      }
+    }
+  })
+}
+
+// Função para gerar invoice com PDF
+async function generateInvoiceWithPdf() {
+  if (projectTotalEarned.value <= 0) {
+    invoiceError.value = 'Não é possível gerar invoice com valor zero'
+    return
+  }
+
+  isGeneratingInvoice.value = true
+  invoiceError.value = ''
+  invoiceSuccess.value = ''
+
+  try {
+    // Gerar número único para a fatura
+    currentInvoiceNumber.value = `INV-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase()}`
+    
+    // Atualizar datas
+    invoiceIssueDate.value = new Date().toLocaleDateString('pt-BR')
+    const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    invoiceDueDate.value = dueDate.toLocaleDateString('pt-BR')
+
+    // Gerar PDF
+    const pdfFilename = await generatePdf()
+    
+    const today = new Date().toISOString().split('T')[0]
+    const dueDateISO = dueDate.toISOString().split('T')[0]
+
+    const invoiceData = {
+      userId: props.project?.userId || '',
+      clientId: props.project?.clientId || '',
+      projectId: props.project?.id || '',
+      issueDate: today,
+      dueDate: dueDateISO,
+      amount: projectTotalEarned.value,
+      status: 'pending',
+      pdfUrl: pdfFilename || ''
+    }
+
+    await createInvoice(invoiceData)
+    
+    invoiceSuccess.value = 'Invoice gerado com sucesso! O PDF foi aberto para impressão.'
+    
+    // Auto-hide success message after 5 seconds
+    setTimeout(() => {
+      invoiceSuccess.value = ''
+    }, 5000)
+  } catch (error) {
+    console.error('Erro ao gerar invoice:', error)
+    invoiceError.value = 'Erro ao gerar invoice. Tente novamente.'
+    
+    // Auto-hide error message after 5 seconds
+    setTimeout(() => {
+      invoiceError.value = ''
+    }, 5000)
+  } finally {
+    isGeneratingInvoice.value = false
+  }
+}
 
 // Funções do timer
 function toggleTimer() {
@@ -266,7 +718,7 @@ function saveTimerHours() {
   }
   
   const hoursToSave = parseFloat(totalHours.value)
-  if (!isNaN(hoursToSave)) { // Removida a verificação de horasToSave > 0
+  if (!isNaN(hoursToSave)) {
     emit('add-manual-hours', hoursToSave, 'Horas trabalhadas via timer')
     resetTimer()
   }
@@ -284,7 +736,7 @@ function startEditingTime() {
 
 function saveTimeEdit() {
   const hours = parseFloat(tempHours.value)
-  if (!isNaN(hours)) { // Removida a verificação de horas >= 0
+  if (!isNaN(hours)) {
     totalSeconds.value = Math.round(hours * 3600)
     editingTime.value = false
   }
@@ -655,6 +1107,7 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .stat-item {
@@ -687,6 +1140,56 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
+/* Invoice Section */
+.invoice-section {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.invoice-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 50px;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.invoice-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.invoice-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.invoice-help {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.invoice-help strong {
+  color: #059669;
+}
+
+/* Template do PDF (sempre oculto) */
+.pdf-template {
+  display: none !important;
+}
+
 /* Mensagens */
 .error-message {
   background: #fef2f2;
@@ -698,6 +1201,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .success-message {
