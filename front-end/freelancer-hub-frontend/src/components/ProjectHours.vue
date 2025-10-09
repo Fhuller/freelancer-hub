@@ -652,6 +652,9 @@ async function generateInvoiceWithPdf() {
     const today = new Date().toISOString().split('T')[0]
     const dueDateISO = dueDate.toISOString().split('T')[0]
 
+    const pdfUrl = pdfFilename ? pdfFilename.toString() : ''
+
+    // CORREÇÃO: Garantir que pdfUrl seja string ou undefined
     const invoiceData = {
       userId: props.project?.userId || '',
       clientId: props.project?.clientId || '',
@@ -660,7 +663,7 @@ async function generateInvoiceWithPdf() {
       dueDate: dueDateISO,
       amount: projectTotalEarned.value,
       status: 'pending',
-      pdfUrl: pdfFilename || ''
+      pdfUrl: pdfUrl || '' // Alterado para undefined ao invés de objeto vazio
     }
 
     await createInvoice(invoiceData)
