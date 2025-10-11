@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import AuthenticatedLayout from '../layouts/AuthenticatedLayout.vue'
 import { fetchInvoices, deleteInvoice } from '../services/invoices'
+import { PdfService, type PdfInvoiceData } from '../services/pdf'
+import { formatCurrency } from '../services/projects'
 
 interface Invoice {
   id: string
@@ -11,7 +13,6 @@ interface Invoice {
   issueDate: string
   dueDate: string
   amount: number
-  status: string
   pdfUrl?: string
 }
 
@@ -22,11 +23,13 @@ const error = ref<string | null>(null)
 const searchQuery = ref('')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
+const generatingPdf = ref<string | null>(null)
 
 // Carregar invoices
 const loadInvoices = async () => {
   try {
     loading.value = true
+    error.value = null
     const data = await fetchInvoices()
     invoices.value = data
   } catch (err) {
@@ -43,10 +46,8 @@ const filteredInvoices = computed(() => {
   
   const query = searchQuery.value.toLowerCase()
   return invoices.value.filter(invoice => 
-    invoice.clientId.toLowerCase().includes(query) ||
-    invoice.projectId.toLowerCase().includes(query) ||
-    invoice.status.toLowerCase().includes(query) ||
-    invoice.id.toLowerCase().includes(query)
+    invoice.id.toLowerCase().includes(query) ||
+    invoice.amount.toString().includes(query)
   )
 })
 
@@ -61,6 +62,39 @@ const totalPages = computed(() => {
   return Math.ceil(filteredInvoices.value.length / itemsPerPage.value)
 })
 
+// Gerar PDF para invoice
+const generateInvoicePdf = async (invoice: Invoice) => {
+  try {
+    generatingPdf.value = invoice.id
+    
+    const invoiceData: PdfInvoiceData = {
+      invoiceNumber: invoice.id,
+      companyName: 'Sua Empresa Ltda',
+      companyAddress: 'Rua Exemplo, 123 - Cidade - Estado - CEP 12345-678',
+      companyContact: 'contato@suaempresa.com - (11) 99999-9999',
+      clientName: `Cliente ${invoice.clientId}`,
+      clientEmail: 'cliente@email.com',
+      invoiceIssueDate: new Date(invoice.issueDate).toLocaleDateString('pt-BR'),
+      invoiceDueDate: new Date(invoice.dueDate).toLocaleDateString('pt-BR'),
+      invoiceStatus: 'Emitido',
+      projectName: `Projeto ${invoice.projectId}`,
+      projectDescription: 'Serviços de desenvolvimento',
+      projectTotalHours: invoice.amount / 100,
+      projectHourlyRate: 100,
+      projectTotalEarned: invoice.amount
+    }
+
+    await PdfService.generateInvoicePdf(invoiceData)
+    
+  } catch (err) {
+    console.error('Erro ao gerar PDF:', err)
+    error.value = 'Erro ao gerar PDF do invoice'
+    setTimeout(() => { error.value = null }, 5000)
+  } finally {
+    generatingPdf.value = null
+  }
+}
+
 // Excluir invoice
 const handleDelete = async (id: string) => {
   if (!confirm('Tem certeza que deseja excluir este invoice?')) return
@@ -71,39 +105,13 @@ const handleDelete = async (id: string) => {
   } catch (err) {
     error.value = 'Erro ao excluir invoice'
     console.error(err)
+    setTimeout(() => { error.value = null }, 5000)
   }
 }
 
 // Formatações
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(amount)
-}
-
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('pt-BR')
-}
-
-const getStatusClass = (status: string) => {
-  const statusMap: { [key: string]: string } = {
-    'paid': 'status-paid',
-    'pending': 'status-pending',
-    'overdue': 'status-overdue',
-    'draft': 'status-draft'
-  }
-  return statusMap[status] || 'status-draft'
-}
-
-const getStatusText = (status: string) => {
-  const statusMap: { [key: string]: string } = {
-    'paid': 'Pago',
-    'pending': 'Pendente',
-    'overdue': 'Atrasado',
-    'draft': 'Rascunho'
-  }
-  return statusMap[status] || status
 }
 
 // Carregar dados ao montar o componente
@@ -115,53 +123,58 @@ onMounted(() => {
 <template>
   <AuthenticatedLayout>
     <div class="invoices-page">
-      <div class="header">
-        <h1 class="page-title">Meus Invoices</h1>
+      <div class="page-header">
+        <h1 class="page-title">
+          <i class="fas fa-file-invoice-dollar"></i>
+          Meus Invoices
+        </h1>
+        <p class="page-description">
+          Gerencie e visualize todos os seus invoices
+        </p>
       </div>
       
+      <!-- Mensagens de erro -->
+      <div v-if="error" class="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+
       <div class="invoices-container">
         <div class="invoices-header">
-          <h2 class="invoices-title">Todos os Invoices</h2>
-          <div class="invoices-actions">
-            <div class="search-box">
-              <span class="search-icon">🔍</span>
-              <input 
-                v-model="searchQuery" 
-                type="text" 
-                placeholder="Buscar invoice..." 
-                class="search-input"
-              >
+          <div class="header-content">
+            <h2 class="invoices-title">
+              <i class="fas fa-list"></i>
+              Todos os Invoices
+            </h2>
+            <div class="invoices-actions">
+              <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input 
+                  v-model="searchQuery" 
+                  type="text" 
+                  placeholder="Buscar invoice..." 
+                  class="search-input"
+                >
+              </div>
             </div>
-            <button class="btn btn-secondary">
-              <span class="btn-icon">📥</span>
-              Exportar
-            </button>
-            <button class="btn btn-primary">
-              <span class="btn-icon">➕</span>
-              Novo Invoice
-            </button>
           </div>
         </div>
         
         <div class="table-container">
           <!-- Loading State -->
           <div v-if="loading" class="loading-state">
-            <div class="loading-spinner"></div>
+            <i class="fas fa-spinner fa-spin loading-icon"></i>
             <p>Carregando invoices...</p>
-          </div>
-          
-          <!-- Error State -->
-          <div v-else-if="error" class="error-state">
-            <div class="error-icon">⚠️</div>
-            <p>{{ error }}</p>
-            <button @click="loadInvoices" class="btn btn-primary">Tentar Novamente</button>
           </div>
           
           <!-- Empty State -->
           <div v-else-if="invoices.length === 0" class="empty-state">
-            <div class="empty-icon">📄</div>
+            <i class="fas fa-file-invoice empty-icon"></i>
             <p>Nenhum invoice encontrado</p>
-            <button class="btn btn-primary">Criar Primeiro Invoice</button>
+            <button class="btn btn-primary">
+              <i class="fas fa-plus"></i>
+              Criar Primeiro Invoice
+            </button>
           </div>
           
           <!-- Table -->
@@ -169,47 +182,35 @@ onMounted(() => {
             <thead>
               <tr>
                 <th>Nº Invoice</th>
-                <th>Cliente</th>
-                <th>Projeto</th>
                 <th>Emissão</th>
                 <th>Vencimento</th>
                 <th>Valor</th>
-                <th>Status</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="invoice in paginatedInvoices" :key="invoice.id">
-                <td>{{ invoice.id }}</td>
-                <td>{{ invoice.clientId }}</td>
-                <td>{{ invoice.projectId }}</td>
+                <td class="invoice-number">{{ invoice.id }}</td>
                 <td>{{ formatDate(invoice.issueDate) }}</td>
                 <td>{{ formatDate(invoice.dueDate) }}</td>
                 <td class="amount">{{ formatCurrency(invoice.amount) }}</td>
-                <td>
-                  <span :class="['status', getStatusClass(invoice.status)]">
-                    {{ getStatusText(invoice.status) }}
-                  </span>
-                </td>
                 <td class="actions">
                   <button 
-                    v-if="invoice.pdfUrl" 
-                    :href="invoice.pdfUrl"
-                    target="_blank"
-                    class="action-btn"
-                    title="Visualizar PDF"
+                    @click="generateInvoicePdf(invoice)"
+                    class="action-btn download-btn"
+                    :disabled="generatingPdf === invoice.id"
+                    :title="generatingPdf === invoice.id ? 'Gerando PDF...' : 'Baixar PDF'"
                   >
-                    👁️
-                  </button>
-                  <button class="action-btn" title="Editar">
-                    ✏️
+                    <i 
+                      :class="generatingPdf === invoice.id ? 'fas fa-spinner fa-spin' : 'fas fa-download'" 
+                    ></i>
                   </button>
                   <button 
                     @click="handleDelete(invoice.id)"
-                    class="action-btn delete"
+                    class="action-btn delete-btn"
                     title="Excluir"
                   >
-                    🗑️
+                    <i class="fas fa-trash"></i>
                   </button>
                 </td>
               </tr>
@@ -228,7 +229,7 @@ onMounted(() => {
               :disabled="currentPage === 1"
               class="pagination-btn"
             >
-              ‹
+              <i class="fas fa-chevron-left"></i>
             </button>
             <button 
               v-for="page in totalPages" 
@@ -243,7 +244,7 @@ onMounted(() => {
               :disabled="currentPage === totalPages"
               class="pagination-btn"
             >
-              ›
+              <i class="fas fa-chevron-right"></i>
             </button>
           </div>
         </div>
@@ -254,106 +255,149 @@ onMounted(() => {
 
 <style scoped>
 .invoices-page {
-  padding: 20px;
+  padding: 2rem;
   background-color: #f5f7fa;
   min-height: 100vh;
+  width: 100%;
+  grid-column: 1/-1;
 }
 
-.header {
-  margin-bottom: 30px;
+.page-header {
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .page-title {
   font-size: 2rem;
-  font-weight: 600;
-  color: #2c3e50;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.page-description {
+  color: #64748b;
   margin: 0;
+  font-size: 1rem;
+}
+
+.error-message {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #fecaca;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
 }
 
 .invoices-container {
   background-color: white;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
 .invoices-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 25px;
-  border-bottom: 1px solid #eee;
 }
 
 .invoices-title {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #1e293b;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.invoices-title i {
+  color: #3b82f6;
 }
 
 .invoices-actions {
   display: flex;
-  gap: 10px;
+  gap: 1rem;
   align-items: center;
 }
 
 .search-box {
   position: relative;
-  margin-right: 10px;
 }
 
 .search-input {
-  padding: 8px 15px 8px 35px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-  width: 200px;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  width: 250px;
   font-size: 0.9rem;
-  transition: border-color 0.3s;
+  transition: all 0.3s ease;
+  background: white;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .search-icon {
   position: absolute;
-  left: 10px;
+  left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #7f8c8d;
+  color: #64748b;
 }
 
 .btn {
-  padding: 8px 16px;
-  border-radius: 5px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s;
+  font-weight: 600;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 0.5rem;
   font-size: 0.9rem;
 }
 
 .btn-primary {
-  background-color: #3498db;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
-.btn-primary:hover {
-  background-color: #2980b9;
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
 }
 
 .btn-secondary {
-  background-color: #ecf0f1;
-  color: #2c3e50;
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
 }
 
-.btn-secondary:hover {
-  background-color: #d5dbdb;
+.btn-secondary:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
 }
 
 .table-container {
@@ -367,156 +411,158 @@ onMounted(() => {
 }
 
 .invoices-table thead {
-  background-color: #f8f9fa;
+  background-color: #f8fafc;
 }
 
 .invoices-table th {
-  padding: 15px 20px;
+  padding: 1rem 1.5rem;
   text-align: left;
   font-weight: 600;
-  color: #2c3e50;
-  border-bottom: 1px solid #eee;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .invoices-table td {
-  padding: 15px 20px;
-  border-bottom: 1px solid #eee;
-  color: #555;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #4b5563;
 }
 
 .invoices-table tbody tr {
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 .invoices-table tbody tr:hover {
-  background-color: #f8f9fa;
+  background-color: #f8fafc;
 }
 
-.status {
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-align: center;
-  display: inline-block;
-  min-width: 80px;
-}
-
-.status-paid {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-pending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status-overdue {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.status-draft {
-  background-color: #e2e3e5;
-  color: #383d41;
+.invoice-number {
+  font-weight: 600;
+  color: #1e293b;
+  font-family: 'Courier New', monospace;
 }
 
 .amount {
-  font-weight: 600;
-  color: #2c3e50;
+  font-weight: 700;
+  color: #059669;
+  font-size: 1.1rem;
 }
 
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 0.5rem;
+  justify-content: flex-start;
 }
 
 .action-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #7f8c8d;
-  transition: color 0.3s;
-  font-size: 1rem;
-  padding: 5px;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
-.action-btn:hover {
-  color: #3498db;
+.download-btn {
+  color: #3b82f6;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
 }
 
-.action-btn.delete:hover {
-  color: #e74c3c;
+.download-btn:hover:not(:disabled) {
+  background: #dbeafe;
+  transform: scale(1.05);
 }
 
-.loading-state, .error-state, .empty-state {
-  padding: 50px 20px;
+.download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.delete-btn {
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.delete-btn:hover {
+  background: #fecaca;
+  transform: scale(1.05);
+}
+
+.loading-state, .empty-state {
+  padding: 3rem 2rem;
   text-align: center;
-  color: #7f8c8d;
+  color: #64748b;
 }
 
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 15px;
+.loading-icon {
+  font-size: 2rem;
+  color: #3b82f6;
+  margin-bottom: 1rem;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-icon, .empty-icon {
+.empty-icon {
   font-size: 3rem;
-  margin-bottom: 15px;
+  color: #cbd5e1;
+  margin-bottom: 1rem;
 }
 
-.empty-state p, .error-state p {
-  margin-bottom: 20px;
+.empty-state p {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
 }
 
 .pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 25px;
-  border-top: 1px solid #eee;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
 }
 
 .pagination-info {
-  color: #7f8c8d;
+  color: #64748b;
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .pagination-controls {
   display: flex;
-  gap: 5px;
+  gap: 0.5rem;
 }
 
 .pagination-btn {
-  padding: 8px 12px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
   background-color: white;
   cursor: pointer;
-  transition: all 0.3s;
-  min-width: 40px;
+  transition: all 0.2s ease;
+  min-width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background-color: #f8f9fa;
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .pagination-btn.active {
-  background-color: #3498db;
+  background-color: #3b82f6;
   color: white;
-  border-color: #3498db;
+  border-color: #3b82f6;
 }
 
 .pagination-btn:disabled {
@@ -525,11 +571,15 @@ onMounted(() => {
 }
 
 /* Responsividade */
-@media (max-width: 992px) {
-  .invoices-header {
+@media (max-width: 1024px) {
+  .invoices-page {
+    padding: 1rem;
+  }
+  
+  .header-content {
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
+    gap: 1rem;
   }
   
   .invoices-actions {
@@ -547,29 +597,53 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .invoices-page {
-    padding: 15px;
-  }
-  
   .invoices-actions {
     flex-direction: column;
     width: 100%;
-    gap: 10px;
+    gap: 0.75rem;
   }
   
   .search-box {
     width: 100%;
-    margin-right: 0;
   }
   
   .pagination {
     flex-direction: column;
-    gap: 15px;
+    gap: 1rem;
+  }
+  
+  .invoices-table {
+    font-size: 0.8rem;
+  }
+  
+  .invoices-table th,
+  .invoices-table td {
+    padding: 0.75rem 1rem;
   }
   
   .actions {
     flex-direction: column;
-    gap: 5px;
+    gap: 0.25rem;
+  }
+  
+  .action-btn {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .invoices-title {
+    font-size: 1.2rem;
+  }
+  
+  .btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
   }
 }
 </style>
