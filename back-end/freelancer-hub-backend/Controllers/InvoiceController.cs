@@ -19,21 +19,26 @@ namespace freelancer_hub_backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetAll()
         {
-            var invoices = await _context.Invoices
-                .Select(i => new InvoiceDto
-                {
-                    Id = i.Id,
-                    UserId = i.UserId,
-                    ClientId = i.ClientId,
-                    ProjectId = i.ProjectId,
-                    IssueDate = i.IssueDate,
-                    DueDate = i.DueDate,
-                    Amount = i.Amount,
-                    Status = i.Status,
-                    PdfUrl = i.PdfUrl,
-                    CreatedAt = i.CreatedAt
-                })
-                .ToListAsync();
+            var invoices = await (from i in _context.Invoices
+                                   join p in _context.Projects
+                                   on i.ProjectId equals p.Id
+                                   join c in _context.Clients
+                                   on i.ClientId equals c.Id
+                                   select new
+                                   {
+                                       Id = i.Id,
+                                       UserId = i.UserId,
+                                       ClientId = i.ClientId,
+                                       ProjectId = i.ProjectId,
+                                       IssueDate = i.IssueDate,
+                                       DueDate = i.DueDate,
+                                       Amount = i.Amount,
+                                       Status = i.Status,
+                                       PdfUrl = i.PdfUrl,
+                                       CreatedAt = i.CreatedAt,
+                                       ProjectName = p.Title,
+                                       ClientName = c.Name
+                                   }).ToListAsync();
 
             return Ok(invoices);
         }

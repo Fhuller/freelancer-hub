@@ -14,6 +14,8 @@ interface Invoice {
   dueDate: string
   amount: number
   pdfUrl?: string
+  projectName: string
+  clientName: string
 }
 
 // Estados reativos
@@ -46,7 +48,8 @@ const filteredInvoices = computed(() => {
   
   const query = searchQuery.value.toLowerCase()
   return invoices.value.filter(invoice => 
-    invoice.id.toLowerCase().includes(query) ||
+    invoice.clientName.toLowerCase().includes(query) ||
+    invoice.projectName.toLowerCase().includes(query) ||
     invoice.amount.toString().includes(query)
   )
 })
@@ -72,12 +75,12 @@ const generateInvoicePdf = async (invoice: Invoice) => {
       companyName: 'Sua Empresa Ltda',
       companyAddress: 'Rua Exemplo, 123 - Cidade - Estado - CEP 12345-678',
       companyContact: 'contato@suaempresa.com - (11) 99999-9999',
-      clientName: `Cliente ${invoice.clientId}`,
+      clientName: invoice.clientName,
       clientEmail: 'cliente@email.com',
       invoiceIssueDate: new Date(invoice.issueDate).toLocaleDateString('pt-BR'),
       invoiceDueDate: new Date(invoice.dueDate).toLocaleDateString('pt-BR'),
       invoiceStatus: 'Emitido',
-      projectName: `Projeto ${invoice.projectId}`,
+      projectName: invoice.projectName,
       projectDescription: 'Serviços de desenvolvimento',
       projectTotalHours: invoice.amount / 100,
       projectHourlyRate: 100,
@@ -152,7 +155,7 @@ onMounted(() => {
                 <input 
                   v-model="searchQuery" 
                   type="text" 
-                  placeholder="Buscar invoice..." 
+                  placeholder="Buscar por cliente, projeto ou valor..." 
                   class="search-input"
                 >
               </div>
@@ -181,7 +184,8 @@ onMounted(() => {
           <table v-else class="invoices-table">
             <thead>
               <tr>
-                <th>Nº Invoice</th>
+                <th>Cliente</th>
+                <th>Projeto</th>
                 <th>Emissão</th>
                 <th>Vencimento</th>
                 <th>Valor</th>
@@ -190,7 +194,8 @@ onMounted(() => {
             </thead>
             <tbody>
               <tr v-for="invoice in paginatedInvoices" :key="invoice.id">
-                <td class="invoice-number">{{ invoice.id }}</td>
+                <td class="client-name">{{ invoice.clientName }}</td>
+                <td class="project-name">{{ invoice.projectName }}</td>
                 <td>{{ formatDate(invoice.issueDate) }}</td>
                 <td>{{ formatDate(invoice.dueDate) }}</td>
                 <td class="amount">{{ formatCurrency(invoice.amount) }}</td>
@@ -345,7 +350,7 @@ onMounted(() => {
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   border-radius: 8px;
   border: 1px solid #d1d5db;
-  width: 250px;
+  width: 300px;
   font-size: 0.9rem;
   transition: all 0.3s ease;
   background: white;
@@ -438,10 +443,14 @@ onMounted(() => {
   background-color: #f8fafc;
 }
 
-.invoice-number {
+.client-name {
   font-weight: 600;
   color: #1e293b;
-  font-family: 'Courier New', monospace;
+}
+
+.project-name {
+  color: #3b82f6;
+  font-weight: 500;
 }
 
 .amount {
