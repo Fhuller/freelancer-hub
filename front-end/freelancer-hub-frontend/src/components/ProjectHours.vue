@@ -219,11 +219,6 @@ const invoiceError = ref('')
 const invoiceSuccess = ref('')
 const pdfTemplate = ref<HTMLElement | null>(null)
 
-// Informações da empresa (pode ser movido para configurações)
-const companyName = ref('Sua Empresa Ltda')
-const companyAddress = ref('Rua Exemplo, 123 - Cidade - Estado - CEP 12345-678')
-const companyContact = ref('contato@suaempresa.com - (11) 99999-9999')
-
 // Computed para formatar o tempo
 const formattedTime = computed(() => {
   const hours = Math.floor(totalSeconds.value / 3600)
@@ -309,9 +304,6 @@ async function generateInvoiceWithPdf() {
     // Gerar dados para o PDF usando o serviço
     const invoiceData: PdfInvoiceData = {
       invoiceNumber: PdfService.generateInvoiceNumber(),
-      companyName: companyName.value,
-      companyAddress: companyAddress.value,
-      companyContact: companyContact.value,
       clientName: clientName.value,
       clientEmail: clientEmail.value,
       invoiceIssueDate: PdfService.getCurrentDate(),

@@ -72,9 +72,6 @@ const generateInvoicePdf = async (invoice: Invoice) => {
     
     const invoiceData: PdfInvoiceData = {
       invoiceNumber: invoice.id,
-      companyName: 'Sua Empresa Ltda',
-      companyAddress: 'Rua Exemplo, 123 - Cidade - Estado - CEP 12345-678',
-      companyContact: 'contato@suaempresa.com - (11) 99999-9999',
       clientName: invoice.clientName,
       clientEmail: 'cliente@email.com',
       invoiceIssueDate: new Date(invoice.issueDate).toLocaleDateString('pt-BR'),
@@ -203,12 +200,9 @@ onMounted(() => {
                   <button 
                     @click="generateInvoicePdf(invoice)"
                     class="action-btn download-btn"
-                    :disabled="generatingPdf === invoice.id"
-                    :title="generatingPdf === invoice.id ? 'Gerando PDF...' : 'Baixar PDF'"
+                    :title="'Baixar PDF'"
                   >
-                    <i 
-                      :class="generatingPdf === invoice.id ? 'fas fa-spinner fa-spin' : 'fas fa-download'" 
-                    ></i>
+                    <i class="fas fa-download" ></i>
                   </button>
                   <button 
                     @click="handleDelete(invoice.id)"
@@ -463,6 +457,7 @@ onMounted(() => {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-start;
+  margin-bottom: -1px;
 }
 
 .action-btn {

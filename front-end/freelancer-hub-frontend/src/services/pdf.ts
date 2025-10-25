@@ -3,9 +3,6 @@ import { formatCurrency } from './projects'
 
 export interface PdfInvoiceData {
   invoiceNumber: string
-  companyName: string
-  companyAddress: string
-  companyContact: string
   clientName: string
   clientEmail: string
   invoiceIssueDate: string
@@ -51,6 +48,12 @@ export class PdfService {
    * Gera o conteúdo HTML do PDF
    */
   private static generatePdfContent(data: PdfInvoiceData): string {
+    // Determina quais seções devem ser exibidas
+    const hasClientInfo = data.clientName || data.clientEmail
+    const hasInvoiceDetails = data.invoiceIssueDate || data.invoiceDueDate || data.invoiceStatus
+    const hasProjectInfo = data.projectName || data.projectDescription
+    const hasItems = data.projectTotalHours > 0 && data.projectHourlyRate > 0
+
     return `
       <!DOCTYPE html>
       <html>
@@ -71,12 +74,22 @@ export class PdfService {
           .pdf-header {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 30px;
             border-bottom: 2px solid #333;
             padding-bottom: 20px;
           }
-          .company-info h2 {
+          .brand-section {
+            flex: 1;
+          }
+          .brand-name {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c5aa0;
             margin: 0 0 10px 0;
+          }
+          .company-info h2 {
+            margin: 15px 0 10px 0;
             color: #333;
             font-size: 18px;
           }
@@ -85,17 +98,18 @@ export class PdfService {
             font-size: 12px;
             color: #666;
           }
+          .invoice-title {
+            text-align: right;
+          }
           .invoice-title h1 {
             margin: 0;
             color: #333;
             font-size: 24px;
-            text-align: right;
           }
           .invoice-number {
             margin: 10px 0 0 0;
             font-size: 14px;
             font-weight: bold;
-            text-align: right;
           }
           .pdf-client-info {
             display: grid;
@@ -178,6 +192,7 @@ export class PdfService {
             border-top: 2px solid #333;
             padding-top: 20px;
             font-size: 12px;
+            color: #666;
           }
           .pdf-footer p {
             margin: 8px 0;
@@ -186,7 +201,19 @@ export class PdfService {
             text-align: center;
             font-style: italic;
             margin-top: 30px !important;
+          }
+          .disclaimer {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            margin-top: 20px;
+            font-style: italic;
+          }
+          .freelancerhub-note {
+            text-align: center;
+            font-size: 10px;
             color: #666;
+            margin-top: 10px;
           }
           @media print {
             body { margin: 0; }
@@ -197,37 +224,45 @@ export class PdfService {
       <body>
         <div class="invoice-pdf">
           <div class="pdf-header">
-            <div class="company-info">
-              <h2>${data.companyName}</h2>
-              <p>${data.companyAddress}</p>
-              <p>${data.companyContact}</p>
+            <div class="brand-section">
+              <div class="brand-name">FreelancerHub</div>
             </div>
             <div class="invoice-title">
               <h1>FATURA</h1>
-              <p class="invoice-number">Nº: ${data.invoiceNumber}</p>
+              ${data.invoiceNumber ? `<p class="invoice-number">Nº: ${data.invoiceNumber}</p>` : ''}
             </div>
           </div>
 
+          ${hasClientInfo || hasInvoiceDetails ? `
           <div class="pdf-client-info">
+            ${hasClientInfo ? `
             <div class="client-section">
               <h3>Cliente</h3>
-              <p><strong>Nome:</strong> ${data.clientName}</p>
-              <p><strong>Email:</strong> ${data.clientEmail}</p>
+              ${data.clientName ? `<p><strong>Nome:</strong> ${data.clientName}</p>` : ''}
+              ${data.clientEmail ? `<p><strong>Email:</strong> ${data.clientEmail}</p>` : ''}
             </div>
+            ` : ''}
+            
+            ${hasInvoiceDetails ? `
             <div class="invoice-details">
               <h3>Detalhes da Fatura</h3>
-              <p><strong>Data de Emissão:</strong> ${data.invoiceIssueDate}</p>
-              <p><strong>Data de Vencimento:</strong> ${data.invoiceDueDate}</p>
-              <p><strong>Status:</strong> ${data.invoiceStatus}</p>
+              ${data.invoiceIssueDate ? `<p><strong>Data de Emissão:</strong> ${data.invoiceIssueDate}</p>` : ''}
+              ${data.invoiceDueDate ? `<p><strong>Data de Vencimento:</strong> ${data.invoiceDueDate}</p>` : ''}
+              ${data.invoiceStatus ? `<p><strong>Status:</strong> ${data.invoiceStatus}</p>` : ''}
             </div>
+            ` : ''}
           </div>
+          ` : ''}
 
+          ${hasProjectInfo ? `
           <div class="pdf-project-info">
             <h3>Projeto</h3>
-            <p><strong>Nome do Projeto:</strong> ${data.projectName}</p>
-            <p><strong>Descrição:</strong> ${data.projectDescription}</p>
+            ${data.projectName ? `<p><strong>Nome do Projeto:</strong> ${data.projectName}</p>` : ''}
+            ${data.projectDescription ? `<p><strong>Descrição:</strong> ${data.projectDescription}</p>` : ''}
           </div>
+          ` : ''}
 
+          ${hasItems ? `
           <div class="pdf-items">
             <h3>Itens da Fatura</h3>
             <table class="items-table">
@@ -241,7 +276,7 @@ export class PdfService {
               </thead>
               <tbody>
                 <tr>
-                  <td>Serviços de desenvolvimento - ${data.projectName}</td>
+                  <td>Serviços de desenvolvimento${data.projectName ? ` - ${data.projectName}` : ''}</td>
                   <td>${data.projectTotalHours.toFixed(2)} horas</td>
                   <td>${formatCurrency(data.projectHourlyRate)}/h</td>
                   <td>${formatCurrency(data.projectTotalEarned)}</td>
@@ -252,25 +287,27 @@ export class PdfService {
 
           <div class="pdf-summary">
             <div class="summary-total">
-              <div class="total-row">
-                <span>Subtotal:</span>
-                <span>${formatCurrency(data.projectTotalEarned)}</span>
-              </div>
-              <div class="total-row">
-                <span>Taxas:</span>
-                <span>${formatCurrency(0)}</span>
-              </div>
               <div class="total-row grand-total">
                 <span><strong>TOTAL:</strong></span>
                 <span><strong>${formatCurrency(data.projectTotalEarned)}</strong></span>
               </div>
             </div>
           </div>
+          ` : ''}
 
           <div class="pdf-footer">
-            <p><strong>Observações:</strong></p>
-            <p>Esta fatura refere-se aos serviços prestados no período indicado. Pagamento devido em ${data.invoiceDueDate}.</p>
+            ${data.invoiceDueDate ? `
+              <p><strong>Observações:</strong></p>
+              <p>Esta fatura refere-se aos serviços prestados no período indicado. Pagamento devido em ${data.invoiceDueDate}.</p>
+            ` : ''}
             <p class="thank-you">Obrigado pelo seu negócio!</p>
+            
+            <div class="disclaimer">
+              <p><strong>Documento gerado automaticamente</strong></p>
+              <p class="freelancerhub-note">
+                Criado utilizando FreelancerHub • Este documento não constitui nota fiscal
+              </p>
+            </div>
           </div>
         </div>
       </body>
