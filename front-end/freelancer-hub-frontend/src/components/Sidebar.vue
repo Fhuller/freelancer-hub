@@ -27,9 +27,6 @@ const emit = defineEmits(['close']);
         <li>
           <RouterLink to="/app/finance" class="nav-link" active-class="active" @click="emit('close')">Financeiro</RouterLink>
         </li>
-        <li>
-          <RouterLink to="/app/reports" class="nav-link" active-class="active" @click="emit('close')">Relatórios</RouterLink>
-        </li>
       </ul>
     </nav>
   </aside>

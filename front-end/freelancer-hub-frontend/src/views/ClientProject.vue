@@ -607,6 +607,8 @@ onMounted(async () => {
   border-radius: 6px;
   margin-bottom: 1rem;
   text-align: center;
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 /* Responsive */

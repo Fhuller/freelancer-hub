@@ -21,6 +21,17 @@
       {{ hoursSuccess }}
     </div>
 
+    <!-- Mensagens específicas para invoices -->
+    <div v-if="invoiceError" class="error-message invoice-error">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ invoiceError }}
+    </div>
+
+    <div v-if="invoiceSuccess" class="success-message invoice-success">
+      <i class="fas fa-check-circle"></i>
+      {{ invoiceSuccess }}
+    </div>
+
     <div class="time-content">
       <!-- Timer -->
       <div class="time-card timer-section">
@@ -145,6 +156,21 @@
             <div class="stat-label">Valor Total</div>
           </div>
         </div>
+
+        <!-- Botão para gerar invoice -->
+        <div class="invoice-section">
+          <button 
+            class="invoice-button" 
+            @click="generateInvoiceWithPdf"
+            :disabled="isGeneratingInvoice || projectTotalEarned <= 0"
+          >
+            <i class="fas fa-file-invoice-dollar"></i>
+            {{ isGeneratingInvoice ? 'Gerando Invoice...' : 'Gerar Invoice com PDF' }}
+          </button>
+          <p class="invoice-help">
+            Gere um invoice com o valor total de <strong>{{ formatCurrency(projectTotalEarned) }}</strong>
+          </p>
+        </div>
       </div>
     </div>
 
@@ -156,8 +182,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted, watch } from 'vue'
 import { formatCurrency } from '../services/projects'
+import { createInvoice, updateInvoice } from '../services/invoices'
+import { PdfService, type PdfInvoiceData } from '../services/pdf'
 
 const props = defineProps<{
   project: any
@@ -185,6 +213,12 @@ const tempHours = ref('')
 const editingHourlyRate = ref(false)
 const tempHourlyRate = ref('')
 
+// Variáveis para geração de invoice
+const isGeneratingInvoice = ref(false)
+const invoiceError = ref('')
+const invoiceSuccess = ref('')
+const pdfTemplate = ref<HTMLElement | null>(null)
+
 // Computed para formatar o tempo
 const formattedTime = computed(() => {
   const hours = Math.floor(totalSeconds.value / 3600)
@@ -211,6 +245,29 @@ const projectTotalEarned = computed(() => {
   return projectTotalHours.value * projectHourlyRate.value
 })
 
+// Computed para dados do cliente e projeto
+const clientName = computed(() => {
+  return props.project?.client?.name || 'Cliente'
+})
+
+const clientEmail = computed(() => {
+  return props.project?.client?.email || 'cliente@email.com'
+})
+
+const projectName = computed(() => {
+  return props.project?.name || 'Projeto'
+})
+
+const projectDescription = computed(() => {
+  return props.project?.description || 'Serviços de desenvolvimento'
+})
+
+// Variáveis para o PDF
+const currentInvoiceNumber = ref(`INV-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`)
+const invoiceIssueDate = ref(new Date().toLocaleDateString('pt-BR'))
+const invoiceDueDate = ref(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'))
+const invoiceStatus = ref('Pendente')
+
 // Watch para limpar mensagens de erro/sucesso quando mudar
 watch(() => props.hoursError, (newError) => {
   if (!newError) return
@@ -231,6 +288,72 @@ watch(() => props.hoursSuccess, (newSuccess) => {
     }
   }, 3000)
 })
+
+// Função para gerar PDF usando window.print() como alternativa
+async function generateInvoiceWithPdf() {
+  if (projectTotalEarned.value <= 0) {
+    invoiceError.value = 'Não é possível gerar invoice com valor zero'
+    return
+  }
+
+  isGeneratingInvoice.value = true
+  invoiceError.value = ''
+  invoiceSuccess.value = ''
+
+  try {
+    // Gerar dados para o PDF usando o serviço
+    const invoiceData: PdfInvoiceData = {
+      invoiceNumber: PdfService.generateInvoiceNumber(),
+      clientName: clientName.value,
+      clientEmail: clientEmail.value,
+      invoiceIssueDate: PdfService.getCurrentDate(),
+      invoiceDueDate: PdfService.calculateDueDate(),
+      invoiceStatus: 'Pendente',
+      projectName: projectName.value,
+      projectDescription: projectDescription.value,
+      projectTotalHours: projectTotalHours.value,
+      projectHourlyRate: projectHourlyRate.value,
+      projectTotalEarned: projectTotalEarned.value
+    }
+
+    // Gerar PDF usando o serviço
+    const pdfFilename = await PdfService.generateInvoicePdf(invoiceData)
+    
+    const today = new Date().toISOString().split('T')[0]
+    const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
+    // Criar invoice no banco de dados
+    const invoiceDataForDb = {
+      userId: props.project?.userId || '',
+      clientId: props.project?.clientId || '',
+      projectId: props.project?.id || '',
+      issueDate: today,
+      dueDate: dueDate,
+      amount: projectTotalEarned.value,
+      status: 'pending',
+      pdfUrl: pdfFilename || ''
+    }
+
+    await createInvoice(invoiceDataForDb)
+    
+    invoiceSuccess.value = 'Invoice gerado com sucesso! O PDF foi aberto para impressão.'
+    
+    // Auto-hide success message after 5 seconds
+    setTimeout(() => {
+      invoiceSuccess.value = ''
+    }, 5000)
+  } catch (error) {
+    console.error('Erro ao gerar invoice:', error)
+    invoiceError.value = 'Erro ao gerar invoice. Tente novamente.'
+    
+    // Auto-hide error message after 5 seconds
+    setTimeout(() => {
+      invoiceError.value = ''
+    }, 5000)
+  } finally {
+    isGeneratingInvoice.value = false
+  }
+}
 
 // Funções do timer
 function toggleTimer() {
@@ -266,7 +389,7 @@ function saveTimerHours() {
   }
   
   const hoursToSave = parseFloat(totalHours.value)
-  if (!isNaN(hoursToSave)) { // Removida a verificação de horasToSave > 0
+  if (!isNaN(hoursToSave)) {
     emit('add-manual-hours', hoursToSave, 'Horas trabalhadas via timer')
     resetTimer()
   }
@@ -284,7 +407,7 @@ function startEditingTime() {
 
 function saveTimeEdit() {
   const hours = parseFloat(tempHours.value)
-  if (!isNaN(hours)) { // Removida a verificação de horas >= 0
+  if (!isNaN(hours)) {
     totalSeconds.value = Math.round(hours * 3600)
     editingTime.value = false
   }
@@ -655,6 +778,7 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .stat-item {
@@ -687,6 +811,56 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
+/* Invoice Section */
+.invoice-section {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.invoice-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 50px;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.invoice-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.invoice-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.invoice-help {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.invoice-help strong {
+  color: #059669;
+}
+
+/* Template do PDF (sempre oculto) */
+.pdf-template {
+  display: none !important;
+}
+
 /* Mensagens */
 .error-message {
   background: #fef2f2;
@@ -698,6 +872,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .success-message {
