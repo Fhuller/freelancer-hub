@@ -34,5 +34,10 @@
   "projectDescriptionPlaceholder": "Descrição breve",
   "hourlyRate": "Taxa Horária",
   "totalHours": "Total de Horas",
-  "totalEarned": "Valor Total"
+  "totalEarned": "Valor Total",
+  "dashboard": "Dashboard",
+  "totalProjects": "Total Projetos",
+  "totalInvoices": "Total Faturas",
+  "totalTasks": "Total Tarefas",
+  "totalClients": "Total Clientes"
 }
