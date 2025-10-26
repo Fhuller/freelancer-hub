@@ -18,15 +18,18 @@ namespace freelancer_hub_backend.Controllers
         private readonly IProjectService _projectService;
         private readonly BlobStorageService _blobStorageService;
         private readonly FreelancerContext _context;
+        private readonly IUserUtils _userUtils;
 
         public ProjectController(
             IProjectService projectService,
             BlobStorageService blobStorageService,
-            FreelancerContext context)
+            FreelancerContext context, 
+            IUserUtils userUtils)
         {
             _projectService = projectService;
             _blobStorageService = blobStorageService;
             _context = context;
+            _userUtils = userUtils;
         }
 
         [HttpGet]
@@ -34,7 +37,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var projects = await _projectService.GetProjectsAsync(userId);
                 return Ok(projects);
             }
@@ -58,7 +61,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var project = await _projectService.CreateProjectAsync(userId, dto);
                 return CreatedAtAction(nameof(GetProjectById), new { id = project.Id }, project);
             }

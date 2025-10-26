@@ -12,10 +12,12 @@ namespace freelancer_hub_backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IUserUtils _userUtils;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IUserUtils userUtils)
         {
             _userService = userService;
+            _userUtils = userUtils;
         }
 
         [HttpGet]
@@ -46,7 +48,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var user = await _userService.GetCurrentUserAsync(userId);
 
                 if (user == null) return NotFound();
@@ -64,7 +66,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var user = await _userService.CreateOrGetUserAsync(userId, dto);
 
                 var existingUser = await _userService.GetUserByIdAsync(userId);
@@ -90,7 +92,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var currentUserId = UserUtils.GetSupabaseUserId(User);
+                var currentUserId = _userUtils.GetSupabaseUserId(User);
                 if (currentUserId != id)
                 {
                     return Forbid("Você só pode atualizar seu próprio perfil.");
@@ -118,7 +120,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var currentUserId = UserUtils.GetSupabaseUserId(User);
+                var currentUserId = _userUtils.GetSupabaseUserId(User);
                 if (currentUserId != id)
                 {
                     return Forbid("Você só pode deletar seu próprio perfil.");

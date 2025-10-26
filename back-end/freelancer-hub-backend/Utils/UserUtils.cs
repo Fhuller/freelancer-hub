@@ -4,12 +4,12 @@ using System.Text.Json;
 
 namespace freelancer_hub_backend.Utils
 {
-    public static class UserUtils
+    public class UserUtils : IUserUtils
     {
         /// <summary>
         /// Retorna o userId do Supabase JWT, lendo a claim user_metadata.sub
         /// </summary>
-        public static string GetSupabaseUserId(ClaimsPrincipal user)
+        public string GetSupabaseUserId(ClaimsPrincipal user)
         {
             var nameIdentifierClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
