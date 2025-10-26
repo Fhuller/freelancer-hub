@@ -31,5 +31,10 @@
   "projectDescriptionPlaceholder": "Brief description",
   "hourlyRate": "Hourly Rate",
   "totalHours": "Total Hours",
-  "totalEarned": "Total Earned"
+  "totalEarned": "Total Earned",
+  "dashboard": "Dashboard",
+  "totalProjects": "Total Projects",
+  "totalInvoices": "Total Invoices",
+  "totalTasks": "Total Tasks",
+  "totalClients": "Total Clients"
 }
