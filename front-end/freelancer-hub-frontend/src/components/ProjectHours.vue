@@ -162,10 +162,9 @@
           <button 
             class="invoice-button" 
             @click="generateInvoiceWithPdf"
-            :disabled="isGeneratingInvoice || projectTotalEarned <= 0"
           >
             <i class="fas fa-file-invoice-dollar"></i>
-            {{ isGeneratingInvoice ? 'Gerando Invoice...' : 'Gerar Invoice com PDF' }}
+            Gerar Invoice com PDF
           </button>
           <p class="invoice-help">
             Gere um invoice com o valor total de <strong>{{ formatCurrency(projectTotalEarned) }}</strong>
@@ -184,7 +183,7 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted, watch } from 'vue'
 import { formatCurrency } from '../services/projects'
-import { createInvoice, updateInvoice } from '../services/invoices'
+import { createInvoice } from '../services/invoices'
 import { PdfService, type PdfInvoiceData } from '../services/pdf'
 
 const props = defineProps<{
@@ -217,7 +216,6 @@ const tempHourlyRate = ref('')
 const isGeneratingInvoice = ref(false)
 const invoiceError = ref('')
 const invoiceSuccess = ref('')
-const pdfTemplate = ref<HTMLElement | null>(null)
 
 // Computed para formatar o tempo
 const formattedTime = computed(() => {
@@ -262,12 +260,6 @@ const projectDescription = computed(() => {
   return props.project?.description || 'Serviços de desenvolvimento'
 })
 
-// Variáveis para o PDF
-const currentInvoiceNumber = ref(`INV-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`)
-const invoiceIssueDate = ref(new Date().toLocaleDateString('pt-BR'))
-const invoiceDueDate = ref(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'))
-const invoiceStatus = ref('Pendente')
-
 // Watch para limpar mensagens de erro/sucesso quando mudar
 watch(() => props.hoursError, (newError) => {
   if (!newError) return
@@ -302,6 +294,9 @@ async function generateInvoiceWithPdf() {
 
   try {
     // Gerar dados para o PDF usando o serviço
+    const today = new Date().toISOString().split('T')[0]
+    const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    
     const invoiceData: PdfInvoiceData = {
       invoiceNumber: PdfService.generateInvoiceNumber(),
       clientName: clientName.value,
@@ -316,13 +311,6 @@ async function generateInvoiceWithPdf() {
       projectTotalEarned: projectTotalEarned.value
     }
 
-    // Gerar PDF usando o serviço
-    const pdfFilename = await PdfService.generateInvoicePdf(invoiceData)
-    
-    const today = new Date().toISOString().split('T')[0]
-    const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-
-    // Criar invoice no banco de dados
     const invoiceDataForDb = {
       userId: props.project?.userId || '',
       clientId: props.project?.clientId || '',
@@ -331,10 +319,15 @@ async function generateInvoiceWithPdf() {
       dueDate: dueDate,
       amount: projectTotalEarned.value,
       status: 'pending',
-      pdfUrl: pdfFilename || ''
+      pdfUrl: `fatura-${invoiceData.invoiceNumber}.pdf`
     }
 
     await createInvoice(invoiceDataForDb)
+    // Gerar PDF usando o serviço
+    const pdfFilename = await PdfService.generateInvoicePdf(invoiceData)
+    
+
+    // Criar invoice no banco de dados
     
     invoiceSuccess.value = 'Invoice gerado com sucesso! O PDF foi aberto para impressão.'
     
@@ -854,11 +847,6 @@ onUnmounted(() => {
 
 .invoice-help strong {
   color: #059669;
-}
-
-/* Template do PDF (sempre oculto) */
-.pdf-template {
-  display: none !important;
 }
 
 /* Mensagens */
