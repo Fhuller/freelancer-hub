@@ -2,30 +2,5 @@
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": ["/images/*", "/css/*", "/js/*"]
-  },
-  "routes": [
-    {
-      "route": "/app/*",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/login",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/reset-password",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/*",
-      "rewrite": "/index.html",
-      "statusCode": 200
-    }
-  ],
-  "responseOverrides": {
-    "404": {
-      "rewrite": "/index.html",
-      "statusCode": 200
-    }
   }
 }
