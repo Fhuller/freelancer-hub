@@ -1,4 +1,4 @@
-name: Build and deploy ASP.Net Core app to Azure Web App - freelancer-hub-backend
+name: Build, test and deploy ASP.Net Core app to Azure Web App - freelancer-hub-backend
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 env:
   AZURE_STORAGE_CONNECTIONSTRING: ${{ secrets.AZURE_STORAGE_CONNECTIONSTRING }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 jobs:
   build:
@@ -23,25 +24,35 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      # Restore
+      - name: Install tools
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global coverlet.console
+
       - name: Restore backend
         run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
 
       - name: Restore tests
         run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
 
-      # Build
+      - name: Begin SonarCloud analysis
+        run: |
+          dotnet sonarscanner begin /k:"freelancer-hub-backend" /d:sonar.token="${{ env.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="coverage.xml"
+
       - name: Build backend
-        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release --no-restore
+        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-incremental
 
-      - name: Build tests
-        run: dotnet build ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --configuration Release --no-restore
+      - name: Run tests and generate coverage
+        run: |
+          coverlet ./back-end/freelancer-hub-backend-tests/bin/Debug/net8.0/freelancer-hub-backend-tests.dll \
+            --target "dotnet" \
+            --targetargs "test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --no-build" \
+            -f opencover \
+            -o "coverage.xml"
 
-      # Run Tests
-      - name: Run tests
-        run: dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --configuration Release --no-build
+      - name: End SonarCloud analysis
+        run: dotnet sonarscanner end /d:sonar.token="${{ env.SONAR_TOKEN }}"
 
-      # Publish
       - name: Publish backend
         run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
 

@@ -1,4 +1,5 @@
-﻿using freelancer_hub_backend.Repository;
+﻿using freelancer_hub_backend;
+using freelancer_hub_backend.Repository;
 using freelancer_hub_backend.Services;
 using freelancer_hub_backend.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
