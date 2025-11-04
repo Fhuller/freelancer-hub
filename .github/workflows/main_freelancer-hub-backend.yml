@@ -23,22 +23,27 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      # Restore solution packages
+      # Restore
       - name: Restore backend
         run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
 
       - name: Restore tests
         run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
 
-      # Run tests before build
+      # Build
+      - name: Build backend
+        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release --no-restore
+
+      - name: Build tests
+        run: dotnet build ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --configuration Release --no-restore
+
+      # Run Tests
       - name: Run tests
         run: dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --configuration Release --no-build
 
-      - name: Build
-        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release --no-restore
-
-      - name: Publish
-        run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp" --no-build
+      # Publish
+      - name: Publish backend
+        run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
