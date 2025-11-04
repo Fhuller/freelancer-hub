@@ -13,11 +13,13 @@ namespace freelancer_hub_backend.Controllers
     {
         private readonly FreelancerContext _context;
         private readonly IClientService _clientService;
+        private readonly IUserUtils _userUtils;
 
-        public ClientController(FreelancerContext context, IClientService clientService)
+        public ClientController(FreelancerContext context, IClientService clientService, IUserUtils userUtils)
         {
             _context = context;
             _clientService = clientService;
+            _userUtils = userUtils;
         }
 
         [HttpGet]
@@ -25,7 +27,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var clients = await _clientService.GetClientsAsync(userId);
                 return Ok(clients);
             }
@@ -50,7 +52,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var client = await _clientService.CreateClientAsync(userId, dto);
                 return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
             }

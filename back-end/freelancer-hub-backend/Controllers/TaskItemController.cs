@@ -11,11 +11,13 @@ namespace freelancer_hub_backend.Controllers
     [Route("api/[controller]")]
     public class TaskItemController : ControllerBase
     {
+        private readonly IUserUtils _userUtils;
         private readonly ITaskItemService _taskItemService;
 
-        public TaskItemController(ITaskItemService taskItemService)
+        public TaskItemController(ITaskItemService taskItemService, IUserUtils userUtils)
         {
             _taskItemService = taskItemService;
+            _userUtils = userUtils;
         }
 
         [HttpGet("project/{projectId}")]
@@ -23,7 +25,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var taskItems = await _taskItemService.GetTaskItemsByProjectAsync(userId, projectId);
                 return Ok(taskItems);
             }
@@ -51,7 +53,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var taskItem = await _taskItemService.CreateTaskItemAsync(userId, dto);
                 return CreatedAtAction(nameof(GetTaskItemById), new { id = taskItem.Id }, taskItem);
             }

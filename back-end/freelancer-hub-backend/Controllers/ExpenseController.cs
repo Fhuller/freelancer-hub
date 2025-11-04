@@ -11,11 +11,13 @@ namespace freelancer_hub_backend.Controllers
     [Route("api/[controller]")]
     public class ExpenseController : ControllerBase
     {
+        private readonly IUserUtils _userUtils;
         private readonly IExpenseService _expenseService;
 
-        public ExpenseController(IExpenseService expenseService)
+        public ExpenseController(IExpenseService expenseService, IUserUtils userUtils)
         {
             _expenseService = expenseService;
+            _userUtils = userUtils;
         }
 
         [HttpGet]
@@ -23,7 +25,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var expenses = await _expenseService.GetExpensesAsync(userId);
                 return Ok(expenses);
             }
@@ -47,7 +49,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = UserUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetSupabaseUserId(User);
                 var expense = await _expenseService.CreateExpenseAsync(userId, dto);
                 return CreatedAtAction(nameof(GetExpenseById), new { id = expense.Id }, expense);
             }

@@ -1,0 +1,73 @@
+# Build Folders
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# Rider IDE
+.idea/
+
+# ASP.NET Core
+appsettings.Development.json
+launchSettings.json
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+*.nuspec
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage.opencover.xml
+coverage.json
+coverage.info
+coverage/
+coverage-report/
+
+# Test results
+TestResults/
+*.trx
+
+# DotCover
+*.dotCover
+
+# Rider
+.idea/
+
+# VS
+.vs/
+*.vcxproj.user
+*.dbmdl
+*.pdb
+
+# Others
+*.DS_Store
+*.bak
+*.backup
+*.swp
+*.swo
+
+# Dotnet CLI tools
+.tools/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Resharper
+_ReSharper*/
+*.ReSharper
+*.DotSettings.user
