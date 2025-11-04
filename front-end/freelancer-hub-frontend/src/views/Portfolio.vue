@@ -74,6 +74,13 @@ export default {
               >
                 🔗 API - Swagger Docs
               </a>
+              <a 
+                href="https://sonarcloud.io/summary/overall?id=Fhuller_freelancer-hub&branch=main" 
+                target="_blank"
+                class="bg-white hover:bg-purple-50 text-purple-700 font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 border border-purple-300"
+              >
+                🔗 SonarCloud
+              </a>
             </div>
           </div>
 
