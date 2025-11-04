@@ -16,14 +16,14 @@ namespace freelancer_hub_backend.Controllers
     public class ProjectController : ControllerBase
     {
         private readonly IProjectService _projectService;
-        private readonly BlobStorageService _blobStorageService;
+        private readonly IBlobStorageService _blobStorageService;
         private readonly FreelancerContext _context;
         private readonly IUserUtils _userUtils;
 
         public ProjectController(
             IProjectService projectService,
-            BlobStorageService blobStorageService,
-            FreelancerContext context, 
+            IBlobStorageService blobStorageService,
+            FreelancerContext context,
             IUserUtils userUtils)
         {
             _projectService = projectService;
@@ -191,24 +191,20 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                // Verificar se o projeto existe
                 var project = await _projectService.GetProjectByIdAsync(projectId);
                 if (project == null)
                     return NotFound(new { message = "Projeto não encontrado" });
 
-                // Validar arquivo
                 if (file == null || file.Length == 0)
                     return BadRequest(new { message = "Arquivo inválido" });
 
-                if (file.Length > 10 * 1024 * 1024) // 10MB
+                if (file.Length > 10 * 1024 * 1024)
                     return BadRequest(new { message = "Arquivo muito grande. Tamanho máximo: 10MB" });
 
-                // Upload para Azure Blob Storage
                 using var stream = file.OpenReadStream();
                 var fileName = $"{Guid.NewGuid()}_{file.FileName}";
                 var fileUrl = await _blobStorageService.UploadFileAsync(stream, fileName);
 
-                // Criar entidade File
                 var fileEntity = new File
                 {
                     Id = Guid.NewGuid(),
@@ -218,19 +214,16 @@ namespace freelancer_hub_backend.Controllers
                     FileSize = file.Length
                 };
 
-                // Criar relação ProjectFile
                 var projectFile = new ProjectFile
                 {
                     ProjectId = projectId,
                     FileId = fileEntity.Id
                 };
 
-                // Salvar no banco
                 await _context.Files.AddAsync(fileEntity);
                 await _context.ProjectFiles.AddAsync(projectFile);
                 await _context.SaveChangesAsync();
 
-                // Retornar DTO
                 var fileDto = new FileDto
                 {
                     Id = fileEntity.Id,
@@ -290,11 +283,9 @@ namespace freelancer_hub_backend.Controllers
                 if (file == null)
                     return NotFound(new { message = "Arquivo não encontrado" });
 
-                // Deletar do Azure Blob Storage
                 var fileName = Path.GetFileName(file.FileUrl);
                 await _blobStorageService.DeleteFileAsync(fileName);
 
-                // Deletar do banco
                 _context.ProjectFiles.Remove(projectFile);
                 _context.Files.Remove(file);
                 await _context.SaveChangesAsync();

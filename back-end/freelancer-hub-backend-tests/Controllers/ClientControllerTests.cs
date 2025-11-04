@@ -13,13 +13,13 @@ using Xunit;
 
 namespace freelancer_hub_backend_tests.Controllers
 {
-    public class ControllerClientTests
+    public class ClientControllerTests
     {
         private readonly Mock<IClientService> _clientServiceMock;
         private readonly Mock<IUserUtils> _userUtilsMock;
         private readonly ClientController _controller;
 
-        public ControllerClientTests()
+        public ClientControllerTests()
         {
             _clientServiceMock = new Mock<IClientService>();
             _userUtilsMock = new Mock<IUserUtils>();

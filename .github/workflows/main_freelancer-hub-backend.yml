@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy ASP.Net Core app to Azure Web App - freelancer-hub-backend
 
 on:
@@ -26,11 +23,22 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Build with dotnet
-        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release
+      # Restore solution packages
+      - name: Restore backend
+        run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
 
-      - name: dotnet publish
-        run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
+      - name: Restore tests
+        run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
+
+      # Run tests before build
+      - name: Run tests
+        run: dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --configuration Release --no-build
+
+      - name: Build
+        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp" --no-build
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4

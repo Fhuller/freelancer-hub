@@ -1,10 +1,12 @@
 ﻿using Azure.Storage.Blobs;
 using freelancer_hub_backend.Settings;
 using Microsoft.Extensions.Options;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace freelancer_hub_backend.Services
 {
-    public class BlobStorageService
+    public class BlobStorageService : IBlobStorageService
     {
         private readonly AzureStorageSettings _settings;
 
