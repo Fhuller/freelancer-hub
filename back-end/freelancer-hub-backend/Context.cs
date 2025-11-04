@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using File = freelancer_hub_backend.Models.File;
 
 
-namespace freelancer_hub_backend.Context
+namespace freelancer_hub_backend
 {
     public class FreelancerContext : DbContext
     {
