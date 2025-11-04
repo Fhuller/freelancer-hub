@@ -9,6 +9,8 @@ on:
 env:
   AZURE_STORAGE_CONNECTIONSTRING: ${{ secrets.AZURE_STORAGE_CONNECTIONSTRING }}
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_ORG: "Felipe Beppler Huller"
+  SONAR_PROJECT_KEY: "freelancer-hub-backend"
 
 jobs:
   build:
@@ -24,24 +26,33 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Install tools
+      - name: Install global tools
         run: |
           dotnet tool install --global dotnet-sonarscanner
           dotnet tool install --global coverlet.console
 
+      # Restore
       - name: Restore backend
         run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
 
       - name: Restore tests
         run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
 
+      # Begin SonarCloud Analysis
       - name: Begin SonarCloud analysis
         run: |
-          dotnet sonarscanner begin /k:"freelancer-hub-backend" /d:sonar.token="${{ env.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="coverage.xml"
+          dotnet sonarscanner begin \
+            /k:"${{ env.SONAR_PROJECT_KEY }}" \
+            /o:"${{ env.SONAR_ORG }}" \
+            /d:sonar.login="${{ env.SONAR_TOKEN }}" \
+            /d:sonar.cs.opencover.reportsPaths="coverage.xml" \
+            /d:sonar.host.url="https://sonarcloud.io"
 
+      # Build backend
       - name: Build backend
         run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-incremental
 
+      # Run tests and generate coverage
       - name: Run tests and generate coverage
         run: |
           coverlet ./back-end/freelancer-hub-backend-tests/bin/Debug/net8.0/freelancer-hub-backend-tests.dll \
@@ -50,9 +61,11 @@ jobs:
             -f opencover \
             -o "coverage.xml"
 
+      # End SonarCloud Analysis
       - name: End SonarCloud analysis
-        run: dotnet sonarscanner end /d:sonar.token="${{ env.SONAR_TOKEN }}"
+        run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
 
+      # Publish backend
       - name: Publish backend
         run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
 
@@ -60,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ${{ env.DOTNET_ROOT }}/myapp
 
   deploy:
     runs-on: windows-latest
@@ -74,7 +87,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
