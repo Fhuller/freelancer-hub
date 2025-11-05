@@ -1,17 +1,13 @@
-﻿using Xunit;
-using Moq;
-using Microsoft.AspNetCore.Mvc;
+﻿using freelancer_hub_backend;
 using freelancer_hub_backend.Controllers;
-using freelancer_hub_backend.Services;
-using freelancer_hub_backend.Utils;
 using freelancer_hub_backend.DTO_s;
 using freelancer_hub_backend.Models;
-using Microsoft.EntityFrameworkCore;
+using freelancer_hub_backend.Services;
+using freelancer_hub_backend.Utils;
 using Microsoft.AspNetCore.Http;
-using System.IO;
-using System.Threading.Tasks;
-using System;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace freelancer_hub_backend_tests.Controllers
 {

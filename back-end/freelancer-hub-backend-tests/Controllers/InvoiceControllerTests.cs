@@ -1,12 +1,9 @@
-﻿using freelancer_hub_backend.Controllers;
+﻿using freelancer_hub_backend;
+using freelancer_hub_backend.Controllers;
 using freelancer_hub_backend.DTO_s;
 using freelancer_hub_backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Xunit;
 
 namespace freelancer_hub_backend_tests.Controllers
 {
