@@ -31,41 +31,24 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
           dotnet tool install --global coverlet.console
 
-      # Restore
       - name: Restore backend
         run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
 
       - name: Restore tests
         run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
 
-      # Begin SonarCloud Analysis
       - name: Begin SonarCloud analysis
-        run: |
-          dotnet sonarscanner begin \
-            /k:"${{ env.SONAR_PROJECT_KEY }}" \
-            /o:"${{ env.SONAR_ORG }}" \
-            /d:sonar.login="${{ env.SONAR_TOKEN }}" \
-            /d:sonar.cs.opencover.reportsPaths="coverage.xml" \
-            /d:sonar.host.url="https://sonarcloud.io"
+        run: dotnet sonarscanner begin /k:"${{ env.SONAR_PROJECT_KEY }}" /o:"${{ env.SONAR_ORG }}" /d:sonar.login="${{ env.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="coverage.xml" /d:sonar.host.url="https://sonarcloud.io"
 
-      # Build backend
       - name: Build backend
         run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-incremental
 
-      # Run tests and generate coverage
       - name: Run tests and generate coverage
-        run: |
-          coverlet ./back-end/freelancer-hub-backend-tests/bin/Debug/net8.0/freelancer-hub-backend-tests.dll \
-            --target "dotnet" \
-            --targetargs "test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --no-build" \
-            -f opencover \
-            -o "coverage.xml"
+        run: coverlet ./back-end/freelancer-hub-backend-tests/bin/Debug/net8.0/freelancer-hub-backend-tests.dll --target "dotnet" --targetargs "test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --no-build" -f opencover -o "coverage.xml"
 
-      # End SonarCloud Analysis
       - name: End SonarCloud analysis
         run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
 
-      # Publish backend
       - name: Publish backend
         run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
 
