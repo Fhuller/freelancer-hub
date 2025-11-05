@@ -29,7 +29,6 @@ jobs:
       - name: Install global tools
         run: |
           dotnet tool install --global dotnet-sonarscanner
-          dotnet tool install --global coverlet.console
 
       - name: Restore backend
         run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
@@ -41,10 +40,10 @@ jobs:
         run: dotnet sonarscanner begin /k:"${{ env.SONAR_PROJECT_KEY }}" /o:"${{ env.SONAR_ORG }}" /d:sonar.login="${{ env.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="coverage.xml" /d:sonar.host.url="https://sonarcloud.io"
 
       - name: Build backend
-        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-incremental
+        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-restore
 
       - name: Run tests and generate coverage
-        run: coverlet ./back-end/freelancer-hub-backend-tests/bin/Debug/net8.0/freelancer-hub-backend-tests.dll --target "dotnet" --targetargs "test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --no-build" -f opencover -o "coverage.xml"
+        run: dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=coverage.xml
 
       - name: End SonarCloud analysis
         run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
