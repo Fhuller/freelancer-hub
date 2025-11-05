@@ -8,9 +8,9 @@ on:
 
 env:
   AZURE_STORAGE_CONNECTIONSTRING: ${{ secrets.AZURE_STORAGE_CONNECTIONSTRING }}
-  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  SONAR_ORG: "Felipe Beppler Huller"
-  SONAR_PROJECT_KEY: "freelancer-hub-backend"
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}           
+  SONAR_ORG: "fhuller482"
+  SONAR_PROJECT_KEY: "Fhuller_freelancer-hub"
 
 jobs:
   build:
