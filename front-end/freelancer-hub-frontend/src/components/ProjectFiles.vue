@@ -150,7 +150,7 @@ function getFileIcon(extension: string): string {
 
 <style scoped>
 .files-section {
-  background: white;
+  background: #fff;
   border-radius: 12px;
   border: 1px solid #e1e5e9;
   padding: 1.5rem;
@@ -186,17 +186,12 @@ function getFileIcon(extension: string): string {
 
 .files-count {
   background: #3b82f6;
-  color: white;
+  color: #fff;
   border-radius: 20px;
   padding: 0.25rem 0.75rem;
   font-size: 0.875rem;
   font-weight: 600;
   margin-left: 0.5rem;
-}
-
-.file-actions {
-  display: flex;
-  gap: 0.75rem;
 }
 
 .file-input {
@@ -205,7 +200,7 @@ function getFileIcon(extension: string): string {
 
 .upload-button {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
+  color: #fff;
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
@@ -303,7 +298,7 @@ function getFileIcon(extension: string): string {
   border-color: #3b82f6;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
   transform: translateY(-2px);
-  background: white;
+  background: #fff;
 }
 
 .file-icon {
@@ -314,7 +309,7 @@ function getFileIcon(extension: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #fff;
   font-size: 1.5rem;
   flex-shrink: 0;
 }
@@ -368,7 +363,7 @@ function getFileIcon(extension: string): string {
 }
 
 .action-button {
-  background: white;
+  background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 0.75rem;
