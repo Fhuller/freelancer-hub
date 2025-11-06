@@ -29,6 +29,9 @@ jobs:
       - name: Install global tools
         run: |
           dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+        env:
+          PATH: $PATH:/home/runner/.dotnet/tools
 
       - name: Restore backend
         run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
@@ -37,13 +40,26 @@ jobs:
         run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
 
       - name: Begin SonarCloud analysis
-        run: dotnet sonarscanner begin /k:"${{ env.SONAR_PROJECT_KEY }}" /o:"${{ env.SONAR_ORG }}" /d:sonar.login="${{ env.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="coverage.xml" /d:sonar.host.url="https://sonarcloud.io"
+        run: |
+          dotnet sonarscanner begin `
+            /k:"${{ env.SONAR_PROJECT_KEY }}" `
+            /o:"${{ env.SONAR_ORG }}" `
+            /d:sonar.login="${{ env.SONAR_TOKEN }}" `
+            /d:sonar.host.url="https://sonarcloud.io" `
+            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml"
 
       - name: Build backend
         run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-restore
 
-      - name: Run tests and generate coverage
-        run: dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=coverage.xml
+      - name: Run tests and collect coverage
+        run: dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --collect:"XPlat Code Coverage" --logger "trx"
+
+      - name: Generate coverage report (optional HTML)
+        run: |
+          reportgenerator `
+            -reports:"back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
+            -targetdir:"coverage-report" `
+            -reporttypes:Html
 
       - name: End SonarCloud analysis
         run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
