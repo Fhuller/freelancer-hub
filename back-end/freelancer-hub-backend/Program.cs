@@ -2,6 +2,7 @@
 using freelancer_hub_backend.Repository;
 using freelancer_hub_backend.Services;
 using freelancer_hub_backend.Settings;
+using freelancer_hub_backend.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,7 +20,9 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.Configure<AzureStorageSettings>(
     builder.Configuration.GetSection("AzureStorage"));
-builder.Services.AddScoped<BlobStorageService>();
+
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<IUserUtils, UserUtils>();
 
 builder.Services.AddSwaggerGen(c =>
 {
