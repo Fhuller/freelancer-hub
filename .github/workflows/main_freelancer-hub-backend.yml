@@ -57,8 +57,8 @@ jobs:
         run: |
           dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj `
             /p:CollectCoverage=true `
-            /p:CoverletOutput=./back-end/freelancer-hub-backend-tests/TestResults/coverage.cobertura.xml `
             /p:CoverletOutputFormat=cobertura `
+            /p:CoverletOutput=./back-end/freelancer-hub-backend-tests/TestResults/coverage `
             /p:Exclude="[xunit.*]*" `
             --logger "trx" `
             --results-directory ./back-end/freelancer-hub-backend-tests/TestResults
@@ -66,9 +66,9 @@ jobs:
       - name: Generate coverage report (HTML + Cobertura XML)
         run: |
           reportgenerator `
-            -reports:"./back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
-            -targetdir:"./back-end/freelancer-hub-backend-tests/coverage-report" `
-            -reporttypes:Html;Cobertura
+            "-reports:./back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
+            "-targetdir:./back-end/freelancer-hub-backend-tests/coverage-report" `
+            "-reporttypes:Html;Cobertura"
 
       - name: Check generated coverage files
         run: dir ./back-end/freelancer-hub-backend-tests/coverage-report /s
