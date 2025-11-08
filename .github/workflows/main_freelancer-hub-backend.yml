@@ -39,7 +39,6 @@ jobs:
       - name: Restore tests
         run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
 
-      # Início da análise SonarCloud (antes do build e test)
       - name: Begin SonarCloud analysis
         run: |
           dotnet sonarscanner begin `
@@ -47,7 +46,7 @@ jobs:
             /o:"${{ env.SONAR_ORG }}" `
             /d:sonar.login="${{ env.SONAR_TOKEN }}" `
             /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.cs.opencover.reportsPaths="back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
+            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" ` # <-- AQUI ESTÁ A MUDANÇA
             /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
             /d:sonar.coverage.exclusions="**/Migrations/**,**/coverage-report/**"
 
@@ -107,3 +106,4 @@ jobs:
           app-name: 'freelancer-hub-backend'
           slot-name: 'Production'
           package: .
+
