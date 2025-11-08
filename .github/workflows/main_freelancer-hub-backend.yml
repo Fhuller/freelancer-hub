@@ -1,31 +1,44 @@
 name: Build, test and deploy ASP.Net Core app to Azure Web App - freelancer-hub-backend
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+
 env:
   AZURE_STORAGE_CONNECTIONSTRING: ${{ secrets.AZURE_STORAGE_CONNECTIONSTRING }}
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   SONAR_ORG: "fhuller482"
   SONAR_PROJECT_KEY: "Fhuller_freelancer-hub"
+
 jobs:
   build:
     runs-on: windows-latest
     permissions:
       contents: read
+
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
+
       - name: Install global tools
         run: |
           dotnet tool install --global dotnet-sonarscanner
           dotnet tool install --global dotnet-reportgenerator-globaltool
-      - name: Restore solution
-        run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.sln
+        env:
+          PATH: $PATH:/home/runner/.dotnet/tools
+
+      - name: Restore backend
+        run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
+
+      - name: Restore tests
+        run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
+
       - name: Begin SonarCloud analysis
         run: |
           dotnet sonarscanner begin `
@@ -33,49 +46,65 @@ jobs:
             /o:"${{ env.SONAR_ORG }}" `
             /d:sonar.login="${{ env.SONAR_TOKEN }}" `
             /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
+            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend-tests/coverage-report/Cobertura.xml" `
             /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
             /d:sonar.coverage.exclusions="**/Migrations/**,**/coverage-report/**"
-      - name: Build solution
-        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.sln --no-restore
+
+      - name: Build backend
+        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-restore
+
       - name: Run tests and collect coverage
         run: |
           dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj `
-            --collect:"XPlat Code Coverage" `
+            /p:CollectCoverage=true `
+            /p:CoverletOutput=./back-end/freelancer-hub-backend-tests/TestResults/coverage.cobertura.xml `
+            /p:CoverletOutputFormat=cobertura `
+            /p:Exclude="[xunit.*]*" `
             --logger "trx" `
             --results-directory ./back-end/freelancer-hub-backend-tests/TestResults
-      - name: Generate coverage report (HTML inside test project)
+
+      - name: Generate coverage report (HTML + Cobertura XML)
         run: |
           reportgenerator `
             -reports:"./back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
             -targetdir:"./back-end/freelancer-hub-backend-tests/coverage-report" `
-            -reporttypes:Html
+            -reporttypes:Html;Cobertura
+
+      - name: Check generated coverage files
+        run: dir ./back-end/freelancer-hub-backend-tests/coverage-report /s
+
       - name: End SonarCloud analysis
         run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
+
       - name: Publish backend
         run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
           path: ${{ env.DOTNET_ROOT }}/myapp
+
   deploy:
     runs-on: windows-latest
     needs: build
     permissions:
       id-token: write
       contents: read
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_128C7F96EAC3414CA14721AC85B9886F }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0BDA7162115F4343A59EF69D3C06C90A }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E8D4DE4A215D444F81DC912C92525AA4 }}
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
