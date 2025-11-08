@@ -20,6 +20,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
@@ -30,21 +32,29 @@ jobs:
         run: |
           dotnet tool install --global dotnet-sonarscanner
           dotnet tool install --global dotnet-reportgenerator-globaltool
-        env:
-          PATH: $PATH:/home/runner/.dotnet/tools
 
-      - name: Restore backend
-        run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
+      - name: Begin SonarCloud analysis
+        run: |
+          dotnet sonarscanner begin `
+            /k:"${{ env.SONAR_PROJECT_KEY }}" `
+            /o:"${{ env.SONAR_ORG }}" `
+            /d:sonar.login="${{ env.SONAR_TOKEN }}" `
+            /d:sonar.host.url="https://sonarcloud.io" `
+            /d:sonar.cs.cobertura.reportsPaths="coverage-report/cobertura.xml" `
+            /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs"
 
-      - name: Restore tests
-        run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
-
-      - name: Build backend
-        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-restore
+      - name: Restore and build
+        run: |
+          dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
+          dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
+          dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-restore --configuration Release
 
       - name: Run tests and collect coverage
         run: |
           dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj `
+            --no-build `
+            --configuration Release `
             --collect:"XPlat Code Coverage" `
             --logger "trx" `
             --results-directory ./back-end/freelancer-hub-backend-tests/TestResults
@@ -74,17 +84,6 @@ jobs:
           if (Test-Path "./coverage-report") {
             Get-ChildItem -Path "./coverage-report" -Recurse | ForEach-Object { Write-Host "File: $($_.Name) - Size: $($_.Length) bytes" }
           }
-
-      - name: Begin SonarCloud analysis
-        run: |
-          dotnet sonarscanner begin `
-            /k:"${{ env.SONAR_PROJECT_KEY }}" `
-            /o:"${{ env.SONAR_ORG }}" `
-            /d:sonar.login="${{ env.SONAR_TOKEN }}" `
-            /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.cs.cobertura.reportsPaths="coverage-report/cobertura.xml" `
-            /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
-            /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs"
 
       - name: End SonarCloud analysis
         run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
