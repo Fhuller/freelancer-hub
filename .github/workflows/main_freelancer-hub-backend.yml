@@ -19,39 +19,28 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
 
-      - name: Install global tools (SonarScanner + ReportGenerator)
+      - name: Install global tools
         run: |
           dotnet tool install --global dotnet-sonarscanner
           dotnet tool install --global dotnet-reportgenerator-globaltool
         env:
-          PATH: C:\Users\runneradmin\.dotnet\tools;${{ env.PATH }}
+          PATH: $PATH:/home/runner/.dotnet/tools
 
-      - name: Restore backend solution
-        run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.sln
+      - name: Restore backend
+        run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
 
-      - name: Begin SonarCloud analysis
-        env:
-          PATH: C:\Users\runneradmin\.dotnet\tools;${{ env.PATH }}
-        run: |
-          dotnet sonarscanner begin `
-            /k:"${{ env.SONAR_PROJECT_KEY }}" `
-            /o:"${{ env.SONAR_ORG }}" `
-            /d:sonar.login="${{ env.SONAR_TOKEN }}" `
-            /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend-tests/coverage-report/Cobertura.xml" `
-            /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
-            /d:sonar.coverage.exclusions="**/Migrations/**,**/coverage-report/**"
+      - name: Restore tests
+        run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
 
       - name: Build backend
-        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.sln --configuration Release --no-restore
+        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-restore
 
       - name: Run tests and collect coverage
         run: |
@@ -60,27 +49,47 @@ jobs:
             --logger "trx" `
             --results-directory ./back-end/freelancer-hub-backend-tests/TestResults
 
-      - name: Check coverage files (debug)
-        run: dir ./back-end/freelancer-hub-backend-tests/TestResults /s
-
-      - name: Generate coverage report (HTML + Cobertura XML)
-        env:
-          PATH: C:\Users\runneradmin\.dotnet\tools;${{ env.PATH }}
+      - name: Generate coverage report and prepare for Sonar
         run: |
-          reportgenerator `
-            "-reports:./back-end/freelancer-hub-backend-tests/TestResults/**/*.cobertura.xml" `
-            "-targetdir:./back-end/freelancer-hub-backend-tests/coverage-report" `
-            "-reporttypes:Html;Cobertura"
+          # Create coverage-report directory in root
+          New-Item -ItemType Directory -Path "./coverage-report" -Force
+          
+          # Find the coverage file and copy to root coverage-report directory
+          $coverageFiles = Get-ChildItem -Path "./back-end/freelancer-hub-backend-tests/TestResults" -Recurse -Filter "coverage.cobertura.xml"
+          if ($coverageFiles) {
+            Copy-Item $coverageFiles[0].FullName -Destination "./coverage-report/cobertura.xml"
+            Write-Host "Coverage file copied to: ./coverage-report/cobertura.xml"
+            Write-Host "File exists: $(Test-Path './coverage-report/cobertura.xml')"
+            Write-Host "File size: $(Get-Item './coverage-report/cobertura.xml').Length bytes"
+          } else {
+            Write-Host "No coverage files found!"
+            Get-ChildItem -Path . -Recurse -Name "*cobertura.xml" | Write-Host
+          }
 
-      - name: Check generated coverage-report (debug)
-        run: dir ./back-end/freelancer-hub-backend-tests/coverage-report /s
+      - name: Debug - List coverage files
+        run: |
+          Write-Host "=== All coverage files found ==="
+          Get-ChildItem -Path . -Recurse -Name "*cobertura.xml" | ForEach-Object { Write-Host "Found: $_" }
+          Write-Host "=== Coverage report directory contents ==="
+          if (Test-Path "./coverage-report") {
+            Get-ChildItem -Path "./coverage-report" -Recurse | ForEach-Object { Write-Host "File: $($_.Name) - Size: $($_.Length) bytes" }
+          }
+
+      - name: Begin SonarCloud analysis
+        run: |
+          dotnet sonarscanner begin `
+            /k:"${{ env.SONAR_PROJECT_KEY }}" `
+            /o:"${{ env.SONAR_ORG }}" `
+            /d:sonar.login="${{ env.SONAR_TOKEN }}" `
+            /d:sonar.host.url="https://sonarcloud.io" `
+            /d:sonar.cs.cobertura.reportsPaths="coverage-report/cobertura.xml" `
+            /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs"
 
       - name: End SonarCloud analysis
-        env:
-          PATH: C:\Users\runneradmin\.dotnet\tools;${{ env.PATH }}
         run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
 
-      - name: Publish backend app
+      - name: Publish backend
         run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
 
       - name: Upload artifact for deployment job
