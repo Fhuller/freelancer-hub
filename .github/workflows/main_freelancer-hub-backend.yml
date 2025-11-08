@@ -32,54 +32,56 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
           dotnet tool install --global dotnet-reportgenerator-globaltool
         env:
-          PATH: $PATH:/home/runner/.dotnet/tools
+          PATH: C:\Users\runneradmin\.dotnet\tools;${{ env.PATH }}
 
       - name: Restore backend solution
         run: dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.sln
 
       - name: Begin SonarCloud analysis
         env:
-          PATH: C:\Users\runneradmin\.dotnet\tools:$Env:PATH
+          PATH: C:\Users\runneradmin\.dotnet\tools;${{ env.PATH }}
         run: |
           dotnet sonarscanner begin `
             /k:"${{ env.SONAR_PROJECT_KEY }}" `
             /o:"${{ env.SONAR_ORG }}" `
             /d:sonar.login="${{ env.SONAR_TOKEN }}" `
             /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend/back-end/freelancer-hub-backend-tests/coverage-report/Cobertura.xml" `
+            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend-tests/coverage-report/Cobertura.xml" `
             /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
             /d:sonar.coverage.exclusions="**/Migrations/**,**/coverage-report/**"
 
-      - name: Build solution
+      - name: Build backend
         run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.sln --configuration Release --no-restore
 
       - name: Run tests and collect coverage
         run: |
-          dotnet test ./back-end/freelancer-hub-backend/back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj `
+          dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj `
             --collect:"XPlat Code Coverage" `
             --logger "trx" `
-            --results-directory ./back-end/freelancer-hub-backend/back-end/freelancer-hub-backend-tests/TestResults
+            --results-directory ./back-end/freelancer-hub-backend-tests/TestResults
 
-      - name: Check coverage files (for debug)
-        run: dir ./back-end/freelancer-hub-backend/back-end/freelancer-hub-backend-tests/TestResults /s
+      - name: Check coverage files (debug)
+        run: dir ./back-end/freelancer-hub-backend-tests/TestResults /s
 
       - name: Generate coverage report (HTML + Cobertura XML)
+        env:
+          PATH: C:\Users\runneradmin\.dotnet\tools;${{ env.PATH }}
         run: |
           reportgenerator `
-            "-reports:./back-end/freelancer-hub-backend/back-end/freelancer-hub-backend-tests/TestResults/**/*.cobertura.xml" `
-            "-targetdir:./back-end/freelancer-hub-backend/back-end/freelancer-hub-backend-tests/coverage-report" `
+            "-reports:./back-end/freelancer-hub-backend-tests/TestResults/**/*.cobertura.xml" `
+            "-targetdir:./back-end/freelancer-hub-backend-tests/coverage-report" `
             "-reporttypes:Html;Cobertura"
 
-      - name: Check generated coverage-report (for debug)
-        run: dir ./back-end/freelancer-hub-backend/back-end/freelancer-hub-backend-tests/coverage-report /s
+      - name: Check generated coverage-report (debug)
+        run: dir ./back-end/freelancer-hub-backend-tests/coverage-report /s
 
       - name: End SonarCloud analysis
         env:
-          PATH: C:\Users\runneradmin\.dotnet\tools:$Env:PATH
+          PATH: C:\Users\runneradmin\.dotnet\tools;${{ env.PATH }}
         run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
 
       - name: Publish backend app
-        run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
+        run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
