@@ -40,13 +40,13 @@ jobs:
             /o:"${{ env.SONAR_ORG }}" `
             /d:sonar.login="${{ env.SONAR_TOKEN }}" `
             /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.cs.cobertura.reportsPaths="coverage-report/cobertura.xml" `
-            /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
-            /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs"
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" `
+            /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html,**/wwwroot/**" `
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs,**/*Tests.cs,**/*Test.cs" `
+            /d:sonar.sourceEncoding="UTF-8"
 
       - name: Build all projects
         run: |
-          # Build both backend and test projects
           dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release
           dotnet build ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --configuration Release
 
@@ -54,31 +54,18 @@ jobs:
         run: |
           dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj `
             --configuration Release `
+            --no-build `
             --collect:"XPlat Code Coverage" `
             --logger "trx" `
-            --results-directory ./back-end/freelancer-hub-backend-tests/TestResults `
-            --verbosity normal
+            --results-directory ./TestResults `
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
-      - name: Generate coverage report and prepare for Sonar
+      - name: List coverage files (debug)
         run: |
-          # Create coverage-report directory in root
-          New-Item -ItemType Directory -Path "./coverage-report" -Force
-          
-          # Find the coverage file and copy to root coverage-report directory
-          $coverageFiles = Get-ChildItem -Path "./back-end/freelancer-hub-backend-tests/TestResults" -Recurse -Filter "coverage.cobertura.xml"
-          if ($coverageFiles) {
-            Copy-Item $coverageFiles[0].FullName -Destination "./coverage-report/cobertura.xml"
-            Write-Host "Coverage file copied to: ./coverage-report/cobertura.xml"
-            Write-Host "File exists: $(Test-Path './coverage-report/cobertura.xml')"
-            Write-Host "File size: $(Get-Item './coverage-report/cobertura.xml').Length bytes"
-            
-            # Show content of coverage file for debugging
-            Write-Host "=== First few lines of coverage file ==="
-            Get-Content "./coverage-report/cobertura.xml" -Head 10
-          } else {
-            Write-Host "No coverage files found!"
-            Write-Host "Searching in:"
-            Get-ChildItem -Path "./back-end/freelancer-hub-backend-tests/TestResults" -Recurse | Write-Host
+          Write-Host "=== Looking for coverage files ==="
+          Get-ChildItem -Path "./TestResults" -Recurse -Filter "*.xml" | ForEach-Object {
+            Write-Host "Found: $($_.FullName)"
+            Write-Host "Size: $($_.Length) bytes"
           }
 
       - name: End SonarCloud analysis
