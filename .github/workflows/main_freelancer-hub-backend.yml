@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Importante para o SonarCloud
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
@@ -44,20 +44,20 @@ jobs:
             /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
             /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs"
 
-      - name: Restore and build
+      - name: Build all projects
         run: |
-          dotnet restore ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj
-          dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
-          dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-restore --configuration Release
+          # Build both backend and test projects
+          dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release
+          dotnet build ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --configuration Release
 
       - name: Run tests and collect coverage
         run: |
           dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj `
-            --no-build `
             --configuration Release `
             --collect:"XPlat Code Coverage" `
             --logger "trx" `
-            --results-directory ./back-end/freelancer-hub-backend-tests/TestResults
+            --results-directory ./back-end/freelancer-hub-backend-tests/TestResults `
+            --verbosity normal
 
       - name: Generate coverage report and prepare for Sonar
         run: |
@@ -71,18 +71,14 @@ jobs:
             Write-Host "Coverage file copied to: ./coverage-report/cobertura.xml"
             Write-Host "File exists: $(Test-Path './coverage-report/cobertura.xml')"
             Write-Host "File size: $(Get-Item './coverage-report/cobertura.xml').Length bytes"
+            
+            # Show content of coverage file for debugging
+            Write-Host "=== First few lines of coverage file ==="
+            Get-Content "./coverage-report/cobertura.xml" -Head 10
           } else {
             Write-Host "No coverage files found!"
-            Get-ChildItem -Path . -Recurse -Name "*cobertura.xml" | Write-Host
-          }
-
-      - name: Debug - List coverage files
-        run: |
-          Write-Host "=== All coverage files found ==="
-          Get-ChildItem -Path . -Recurse -Name "*cobertura.xml" | ForEach-Object { Write-Host "Found: $_" }
-          Write-Host "=== Coverage report directory contents ==="
-          if (Test-Path "./coverage-report") {
-            Get-ChildItem -Path "./coverage-report" -Recurse | ForEach-Object { Write-Host "File: $($_.Name) - Size: $($_.Length) bytes" }
+            Write-Host "Searching in:"
+            Get-ChildItem -Path "./back-end/freelancer-hub-backend-tests/TestResults" -Recurse | Write-Host
           }
 
       - name: End SonarCloud analysis
