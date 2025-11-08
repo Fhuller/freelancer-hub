@@ -46,7 +46,7 @@ jobs:
             /o:"${{ env.SONAR_ORG }}" `
             /d:sonar.login="${{ env.SONAR_TOKEN }}" `
             /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" ` # <-- AQUI ESTÁ A MUDANÇA
+            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
             /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
             /d:sonar.coverage.exclusions="**/Migrations/**,**/coverage-report/**"
 
@@ -106,4 +106,5 @@ jobs:
           app-name: 'freelancer-hub-backend'
           slot-name: 'Production'
           package: .
+
 
