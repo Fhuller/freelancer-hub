@@ -8,7 +8,7 @@ on:
 
 env:
   AZURE_STORAGE_CONNECTIONSTRING: ${{ secrets.AZURE_STORAGE_CONNECTIONSTRING }}
-  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}           
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   SONAR_ORG: "fhuller482"
   SONAR_PROJECT_KEY: "Fhuller_freelancer-hub"
 
@@ -39,6 +39,7 @@ jobs:
       - name: Restore tests
         run: dotnet restore ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj
 
+      # Início da análise SonarCloud (antes do build e test)
       - name: Begin SonarCloud analysis
         run: |
           dotnet sonarscanner begin `
@@ -46,13 +47,19 @@ jobs:
             /o:"${{ env.SONAR_ORG }}" `
             /d:sonar.login="${{ env.SONAR_TOKEN }}" `
             /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.cs.cobertura.reportsPaths="back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml"
+            /d:sonar.cs.opencover.reportsPaths="back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
+            /d:sonar.exclusions="**/Migrations/**,**/coverage-report/**,**/*.html" `
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/coverage-report/**"
 
       - name: Build backend
         run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --no-restore
 
       - name: Run tests and collect coverage
-        run: dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --collect:"XPlat Code Coverage" --logger "trx"
+        run: |
+          dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj `
+            --collect:"XPlat Code Coverage" `
+            --logger "trx" `
+            --results-directory ./back-end/freelancer-hub-backend-tests/TestResults
 
       - name: Generate coverage report (optional HTML)
         run: |
