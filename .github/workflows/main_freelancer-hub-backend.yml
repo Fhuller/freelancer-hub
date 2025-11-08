@@ -61,11 +61,11 @@ jobs:
             --logger "trx" `
             --results-directory ./back-end/freelancer-hub-backend-tests/TestResults
 
-      - name: Generate coverage report (optional HTML)
+      - name: Generate coverage report (HTML inside test project)
         run: |
           reportgenerator `
-            -reports:"back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
-            -targetdir:"coverage-report" `
+            -reports:"./back-end/freelancer-hub-backend-tests/TestResults/**/coverage.cobertura.xml" `
+            -targetdir:"./back-end/freelancer-hub-backend-tests/coverage-report" `
             -reporttypes:Html
 
       - name: End SonarCloud analysis
