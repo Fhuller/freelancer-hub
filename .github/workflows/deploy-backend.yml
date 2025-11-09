@@ -46,7 +46,7 @@ jobs:
           name: .net-app
 
       - name: Login to Azure
-        uses: azure/login@v2.0.0
+        uses: azure/login@a457da9
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_128C7F96EAC3414CA14721AC85B9886F }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0BDA7162115F4343A59EF69D3C06C90A }}
@@ -54,7 +54,7 @@ jobs:
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3.0.0
+        uses: azure/webapps-deploy@122b7ec
         with:
           app-name: 'freelancer-hub-backend'
           slot-name: 'Production'
