@@ -40,14 +40,21 @@ jobs:
       - name: Run tests with coverage
         run: npm run test
 
+      - name: Verify coverage file exists (debug)
+        run: |
+          echo "=== Listing coverage folder ==="
+          ls -R coverage || echo "Coverage folder not found"
+
       - name: Upload coverage to SonarCloud
         run: |
           npx sonar-scanner \
             -Dsonar.organization="${{ env.SONAR_ORG }}" \
             -Dsonar.projectKey="${{ env.SONAR_PROJECT_KEY }}" \
             -Dsonar.sources="src" \
+            -Dsonar.tests="tests" \
             -Dsonar.javascript.lcov.reportPaths="coverage/lcov.info" \
             -Dsonar.exclusions="**/tests/**,**/*.spec.ts,**/*.test.ts" \
+            -Dsonar.coverage.exclusions="**/tests/**,**/*.spec.ts,**/*.test.ts" \
             -Dsonar.host.url="https://sonarcloud.io" \
             -Dsonar.login="${{ env.SONAR_TOKEN }}" \
             -Dsonar.sourceEncoding="UTF-8"
