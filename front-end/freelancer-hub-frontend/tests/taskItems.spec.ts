@@ -20,7 +20,7 @@ import {
   createTaskItem,
   updateTaskItem,
   deleteTaskItem
-} from '@/services/taskitems' 
+} from '@/services/taskItems' 
 
 describe('TaskItems Service', () => {
 
