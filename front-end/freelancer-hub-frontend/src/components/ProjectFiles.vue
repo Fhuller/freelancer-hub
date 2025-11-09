@@ -164,7 +164,6 @@ function getFileIcon(extension: string): string {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
   border-bottom: 2px solid #f1f5f9;
   padding: 0 0 1rem 0;
 }
