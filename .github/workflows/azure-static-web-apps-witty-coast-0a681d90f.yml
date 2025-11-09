@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: Build, Test and Deploy Vue App to Azure Static Web App
 
 on:
   push:
@@ -9,30 +9,63 @@ on:
     branches:
       - main
 
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_ORG: "fhuller482"
+  SONAR_PROJECT_KEY: "Fhuller_freelancer-hub"
+
 jobs:
-  build_and_deploy_job:
+  build_test_sonar_deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
+    name: Build, Test, Sonar and Deploy Frontend
 
-      - uses: actions/setup-node@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          node-version: "18"
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
       - name: Install dependencies
-        run: npm install
         working-directory: ./front-end/freelancer-hub-frontend
+        run: npm ci
 
-      - name: Build
+      - name: Run tests with coverage
+        working-directory: ./front-end/freelancer-hub-frontend
+        run: npm test
+
+      - name: List coverage files (debug)
+        run: |
+          echo "=== Procurando cobertura do frontend ==="
+          find ./front-end/freelancer-hub-frontend/coverage -name "*.info" || echo "Nenhum arquivo encontrado"
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: ./front-end/freelancer-hub-frontend
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: "https://sonarcloud.io"
+          SONAR_ORG: ${{ env.SONAR_ORG }}
+          SONAR_PROJECT_KEY: ${{ env.SONAR_PROJECT_KEY }}
+          SONAR_SCANNER_OPTS: >
+            -Dsonar.sources=src
+            -Dsonar.tests=tests
+            -Dsonar.test.inclusions="**/*.spec.ts,**/*.test.ts"
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.exclusions="**/dist/**,**/node_modules/**"
+
+      - name: Build Vue app
+        working-directory: ./front-end/freelancer-hub-frontend
         run: npm run build
-        working-directory: ./front-end/freelancer-hub-frontend
 
-      - name: Build And Deploy
+      - name: Deploy to Azure Static Web App
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -40,13 +73,13 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "./front-end/freelancer-hub-frontend"
-          api_location: ""
           output_location: "dist"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
+
     steps:
       - uses: Azure/static-web-apps-deploy@v1
         with:
