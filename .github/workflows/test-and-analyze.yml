@@ -37,7 +37,7 @@ jobs:
 
       - name: Run frontend tests with coverage
         working-directory: ./front-end/freelancer-hub-frontend
-        run: npm run test -- --coverage
+        run: npm run test
 
       - name: Verify frontend coverage file
         run: |
