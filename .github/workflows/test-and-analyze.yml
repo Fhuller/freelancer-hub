@@ -1,0 +1,96 @@
+name: Test and Analyze Full Stack
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_ORG: "fhuller482"
+  SONAR_PROJECT_KEY: "Fhuller_freelancer-hub"
+
+jobs:
+  test-and-analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ===== FRONTEND =====
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        working-directory: ./front-end/freelancer-hub-frontend
+        run: npm ci
+
+      - name: Run frontend tests with coverage
+        working-directory: ./front-end/freelancer-hub-frontend
+        run: npm run test -- --coverage
+
+      - name: Verify frontend coverage file
+        run: |
+          echo "=== Frontend Coverage Files ==="
+          ls -R ./front-end/freelancer-hub-frontend/coverage || echo "Frontend coverage not found"
+
+      # ===== BACKEND =====
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Build backend projects
+        run: |
+          dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release
+          dotnet build ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj --configuration Release
+
+      - name: Run backend tests with coverage
+        run: |
+          dotnet test ./back-end/freelancer-hub-backend-tests/freelancer-hub-backend-tests.csproj \
+            --configuration Release \
+            --no-build \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+      - name: Verify backend coverage files
+        run: |
+          echo "=== Backend Coverage Files ==="
+          find ./TestResults -name "*.xml" -type f
+
+      # ===== SONARCLOUD ANALYSIS =====
+      - name: Install SonarCloud scanner
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+
+      - name: Begin SonarCloud analysis
+        run: |
+          dotnet sonarscanner begin \
+            /k:"${{ env.SONAR_PROJECT_KEY }}" \
+            /o:"${{ env.SONAR_ORG }}" \
+            /d:sonar.login="${{ env.SONAR_TOKEN }}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
+            /d:sonar.javascript.lcov.reportPaths="front-end/freelancer-hub-frontend/coverage/lcov.info" \
+            /d:sonar.sources="back-end/freelancer-hub-backend,front-end/freelancer-hub-frontend/src" \
+            /d:sonar.tests="back-end/freelancer-hub-backend-tests,front-end/freelancer-hub-frontend/tests" \
+            /d:sonar.exclusions="**/Migrations/**,**/node_modules/**,**/dist/**,**/coverage/**,**/*.html,**/wwwroot/**" \
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs,**/*Tests.cs,**/*Test.cs,**/*.spec.ts,**/*.test.ts,**/tests/**" \
+            /d:sonar.sourceEncoding="UTF-8"
+
+      - name: Build for SonarCloud
+        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release
+
+      - name: End SonarCloud analysis
+        run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
