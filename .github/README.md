@@ -4,10 +4,10 @@ Um sistema completo para gerenciamento de clientes, projetos e finanças desenvo
 
 ## 📋 Visão Geral
 
-FreelanceHub é uma solução integrada que permite aos freelancers manter controle total sobre seus negócios. O sistema oferece ferramentas para gerenciar clientes, acompanhar projetos, gerar faturas, monitorar pagamentos e analisar o desempenho através de relatórios detalhados.
+FreelanceHub é uma solução integrada que permite aos freelancers manter controle total sobre seus negócios. O sistema oferece ferramentas para gerenciar clientes, acompanhar projetos, gerar faturas, monitorar pagamentos e gerenciar tarefas e arquivos.
 
 - RFC: https://www.overleaf.com/read/xthqfscqnfrw#653fbd
-- Projeto em prod: https://freelancer-hub-tau.vercel.app
+- Projeto em prod: https://freelancerhub-portfolio.com.br/
 
 ## 🚀 Tecnologias
 
@@ -24,36 +24,23 @@ FreelanceHub é uma solução integrada que permite aos freelancers manter contr
 
 ### Módulo de Gestão de Clientes
 - Cadastro e gerenciamento de clientes
-- Histórico de interações e projetos por cliente
-- Sistema de categorização e notas
-- Armazenamento de documentos e arquivos relacionados
+- Histórico de projetos por cliente
 
 ### Módulo de Gestão de Projetos e Entregas
 - Criação e acompanhamento de projetos
-- Definição de entregas (milestones)
-- Configuração de prazos e lembretes
+- Definição de tarefas
 - Acompanhamento de status e progresso
 - Gestão de documentos e arquivos por projeto
+- Rastreamento de horas por projeto
+- Geração de documentos de cobrança por hora
 
 ### Módulo de Gestão Financeira
-- Geração de invoices/faturas
+- Controle de invoices/faturas
 - Controle de pagamentos recebidos
-- Registro de despesas por projeto
 - Visualização de balanço financeiro
-- Exportação de dados para contabilidade
-
-### Módulo de Relatórios
-- Dashboard com métricas principais
-- Relatórios de produtividade
-- Análise financeira por período
-- Relatórios de clientes e projetos
-- Exportação em vários formatos
 
 ## 📝 Planos Futuros
 
 - Integração com plataformas de freelance populares
 - Sistema de cobrança integrado
-
-- Extensão de funcionalidades de gestão financeira
-
-
+- Adição de calendário público
