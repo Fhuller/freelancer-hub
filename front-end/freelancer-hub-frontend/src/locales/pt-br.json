@@ -39,5 +39,21 @@
   "totalProjects": "Total Projetos",
   "totalInvoices": "Total Faturas",
   "totalTasks": "Total Tarefas",
-  "totalClients": "Total Clientes"
+  "totalClients": "Total Clientes",
+  "dashboardPage": {
+    "loading": "Carregando dados do dashboard...",
+    "projectsTitle": "Projetos em Andamento",
+    "projectsDescription": "Projetos ativos no momento",
+    "projectsTotalSuffix": "projetos no total",
+    "invoicesTitle": "Faturas do Mês",
+    "invoicesDescription": "Resumo financeiro mensal",
+    "invoiceSingular": "emissão",
+    "invoicePlural": "emissões",
+    "thisMonth": "este mês",
+    "tasksTitle": "Tarefas em Andamento",
+    "tasksDescription": "Tarefas sendo executadas",
+    "tasksTotalSuffix": "tarefas no total",
+    "clientsTitle": "Total de Clientes",
+    "clientsDescription": "Clientes cadastrados"
+  }
 }

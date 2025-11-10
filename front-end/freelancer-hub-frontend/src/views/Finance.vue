@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import AuthenticatedLayout from '../layouts/AuthenticatedLayout.vue'
-import { fetchInvoices, deleteInvoice } from '../services/invoices'
+import { fetchInvoices, deleteInvoice, updateInvoice } from '../services/invoices'
 import { PdfService, type PdfInvoiceData } from '../services/pdf'
 import { formatCurrency } from '../services/projects'
 
@@ -16,6 +16,7 @@ interface Invoice {
   pdfUrl?: string
   projectName: string
   clientName: string
+  status?: string
 }
 
 // Estados reativos
@@ -26,6 +27,7 @@ const searchQuery = ref('')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const generatingPdf = ref<string | null>(null)
+const updatingStatus = ref<string | null>(null)
 
 // Carregar invoices
 const loadInvoices = async () => {
@@ -109,6 +111,41 @@ const handleDelete = async (id: string) => {
   }
 }
 
+// Toggle invoice status (pending <-> paid) and call service to update
+const toggleStatus = async (invoice: Invoice) => {
+  try {
+    const current = (invoice.status ?? '').toLowerCase()
+    const newStatus = current === 'pending' ? 'paid' : 'pending'
+    updatingStatus.value = invoice.id
+
+    // optimistic local update (optional)
+    const previousStatus = invoice.status
+    invoice.status = newStatus
+
+    // call service (assumes signature updateInvoice(id, payload))
+    await updateInvoice(invoice.id, {
+      issueDate: invoice.issueDate,
+      dueDate: invoice.dueDate,
+      amount: invoice.amount,
+      status: newStatus,
+      pdfUrl: invoice.pdfUrl
+    })
+
+    // update succeeded -> keep local change
+  } catch (err) {
+    console.error('Erro ao atualizar status do invoice:', err)
+    error.value = 'Erro ao atualizar status do invoice'
+    // revert optimistic change if needed
+    const idx = invoices.value.findIndex(i => i.id === invoice.id)
+    if (idx !== -1) {
+      invoices.value[idx].status = invoices.value[idx].status === 'paid' ? 'pending' : 'paid'
+    }
+    setTimeout(() => { error.value = null }, 5000)
+  } finally {
+    updatingStatus.value = null
+  }
+}
+
 // Formatações
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('pt-BR')
@@ -186,6 +223,7 @@ onMounted(() => {
                 <th>Emissão</th>
                 <th>Vencimento</th>
                 <th>Valor</th>
+                <th>Pago</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -196,11 +234,24 @@ onMounted(() => {
                 <td>{{ formatDate(invoice.issueDate) }}</td>
                 <td>{{ formatDate(invoice.dueDate) }}</td>
                 <td class="amount">{{ formatCurrency(invoice.amount) }}</td>
+
+                <!-- Paid checkbox -->
+                <td class="paid-checkbox">
+                  <input
+                    type="checkbox"
+                    :checked="(invoice.status || '').toLowerCase() === 'paid'"
+                    @change="toggleStatus(invoice)"
+                    :disabled="updatingStatus === invoice.id"
+                    :title="(invoice.status || '').toLowerCase() === 'paid' ? 'Marcar como pendente' : 'Marcar como pago'"
+                  />
+                </td>
+
                 <td class="actions">
                   <button 
                     @click="generateInvoicePdf(invoice)"
                     class="action-btn download-btn"
                     :title="'Baixar PDF'"
+                    :disabled="updatingStatus === invoice.id"
                   >
                     <i class="fas fa-download" ></i>
                   </button>
@@ -208,6 +259,7 @@ onMounted(() => {
                     @click="handleDelete(invoice.id)"
                     class="action-btn delete-btn"
                     title="Excluir"
+                    :disabled="updatingStatus === invoice.id"
                   >
                     <i class="fas fa-trash"></i>
                   </button>
@@ -572,6 +624,10 @@ onMounted(() => {
 .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.paid-checkbox {
+  padding: 1rem 1.5rem;
 }
 
 /* Responsividade */
