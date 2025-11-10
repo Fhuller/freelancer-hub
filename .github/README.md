@@ -20,6 +20,9 @@ FreelanceHub é uma solução integrada que permite aos freelancers manter contr
 - [Frontend](../front-end/README.md) – Detalhes do frontend, como setup, dependências e execução.
 - [Backend](../back-end/README.md) – Detalhes do backend, APIs, banco de dados e execução.
 
+### Arquitetura do Sistema
+![Arquitetura do Sistema](../docs/diagrama_arquitetura.png)
+
 ## 🔑 Funcionalidades Principais
 
 ### Módulo de Gestão de Clientes
@@ -44,3 +47,4 @@ FreelanceHub é uma solução integrada que permite aos freelancers manter contr
 - Integração com plataformas de freelance populares
 - Sistema de cobrança integrado
 - Adição de calendário público
+
