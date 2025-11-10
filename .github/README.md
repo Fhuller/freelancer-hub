@@ -23,6 +23,9 @@ FreelanceHub é uma solução integrada que permite aos freelancers manter contr
 ### Arquitetura do Sistema
 ![Arquitetura do Sistema](../docs/diagrama_arquitetura.png)
 
+### Diagrama do banco
+![Deiagrama do Banco](../docs/UML.png)
+
 ## 🔑 Funcionalidades Principais
 
 ### Módulo de Gestão de Clientes
@@ -47,4 +50,5 @@ FreelanceHub é uma solução integrada que permite aos freelancers manter contr
 - Integração com plataformas de freelance populares
 - Sistema de cobrança integrado
 - Adição de calendário público
+
 
