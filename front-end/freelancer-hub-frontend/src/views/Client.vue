@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchClientById, type ClientReadDto } from '../services/clients'
 import { fetchProjects, createProject, updateProject, deleteProject } from '../services/projects'
@@ -17,6 +17,7 @@ const router = useRouter()
 const client = ref<ClientReadDto | null>(null)
 
 const projects = ref<any[]>([])
+const projectSearch = ref('') // <-- new
 const editingProject = ref<any | null>(null)
 
 const projectTemplate = ref({
@@ -137,6 +138,16 @@ function openProjectDetails(project: any) {
   })
 }
 
+const filteredProjects = computed(() => {
+  if (!projectSearch.value) return projects.value
+  const q = projectSearch.value.toLowerCase()
+  return projects.value.filter((p: any) =>
+    (p.title || '').toLowerCase().includes(q) ||
+    (p.description || '').toLowerCase().includes(q) ||
+    (p.status || '').toLowerCase().includes(q)
+  )
+})
+
 onMounted(async () => {
   await loadClient()
   await loadProjects()
@@ -152,17 +163,19 @@ onMounted(async () => {
         v-if="client"
         :model="client"
         model-name="client"
+        searchable
+        @search="projectSearch = $event"
       />
 
       <AddCard :label="t('ProjectCreateDto')" :onClick="openNewProjectModal" />
 
       <ContentCard
-        v-for="project in projects"
+        v-for="project in filteredProjects"
         :key="project.id"
         :label="project.title"
-        :onMainClick="() => openProjectDetails(project)"
-        :onEdit="() => editProject(project)"
-        :onDelete="() => removeProject(project)"
+        :on-main-click="() => openProjectDetails(project)"
+        :on-edit="() => editProject(project)"
+        :on-delete="() => removeProject(project)"
       />
 
       <BaseModal
