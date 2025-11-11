@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
-  model: Record<string, any>
+  model?: Record<string, any>
   modelName?: string
+  searchable?: boolean
+  placeholder?: string
 }>()
+
+const emit = defineEmits(['search'])
 
 const { t, locale } = useI18n()
 
@@ -52,15 +56,33 @@ const fields = computed(() => {
       value: formatValue(value)
     }))
 })
+
+// --- searchable input logic ---
+const searchQuery = ref('')
+function emitSearch() {
+  emit('search', searchQuery.value.trim())
+}
 </script>
 
 <template>
   <header class="base-header">
-    <h2 class="header-title">
-      {{ t(modelName || 'details') }}
-    </h2>
+    <div class="header-top">
+      <h2 class="header-title">
+        {{ t(modelName || 'details') }}
+      </h2>
 
-    <div class="header-fields">
+      <!-- simple search input, visible when searchable prop is true -->
+      <div v-if="props.searchable" class="header-search">
+        <input
+          v-model="searchQuery"
+          @input="emitSearch"
+          :placeholder="props.placeholder || t('search')"
+          class="header-search-input"
+        />
+      </div>
+    </div>
+
+    <div class="header-fields" v-if="fields.length">
       <div
         v-for="field in fields"
         :key="field.key"
@@ -75,24 +97,43 @@ const fields = computed(() => {
 
 <style scoped>
 .base-header {
-  grid-column: 1 / -1; /* ocupa todas as colunas do grid */
+  grid-column: 1 / -1;
   background: #f9f9f9;
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   width: 100%;
 }
 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .header-title {
-  margin: 0 0 1rem;
+  margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
   font-weight: 600;
+}
+
+.header-search {
+  min-width: 220px;
+}
+
+.header-search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
 }
 
 .header-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 0.75rem 1rem;
+  margin-top: 0.75rem;
 }
 
 .header-field {
