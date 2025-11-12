@@ -48,7 +48,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = _userUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetJWTUserID(User);
                 var user = await _userService.GetCurrentUserAsync(userId);
 
                 if (user == null) return NotFound();
@@ -66,7 +66,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = _userUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetJWTUserID(User);
                 var user = await _userService.CreateOrGetUserAsync(userId, dto);
 
                 var existingUser = await _userService.GetUserByIdAsync(userId);
@@ -92,7 +92,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var currentUserId = _userUtils.GetSupabaseUserId(User);
+                var currentUserId = _userUtils.GetJWTUserID(User);
                 if (currentUserId != id)
                 {
                     return Forbid("Você só pode atualizar seu próprio perfil.");
@@ -120,7 +120,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var currentUserId = _userUtils.GetSupabaseUserId(User);
+                var currentUserId = _userUtils.GetJWTUserID(User);
                 if (currentUserId != id)
                 {
                     return Forbid("Você só pode deletar seu próprio perfil.");

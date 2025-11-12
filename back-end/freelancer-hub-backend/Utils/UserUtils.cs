@@ -9,7 +9,7 @@ namespace freelancer_hub_backend.Utils
         /// <summary>
         /// Retorna o userId do Supabase JWT, lendo a claim user_metadata.sub
         /// </summary>
-        public string GetSupabaseUserId(ClaimsPrincipal user)
+        public string GetJWTUserID(ClaimsPrincipal user)
         {
             var nameIdentifierClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 

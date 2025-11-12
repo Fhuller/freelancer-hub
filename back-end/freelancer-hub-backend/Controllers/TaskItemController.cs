@@ -25,7 +25,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = _userUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetJWTUserID(User);
                 var taskItems = await _taskItemService.GetTaskItemsByProjectAsync(userId, projectId);
                 return Ok(taskItems);
             }
@@ -53,7 +53,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = _userUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetJWTUserID(User);
                 var taskItem = await _taskItemService.CreateTaskItemAsync(userId, dto);
                 return CreatedAtAction(nameof(GetTaskItemById), new { id = taskItem.Id }, taskItem);
             }

@@ -25,7 +25,7 @@ namespace freelancer_hub_backend_tests.Controllers
                 new Claim("sub", "test-user-id")
             }));
 
-            _userUtilsMock.Setup(u => u.GetSupabaseUserId(claimsUser))
+            _userUtilsMock.Setup(u => u.GetJWTUserID(claimsUser))
                           .Returns("test-user-id");
 
             _controller = new UserController(_userServiceMock.Object, _userUtilsMock.Object)

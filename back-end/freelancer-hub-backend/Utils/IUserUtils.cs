@@ -4,6 +4,6 @@ namespace freelancer_hub_backend.Utils
 {
     public interface IUserUtils
     {
-        string GetSupabaseUserId(ClaimsPrincipal user);
+        string GetJWTUserID(ClaimsPrincipal user);
     }
 }

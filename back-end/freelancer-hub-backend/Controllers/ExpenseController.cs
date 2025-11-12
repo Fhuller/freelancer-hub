@@ -25,7 +25,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = _userUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetJWTUserID(User);
                 var expenses = await _expenseService.GetExpensesAsync(userId);
                 return Ok(expenses);
             }
@@ -49,7 +49,7 @@ namespace freelancer_hub_backend.Controllers
         {
             try
             {
-                var userId = _userUtils.GetSupabaseUserId(User);
+                var userId = _userUtils.GetJWTUserID(User);
                 var expense = await _expenseService.CreateExpenseAsync(userId, dto);
                 return CreatedAtAction(nameof(GetExpenseById), new { id = expense.Id }, expense);
             }

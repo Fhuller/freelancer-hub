@@ -51,7 +51,7 @@ namespace freelancer_hub_backend_tests.Controllers
         public async Task GetProjects_ReturnsOk()
         {
             var controller = CreateController();
-            _userUtilsMock.Setup(x => x.GetSupabaseUserId(It.IsAny<System.Security.Claims.ClaimsPrincipal>()))
+            _userUtilsMock.Setup(x => x.GetJWTUserID(It.IsAny<System.Security.Claims.ClaimsPrincipal>()))
                 .Returns("user123");
             _projectServiceMock.Setup(s => s.GetProjectsAsync("user123"))
                 .ReturnsAsync(new List<ProjectDto>());
@@ -77,7 +77,7 @@ namespace freelancer_hub_backend_tests.Controllers
 
             var created = new ProjectDto { Id = Guid.NewGuid(), Title = "Test", UserId = "user123" };
 
-            _userUtilsMock.Setup(x => x.GetSupabaseUserId(It.IsAny<System.Security.Claims.ClaimsPrincipal>()))
+            _userUtilsMock.Setup(x => x.GetJWTUserID(It.IsAny<System.Security.Claims.ClaimsPrincipal>()))
                 .Returns("user123");
             _projectServiceMock.Setup(s => s.CreateProjectAsync("user123", dto))
                 .ReturnsAsync(created);
