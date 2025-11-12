@@ -1,0 +1,61 @@
+name: Deploy Backend to Azure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'back-end/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_STORAGE_CONNECTIONSTRING: ${{ secrets.AZURE_STORAGE_CONNECTIONSTRING }}
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Build backend
+        run: dotnet build ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj --configuration Release
+
+      - name: Publish backend
+        run: dotnet publish ./back-end/freelancer-hub-backend/freelancer-hub-backend.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
+
+      - name: Upload artifact for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{ env.DOTNET_ROOT }}/myapp
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+
+      - name: Login to Azure
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_128C7F96EAC3414CA14721AC85B9886F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0BDA7162115F4343A59EF69D3C06C90A }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E8D4DE4A215D444F81DC912C92525AA4 }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@122b7ec46017e53a3f71e3a027d67550a1641f5e
+        with:
+          app-name: 'freelancer-hub-backend'
+          slot-name: 'Production'
+          package: .

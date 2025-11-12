@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'vue-toast-notification';
@@ -8,12 +8,14 @@ import AuthenticatedLayout from '../layouts/AuthenticatedLayout.vue';
 import ContentCard from '../components/ContentCard.vue';
 import AddCard from '../components/AddCard.vue';
 import BaseModal from '../components/BaseModal.vue';
+import BaseHeader from '../components/BaseHeader.vue';
 import { fetchClients, createClient, deleteClient, updateClient, type ClientReadDto, type ClientCreateDto, type ClientUpdateDto } from '../services/clients';
 
 const { t } = useI18n();
 const toast = useToast();
 
 const clients = ref<ClientReadDto[]>([]);
+const clientSearch = ref('');
 const editingClient = ref<ClientReadDto | null>(null);
 const isLoadingClients = ref(false);
 const error = ref('');
@@ -50,6 +52,18 @@ async function loadClients() {
     isLoadingClients.value = false;
   }
 }
+
+const filteredClients = computed(() => {
+  if (!clientSearch.value) return clients.value
+  const q = clientSearch.value.toLowerCase()
+  return clients.value.filter(c =>
+    (c.name || '').toLowerCase().includes(q) ||
+    (c.email || '').toLowerCase().includes(q) ||
+    (c.companyName || '').toLowerCase().includes(q) ||
+    (c.phone || '').toString().toLowerCase().includes(q) ||
+    (c.notes || '').toLowerCase().includes(q)
+  )
+})
 
 function openNewClientModal() {
   clientTemplate.name = '';
@@ -124,13 +138,15 @@ onMounted(() => {
 
 <template>
   <AuthenticatedLayout :loading="isLoadingClients">
+    <BaseHeader :model="{}" model-name="clients" searchable @search="clientSearch = $event" />
+
     <AddCard :label="t('ClientCreateDto')" :onClick="openNewClientModal" />
 
     <div v-if="isLoadingClients">{{ t('loadingClients') }}</div>
     <div v-else-if="error">{{ error }}</div>
 
     <ContentCard
-      v-for="client in clients"
+      v-for="client in filteredClients"
       :key="client.id"
       :label="client.name"
       :onMainClick="() => openClientDetails(client)"

@@ -10,7 +10,8 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "test": "vitest run --coverage"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.0.1",
@@ -27,17 +28,22 @@
     "@tsconfig/node22": "^22.0.1",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-vue": "^5.2.3",
+    "@vitest/coverage-v8": "^4.0.8",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.5.0",
+    "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.7.0",
     "eslint": "^9.22.0",
     "eslint-plugin-vue": "~10.0.0",
+    "happy-dom": "^20.0.10",
     "jiti": "^2.4.2",
+    "jsdom": "^27.0.1",
     "npm-run-all2": "^7.0.2",
     "prettier": "3.5.3",
     "typescript": "~5.8.0",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2",
+    "vitest": "^4.0.8",
     "vue-tsc": "^2.2.8"
   }
 }

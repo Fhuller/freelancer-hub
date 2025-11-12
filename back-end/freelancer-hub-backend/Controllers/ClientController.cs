@@ -11,13 +11,11 @@ namespace freelancer_hub_backend.Controllers
     [Route("api/[controller]")]
     public class ClientController : ControllerBase
     {
-        private readonly FreelancerContext _context;
         private readonly IClientService _clientService;
         private readonly IUserUtils _userUtils;
 
-        public ClientController(FreelancerContext context, IClientService clientService, IUserUtils userUtils)
+        public ClientController(IClientService clientService, IUserUtils userUtils)
         {
-            _context = context;
             _clientService = clientService;
             _userUtils = userUtils;
         }

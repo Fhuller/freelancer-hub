@@ -1,7 +1,7 @@
 # Freelancer Hub - Frontend
 
 ## 🌐 Demo
-**Aplicação em produção**: [https://freelancer-hub-tau.vercel.app/](https://freelancer-hub-tau.vercel.app/)
+**Aplicação em produção**: https://freelancerhub-portfolio.com.br/
 
 ## 📋 Descrição
 Frontend da aplicação Freelancer Hub desenvolvido em **Vue 3** com **TypeScript**, utilizando **Vite** como bundler e **Vercel** para deploy automatizado.
@@ -13,7 +13,7 @@ Frontend da aplicação Freelancer Hub desenvolvido em **Vue 3** com **TypeScrip
 - **Vite** - Build tool e dev server ultra-rápido
 - **Pinia** - Gerenciamento de estado para Vue
 - **Vue Router** - Roteamento SPA
-- **Vercel** - Plataforma de deploy
+- **Azure Static Web Apps** - Plataforma de deploy
 
 ## ⚡ Como executar o projeto
 

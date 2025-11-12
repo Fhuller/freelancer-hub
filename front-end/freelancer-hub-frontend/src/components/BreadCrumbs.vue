@@ -88,8 +88,6 @@ const breadcrumbs = computed(() => {
     });
   } else if (currentRoute === 'Finance') {
     items.push({ name: 'Financeiro', path: '/app/finance', clickable: true });
-  } else if (currentRoute === 'Reports') {
-    items.push({ name: 'Relatórios', path: '/app/reports', clickable: true });
   }
 
   return items;

@@ -124,7 +124,7 @@ const formatCurrency = (value: number) => {
       
       <div v-if="loading" class="loading">
         <div class="loading-spinner"></div>
-        <p>Carregando dados do dashboard...</p>
+        <p>{{ t('dashboardPage.loading') }}</p>
       </div>
       
       <div v-else class="dashboard-grid">
@@ -133,8 +133,8 @@ const formatCurrency = (value: number) => {
           <div class="metric-content">
             <div class="metric-header">
               <div class="metric-info">
-                <h3>Projetos em Andamento</h3>
-                <p class="metric-description">Projetos ativos no momento</p>
+                <h3>{{ t('dashboardPage.projectsTitle') }}</h3>
+                <p class="metric-description">{{ t('dashboardPage.projectsDescription') }}</p>
               </div>
               <div class="metric-icon projects">
                 <i class="fas fa-chart-line"></i>
@@ -146,7 +146,7 @@ const formatCurrency = (value: number) => {
               </div>
             </div>
             <div class="metric-footer">
-              <span class="total-projects">{{ projects.length }} projetos no total</span>
+              <span class="total-projects">{{ projects.length }} {{ t('dashboardPage.projectsTotalSuffix') }}</span>
             </div>
           </div>
         </div>
@@ -156,8 +156,8 @@ const formatCurrency = (value: number) => {
           <div class="metric-content">
             <div class="metric-header">
               <div class="metric-info">
-                <h3>Faturas do Mês</h3>
-                <p class="metric-description">Resumo financeiro mensal</p>
+                <h3>{{ t('dashboardPage.invoicesTitle') }}</h3>
+                <p class="metric-description">{{ t('dashboardPage.invoicesDescription') }}</p>
               </div>
               <div class="metric-icon invoices">
                 <i class="fas fa-money-bill-wave"></i>
@@ -169,7 +169,11 @@ const formatCurrency = (value: number) => {
               </div>
             </div>
             <div class="metric-footer">
-              <span class="invoice-count">{{ monthlyInvoicesCount }} {{ monthlyInvoicesCount === 1 ? 'emissão' : 'emissões' }} este mês</span>
+              <span class="invoice-count">
+                {{ monthlyInvoicesCount }}
+                {{ monthlyInvoicesCount === 1 ? t('dashboardPage.invoiceSingular') : t('dashboardPage.invoicePlural') }}
+                {{ t('dashboardPage.thisMonth') }}
+              </span>
             </div>
           </div>
         </div>
@@ -179,8 +183,8 @@ const formatCurrency = (value: number) => {
           <div class="metric-content">
             <div class="metric-header">
               <div class="metric-info">
-                <h3>Tarefas em Andamento</h3>
-                <p class="metric-description">Tarefas sendo executadas</p>
+                <h3>{{ t('dashboardPage.tasksTitle') }}</h3>
+                <p class="metric-description">{{ t('dashboardPage.tasksDescription') }}</p>
               </div>
               <div class="metric-icon tasks">
                 <i class="fas fa-tasks"></i>
@@ -192,7 +196,7 @@ const formatCurrency = (value: number) => {
               </div>
             </div>
             <div class="metric-footer">
-              <span class="total-tasks">{{ tasks.length }} tarefas no total</span>
+              <span class="total-tasks">{{ tasks.length }} {{ t('dashboardPage.tasksTotalSuffix') }}</span>
             </div>
           </div>
         </div>
@@ -202,8 +206,8 @@ const formatCurrency = (value: number) => {
           <div class="metric-content">
             <div class="metric-header">
               <div class="metric-info">
-                <h3>Total de Clientes</h3>
-                <p class="metric-description">Clientes cadastrados</p>
+                <h3>{{ t('dashboardPage.clientsTitle') }}</h3>
+                <p class="metric-description">{{ t('dashboardPage.clientsDescription') }}</p>
               </div>
               <div class="metric-icon clients">
                 <i class="fas fa-users"></i>
