@@ -4,7 +4,7 @@ import AuthComponent from '../src/components/LoginRegister.vue' // Caminho do co
 
 // --- CORREÇÃO AQUI: MOCK USANDO A FÁBRICA vi.fn() ---
 // Moca o módulo completo usando o caminho de alias que o componente usa.
-vi.mock('@/services/supabase.ts', () => ({
+vi.mock('@/services/session.ts', () => ({
   signUp: vi.fn(),
   signIn: vi.fn(),
   getSession: vi.fn(),
@@ -12,7 +12,7 @@ vi.mock('@/services/supabase.ts', () => ({
 
 // Importa as funções MOCKADAS para que possamos controlá-las nos testes (mockResolvedValueOnce, etc.)
 // O caminho deve ser o mesmo do vi.mock
-import { signUp, signIn, getSession } from '@/services/supabase.ts'
+import { signUp, signIn, getSession } from '@/services/session.ts'
 
 
 // Dados de teste

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { signUp, signIn, getSession } from '../services/supabase'
+import { signUp, signIn, getSession } from '../services/session'
 
 // Campos separados para registro
 const signUpEmail = ref('')

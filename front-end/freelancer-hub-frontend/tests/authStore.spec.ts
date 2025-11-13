@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
-import * as supabaseService from '@/services/supabase'
+import * as supabaseService from '@/services/session'
 import * as usersService from '@/services/users'
 import { createClient } from '@supabase/supabase-js'
 import router from '@/router'
 
 // Mock dos módulos
-vi.mock('@/services/supabase')
+vi.mock('@/services/session')
 vi.mock('@/services/users')
 vi.mock('@supabase/supabase-js')
 vi.mock('@/router')

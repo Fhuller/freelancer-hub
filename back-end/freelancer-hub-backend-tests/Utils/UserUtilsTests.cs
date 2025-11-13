@@ -16,7 +16,7 @@ namespace freelancer_hub_backend.Tests.Utils
         }
 
         [Fact]
-        public void GetSupabaseUserId_DeveRetornarId_QuandoClaimExiste()
+        public void GetJWTUserID_DeveRetornarId_QuandoClaimExiste()
         {
             // Arrange
             var userIdEsperado = "abc123";
@@ -28,14 +28,14 @@ namespace freelancer_hub_backend.Tests.Utils
             var user = new ClaimsPrincipal(identity);
 
             // Act
-            var resultado = _userUtils.GetSupabaseUserId(user);
+            var resultado = _userUtils.GetJWTUserID(user);
 
             // Assert
             Assert.Equal(userIdEsperado, resultado);
         }
 
         [Fact]
-        public void GetSupabaseUserId_DeveLancarExcecao_QuandoClaimNaoExiste()
+        public void GetJWTUserID_DeveLancarExcecao_QuandoClaimNaoExiste()
         {
             // Arrange
             var claims = new List<Claim>(); // sem ClaimTypes.NameIdentifier
@@ -43,12 +43,12 @@ namespace freelancer_hub_backend.Tests.Utils
             var user = new ClaimsPrincipal(identity);
 
             // Act & Assert
-            var ex = Assert.Throws<UnauthorizedAccessException>(() => _userUtils.GetSupabaseUserId(user));
+            var ex = Assert.Throws<UnauthorizedAccessException>(() => _userUtils.GetJWTUserID(user));
             Assert.Equal("Usuário sem ID (nameidentifier) no token.", ex.Message);
         }
 
         [Fact]
-        public void GetSupabaseUserId_DeveLancarExcecao_QuandoClaimVazia()
+        public void GetJWTUserID_DeveLancarExcecao_QuandoClaimVazia()
         {
             // Arrange
             var claims = new List<Claim>
@@ -59,7 +59,7 @@ namespace freelancer_hub_backend.Tests.Utils
             var user = new ClaimsPrincipal(identity);
 
             // Act & Assert
-            var ex = Assert.Throws<UnauthorizedAccessException>(() => _userUtils.GetSupabaseUserId(user));
+            var ex = Assert.Throws<UnauthorizedAccessException>(() => _userUtils.GetJWTUserID(user));
             Assert.Equal("Usuário sem ID (nameidentifier) no token.", ex.Message);
         }
     }

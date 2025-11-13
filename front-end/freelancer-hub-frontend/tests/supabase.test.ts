@@ -22,7 +22,7 @@ vi.mock('@supabase/supabase-js', () => ({
 
 // 3. Agora podemos importar o serviço
 // (Graças ao hoisting, esta importação ocorre *após* a execução do mock)
-import { signUp, signIn, signOut, getSession } from '@/services/supabase'
+import { signUp, signIn, signOut, getSession } from '@/services/session'
 
 describe('Supabase service', () => {
   beforeEach(() => {
