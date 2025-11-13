@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { signUp, signIn, signOut, getSession } from '../services/supabase'
+import { signUp, signIn, signOut, getSession } from '../services/session'
 import type { Session } from '@supabase/supabase-js'
 import router from '@/router'
 import { useToast } from 'vue-toast-notification'
