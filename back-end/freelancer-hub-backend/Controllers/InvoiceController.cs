@@ -1,29 +1,37 @@
 ﻿using freelancer_hub_backend.DTO_s;
 using freelancer_hub_backend.Models;
+using freelancer_hub_backend.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace freelancer_hub_backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class InvoiceController : ControllerBase
     {
         private readonly FreelancerContext _context;
+        private readonly IUserUtils _userUtils;
 
-        public InvoiceController(FreelancerContext context)
+        public InvoiceController(FreelancerContext context, IUserUtils userUtils)
         {
             _context = context;
+            _userUtils = userUtils;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetAll()
         {
+            var userId = _userUtils.GetJWTUserID(User);
+
             var invoices = await (from i in _context.Invoices
                                    join p in _context.Projects
                                    on i.ProjectId equals p.Id
                                    join c in _context.Clients
                                    on i.ClientId equals c.Id
+                                   where i.UserId == userId
                                    select new
                                    {
                                        Id = i.Id,
