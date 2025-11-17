@@ -2,13 +2,19 @@
 using freelancer_hub_backend.Controllers;
 using freelancer_hub_backend.DTO_s;
 using freelancer_hub_backend.Models;
+using freelancer_hub_backend.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Moq;
+using System.Security.Claims;
 
 namespace freelancer_hub_backend_tests.Controllers
 {
     public class InvoiceControllerTests
     {
+        private readonly Mock<IUserUtils> _userUtilsMock;
+
         private FreelancerContext GetInMemoryDbContext()
         {
             var options = new DbContextOptionsBuilder<FreelancerContext>()
@@ -16,6 +22,36 @@ namespace freelancer_hub_backend_tests.Controllers
                 .Options;
 
             return new FreelancerContext(options);
+        }
+
+        public InvoiceControllerTests()
+        {
+            _userUtilsMock = new Mock<IUserUtils>();
+
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim("sub", "test-user-id")
+            }));
+
+            _userUtilsMock
+                .Setup(u => u.GetJWTUserID(It.IsAny<ClaimsPrincipal>()))
+                .Returns("test-user-id");
+        }
+
+        private InvoiceController CreateController(FreelancerContext context)
+        {
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim("sub", "test-user-id")
+            }));
+
+            return new InvoiceController(context, _userUtilsMock.Object)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext { User = user }
+                }
+            };
         }
 
         [Fact]
@@ -26,7 +62,7 @@ namespace freelancer_hub_backend_tests.Controllers
             var client = new Client
             {
                 Id = Guid.NewGuid(),
-                UserId = "test-user",
+                UserId = "test-user-id",
                 Name = "Cliente A",
                 Email = "a@a.com"
             };
@@ -34,7 +70,7 @@ namespace freelancer_hub_backend_tests.Controllers
             var project = new Project
             {
                 Id = Guid.NewGuid(),
-                UserId = "test-user",
+                UserId = "test-user-id",
                 ClientId = client.Id,
                 Title = "Projeto X",
                 DueDate = DateTime.UtcNow.AddDays(10)
@@ -43,7 +79,7 @@ namespace freelancer_hub_backend_tests.Controllers
             var invoice = new Invoice
             {
                 Id = Guid.NewGuid(),
-                UserId = "test-user",
+                UserId = "test-user-id",
                 ClientId = client.Id,
                 ProjectId = project.Id,
                 IssueDate = DateTime.UtcNow,
@@ -58,7 +94,7 @@ namespace freelancer_hub_backend_tests.Controllers
             context.Invoices.Add(invoice);
             await context.SaveChangesAsync();
 
-            var controller = new InvoiceController(context);
+            var controller = CreateController(context);
 
             var result = await controller.GetAll();
 
@@ -76,7 +112,7 @@ namespace freelancer_hub_backend_tests.Controllers
             var invoice = new Invoice
             {
                 Id = id,
-                UserId = "test",
+                UserId = "test-user-id",
                 ClientId = Guid.NewGuid(),
                 ProjectId = Guid.NewGuid(),
                 IssueDate = DateTime.UtcNow,
@@ -89,7 +125,7 @@ namespace freelancer_hub_backend_tests.Controllers
             context.Invoices.Add(invoice);
             await context.SaveChangesAsync();
 
-            var controller = new InvoiceController(context);
+            var controller = CreateController(context);
 
             var result = await controller.GetById(id);
             var ok = Assert.IsType<OkObjectResult>(result.Result);
@@ -101,7 +137,7 @@ namespace freelancer_hub_backend_tests.Controllers
         [Fact]
         public async Task GetById_ReturnsNotFound_WhenNotExists()
         {
-            var controller = new InvoiceController(GetInMemoryDbContext());
+            var controller = CreateController(GetInMemoryDbContext());
 
             var result = await controller.GetById(Guid.NewGuid());
 
@@ -112,11 +148,11 @@ namespace freelancer_hub_backend_tests.Controllers
         public async Task Create_ReturnsCreated()
         {
             var context = GetInMemoryDbContext();
-            var controller = new InvoiceController(context);
+            var controller = CreateController(context);
 
             var dto = new InvoiceCreateDto
             {
-                UserId = "user",
+                UserId = "test-user-id",
                 ClientId = Guid.NewGuid(),
                 ProjectId = Guid.NewGuid(),
                 IssueDate = DateTime.UtcNow,
@@ -143,7 +179,7 @@ namespace freelancer_hub_backend_tests.Controllers
             var invoice = new Invoice
             {
                 Id = id,
-                UserId = "user",
+                UserId = "test-user-id",
                 ClientId = Guid.NewGuid(),
                 ProjectId = Guid.NewGuid(),
                 IssueDate = DateTime.UtcNow,
@@ -155,7 +191,7 @@ namespace freelancer_hub_backend_tests.Controllers
             context.Invoices.Add(invoice);
             await context.SaveChangesAsync();
 
-            var controller = new InvoiceController(context);
+            var controller = CreateController(context);
 
             var dto = new InvoiceUpdateDto
             {
@@ -175,7 +211,7 @@ namespace freelancer_hub_backend_tests.Controllers
         [Fact]
         public async Task Update_ReturnsNotFound_WhenNotExists()
         {
-            var controller = new InvoiceController(GetInMemoryDbContext());
+            var controller = CreateController(GetInMemoryDbContext());
 
             var dto = new InvoiceUpdateDto
             {
@@ -200,7 +236,7 @@ namespace freelancer_hub_backend_tests.Controllers
             var invoice = new Invoice
             {
                 Id = id,
-                UserId = "user",
+                UserId = "test-user-id",
                 ClientId = Guid.NewGuid(),
                 ProjectId = Guid.NewGuid()
             };
@@ -208,7 +244,8 @@ namespace freelancer_hub_backend_tests.Controllers
             context.Invoices.Add(invoice);
             await context.SaveChangesAsync();
 
-            var controller = new InvoiceController(context);
+            var controller = CreateController(context);
+
             var result = await controller.Delete(id);
 
             Assert.IsType<NoContentResult>(result);
@@ -217,7 +254,7 @@ namespace freelancer_hub_backend_tests.Controllers
         [Fact]
         public async Task Delete_ReturnsNotFound_WhenNotExists()
         {
-            var controller = new InvoiceController(GetInMemoryDbContext());
+            var controller = CreateController(GetInMemoryDbContext());
 
             var result = await controller.Delete(Guid.NewGuid());
 
