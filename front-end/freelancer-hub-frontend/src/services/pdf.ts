@@ -48,11 +48,11 @@ export class PdfService {
    * Gera o conteúdo HTML do PDF
    */
   private static generatePdfContent(data: PdfInvoiceData): string {
-    // Determina quais seções devem ser exibidas
-    const hasClientInfo = data.clientName || data.clientEmail
-    const hasInvoiceDetails = data.invoiceIssueDate || data.invoiceDueDate || data.invoiceStatus
-    const hasProjectInfo = data.projectName || data.projectDescription
-    const hasItems = data.projectTotalHours > 0 && data.projectHourlyRate > 0
+  // Determina quais seções devem ser exibidas
+  const hasClientInfo = !!(data.clientName || data.clientEmail)
+  const hasInvoiceDetails = !!(data.invoiceIssueDate || data.invoiceDueDate || data.invoiceStatus)
+  const hasProjectInfo = !!(data.projectName || data.projectDescription)
+  const hasItems = data.projectTotalHours > 0 && data.projectHourlyRate > 0
 
     return `
       <!DOCTYPE html>
@@ -232,8 +232,23 @@ export class PdfService {
               ${data.invoiceNumber ? `<p class="invoice-number">Nº: ${data.invoiceNumber}</p>` : ''}
             </div>
           </div>
+          ${this.renderClientAndInvoiceInfo(data, hasClientInfo, hasInvoiceDetails)}
 
-          ${hasClientInfo || hasInvoiceDetails ? `
+          ${this.renderProjectInfo(data, hasProjectInfo)}
+
+          ${this.renderItemsAndSummary(data, hasItems)}
+
+          ${this.renderFooter(data)}
+        </div>
+      </body>
+      </html>
+    `
+  }
+
+  private static renderClientAndInvoiceInfo(data: PdfInvoiceData, hasClientInfo: boolean, hasInvoiceDetails: boolean): string {
+    if (!hasClientInfo && !hasInvoiceDetails) return ''
+
+    return `
           <div class="pdf-client-info">
             ${hasClientInfo ? `
             <div class="client-section">
@@ -242,7 +257,7 @@ export class PdfService {
               ${data.clientEmail ? `<p><strong>Email:</strong> ${data.clientEmail}</p>` : ''}
             </div>
             ` : ''}
-            
+
             ${hasInvoiceDetails ? `
             <div class="invoice-details">
               <h3>Detalhes da Fatura</h3>
@@ -252,17 +267,25 @@ export class PdfService {
             </div>
             ` : ''}
           </div>
-          ` : ''}
+          `
+  }
 
-          ${hasProjectInfo ? `
+  private static renderProjectInfo(data: PdfInvoiceData, hasProjectInfo: boolean): string {
+    if (!hasProjectInfo) return ''
+
+    return `
           <div class="pdf-project-info">
             <h3>Projeto</h3>
             ${data.projectName ? `<p><strong>Nome do Projeto:</strong> ${data.projectName}</p>` : ''}
             ${data.projectDescription ? `<p><strong>Descrição:</strong> ${data.projectDescription}</p>` : ''}
           </div>
-          ` : ''}
+          `
+  }
 
-          ${hasItems ? `
+  private static renderItemsAndSummary(data: PdfInvoiceData, hasItems: boolean): string {
+    if (!hasItems) return ''
+
+    return `
           <div class="pdf-items">
             <h3>Itens da Fatura</h3>
             <table class="items-table">
@@ -293,8 +316,11 @@ export class PdfService {
               </div>
             </div>
           </div>
-          ` : ''}
+          `
+  }
 
+  private static renderFooter(data: PdfInvoiceData): string {
+    return `
           <div class="pdf-footer">
             ${data.invoiceDueDate ? `
               <p><strong>Observações:</strong></p>
@@ -309,10 +335,7 @@ export class PdfService {
               </p>
             </div>
           </div>
-        </div>
-      </body>
-      </html>
-    `
+        `
   }
 
   /**
