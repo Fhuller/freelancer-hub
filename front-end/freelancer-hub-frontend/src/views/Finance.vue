@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import AuthenticatedLayout from '../layouts/AuthenticatedLayout.vue'
 import { fetchInvoices, deleteInvoice, updateInvoice } from '../services/invoices'
+import { fetchClientById } from '../services/clients'
 import { PdfService, type PdfInvoiceData } from '../services/pdf'
 import { formatCurrency } from '../services/projects'
 
@@ -16,6 +17,7 @@ interface Invoice {
   pdfUrl?: string
   projectName: string
   clientName: string
+  clientEmail?: string
   status?: string
 }
 
@@ -35,7 +37,30 @@ const loadInvoices = async () => {
     loading.value = true
     error.value = null
     const data = await fetchInvoices()
-    invoices.value = data
+
+    // Sempre atualizar dados do cliente: deduplicar clientIds e buscar em paralelo
+  const clientIds = Array.from(new Set(data.map((d: any) => d.clientId).filter(Boolean))) as string[]
+
+    // Buscar todos os clients únicos em paralelo
+    const clientsById: Record<string, any> = {}
+    await Promise.all(clientIds.map(async (cid: string) => {
+      try {
+        const client = await fetchClientById(cid)
+        if (client && client.id) clientsById[cid] = client
+      } catch (err) {
+        console.error('Erro ao buscar cliente', cid, err)
+      }
+    }))
+
+    // Mapear invoices e sobrescrever com dados buscados quando disponíveis
+    invoices.value = data.map((inv: any) => {
+      const client = inv.clientId ? clientsById[inv.clientId] : null
+      return {
+        ...inv,
+        clientName: client?.name || inv.clientName || 'Cliente',
+        clientEmail: client?.email || inv.clientEmail || ''
+      }
+    })
   } catch (err) {
     error.value = 'Erro ao carregar invoices'
     console.error(err)
@@ -72,10 +97,12 @@ const generateInvoicePdf = async (invoice: Invoice) => {
   try {
     generatingPdf.value = invoice.id
     
+    console.log(invoice);
+
     const invoiceData: PdfInvoiceData = {
       invoiceNumber: invoice.id,
       clientName: invoice.clientName,
-      clientEmail: 'cliente@email.com',
+      clientEmail: invoice.clientEmail || 'cliente@email.com',
       invoiceIssueDate: new Date(invoice.issueDate).toLocaleDateString('pt-BR'),
       invoiceDueDate: new Date(invoice.dueDate).toLocaleDateString('pt-BR'),
       invoiceStatus: 'Emitido',

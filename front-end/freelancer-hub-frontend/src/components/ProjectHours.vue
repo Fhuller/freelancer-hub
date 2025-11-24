@@ -181,10 +181,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted, watch, onMounted } from 'vue'
 import { formatCurrency } from '../services/projects'
 import { createInvoice } from '../services/invoices'
 import { PdfService, type PdfInvoiceData } from '../services/pdf'
+import { fetchClientById, type ClientReadDto } from '../services/clients'
 
 const props = defineProps<{
   project: any
@@ -243,13 +244,54 @@ const projectTotalEarned = computed(() => {
   return projectTotalHours.value * projectHourlyRate.value
 })
 
+// Estado para cliente carregado via service (quando props.project.client estiver vazio)
+const fetchedClient = ref<ClientReadDto | null>(null)
+const isLoadingClient = ref(false)
+const clientLoadError = ref('')
+
+// Função para carregar cliente pelo clientId do projeto
+async function loadClient() {
+  const clientId = props.project?.clientId
+  if (!clientId) {
+    fetchedClient.value = null
+    return
+  }
+
+  // se o projeto já traz o objeto client, não precisa buscar
+  if (props.project?.client && Object.keys(props.project.client).length > 0) {
+    fetchedClient.value = null
+    return
+  }
+
+  isLoadingClient.value = true
+  clientLoadError.value = ''
+  try {
+    const client = await fetchClientById(clientId)
+    fetchedClient.value = client
+  } catch (err) {
+    console.error('Erro ao carregar cliente:', err)
+    clientLoadError.value = 'Não foi possível carregar os dados do cliente'
+    fetchedClient.value = null
+  } finally {
+    isLoadingClient.value = false
+  }
+}
+
+onMounted(() => {
+  loadClient()
+})
+
+watch(() => props.project?.clientId, (newId, oldId) => {
+  if (newId && newId !== oldId) loadClient()
+})
+
 // Computed para dados do cliente e projeto
 const clientName = computed(() => {
-  return props.project?.client?.name || 'Cliente'
+  return fetchedClient.value?.name || props.project?.client?.name || 'Cliente'
 })
 
 const clientEmail = computed(() => {
-  return props.project?.client?.email || 'cliente@email.com'
+  return fetchedClient.value?.email || props.project?.client?.email || 'cliente@email.com'
 })
 
 const projectName = computed(() => {
