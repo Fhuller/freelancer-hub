@@ -8,6 +8,8 @@ FreelanceHub é uma solução integrada que permite aos freelancers manter contr
 
 - RFC: https://www.overleaf.com/read/xthqfscqnfrw#653fbd
 - Projeto em prod: https://freelancerhub-portfolio.com.br/
+- Usuário de Teste: fhullerbr+teste@gmail.com
+- PWD: 123456789
 
 ## 🚀 Tecnologias
 
@@ -50,5 +52,6 @@ FreelanceHub é uma solução integrada que permite aos freelancers manter contr
 - Integração com plataformas de freelance populares
 - Sistema de cobrança integrado
 - Adição de calendário público
+
 
 
